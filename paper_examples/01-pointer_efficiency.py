@@ -59,7 +59,7 @@ fig, ax1 = plt.subplots(figsize=(6.3, 4.4), dpi=500)
 ax1.set_xscale('log')
 ax1.set_yscale('log')
 ax1.plot(ram_size, t_load, marker='o', linestyle='-', linewidth=2, markersize=6, color='C0')
-ax1.set_xlabel('RAM usage (MB)', fontsize=16)
+ax1.set_xlabel('Memory usage (MB)', fontsize=16)
 ax1.set_ylabel('Load time (s)', fontsize=16)
 ax1.tick_params(axis='both', labelsize=14)
 # ax1.grid(True, which='both', linestyle='--', alpha=0.2)
@@ -75,15 +75,20 @@ def size_to_ram(x):
 # Add log-scale secondary x-axis
 ax2 = ax1.secondary_xaxis('top', functions=(ram_to_size, size_to_ram))
 ax2.set_xscale('log')
-ax2.set_xlabel('Array size (number of elements)', fontsize=16, labelpad=10)
+ax2.set_xlabel('DNS grid points', fontsize=16, labelpad=10)
 ax2.tick_params(axis='x', labelsize=14)
 
 # Get max values
 max_time = np.max(t_load)
 max_ram = ram_size[np.array(t_load).argmax()]  # RAM at max load time
+max_elems = elements[-1]
 
 # Create annotation text
-annotation_text = f"Maximum loading time: {max_time:.2f} s\nMaximum RAM usage: {max_ram/1024:.2f} GB\nMaximum array size: "
+annotation_text = (
+    f"Peak load time: {max_time:.2f} s\n"
+    f"Peak memory usage: {max_ram / 1024:.2f} GB\n"
+    f"Array size: {max_elems / 1e6:.1f} M elements"
+)
 
 # Add to plot (adjust x and y coordinates as needed)
 plt.text(0.06, 1.2, annotation_text,
