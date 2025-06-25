@@ -294,6 +294,7 @@ def contour_plot(X,
         plt.title('')
     
     figure = plt.gcf()
+    axes = plt.gca()
     
     if save:
         if title is None:
@@ -310,7 +311,7 @@ def contour_plot(X,
     # Close the figure to prevent it from displaying when returned
     plt.close(figure)
     
-    return figure
+    return figure, axes
 
 def cond_mean_plot(x, y, num_bins=30, 
                    log=False, 

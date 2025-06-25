@@ -2685,7 +2685,7 @@ class Field3D():
         if title is None:
             title = attribute
         
-        contour_plot(X, Y, Z, 
+        fig, ax = contour_plot(X, Y, Z, 
                     log=log,
                     colormap=colormap, 
                     cbar_title=cbar_title,
@@ -2714,7 +2714,7 @@ class Field3D():
                     show=show
                     )
         
-        return
+        return fig, ax
         
     def plot_y_midplane(self, attribute, 
                         log=False,
@@ -2776,7 +2776,7 @@ class Field3D():
         if title is None:
             title = attribute
         
-        contour_plot(X, Y, Z, 
+        fig, ax = contour_plot(X, Y, Z, 
                     log=log,
                     colormap=colormap, 
                     cbar_title=cbar_title,
@@ -2805,7 +2805,7 @@ class Field3D():
                     show=show
                     )
         
-        return
+        return fig, ax
         
     def plot_z_midplane(self, attribute, 
                         log=False,
@@ -2868,7 +2868,7 @@ class Field3D():
         if title is None:
             title = attribute
         
-        contour_plot(X, Y, Z, 
+        fig, ax = contour_plot(X, Y, Z, 
                     log=log,
                     colormap=colormap, 
                     cbar_title=cbar_title,
@@ -2898,7 +2898,7 @@ class Field3D():
                     show=show
                     )
         
-        return
+        return fig, ax
     
     def print_attributes(self):
         """

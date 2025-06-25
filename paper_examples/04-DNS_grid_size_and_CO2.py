@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 
 fontsize = 12
 figsize = (7, 6)
+dpi = 800
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 1. DNS-size data (scatter + log-trend)
@@ -134,7 +135,7 @@ ax_co2.text(
 # ensure output directory exists, then save
 pathlib.Path("figures").mkdir(exist_ok=True)
 fig.savefig("figures/DNS_size_and_CO2.png",
-            transparent=False, bbox_inches="tight", dpi=800)
+            transparent=False, bbox_inches="tight", dpi=dpi)
 
 plt.show()
 print("Figure saved to figures/DNS_size_and_CO2.png")
