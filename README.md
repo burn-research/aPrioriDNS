@@ -59,6 +59,9 @@ This open-source software is distributed under the MIT license. If you use it in
 
 Lorenzo Piu. ‘aprioridns: V1.1.8’. Zenodo, 19 September 2024. https://doi.org/10.5281/zenodo.13793623.
 
+## Third party software
+The present library relies on the code [PyCSP](https://github.com/rmalpica/PyCSP) package for Computational Singular Perturbation (CSP) analysis. PyCSP is developed and maintained by Professor Riccardo Malpica Galassi at Sapienza University of Rome. For detailed documentation and further information, please refer to the original repository.
+
 ## Quickstart
 The following code can be used to test the library once installed. A detailed explanation of the workflow presented is available [here](https://apriori.gitbook.io/apriori-documentation-1/getting-started/quickstart).
 
