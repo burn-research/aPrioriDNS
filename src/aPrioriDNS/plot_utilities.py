@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
 from scipy.stats import gaussian_kde
+from matplotlib import ticker
 
 from ._styles import ParityPlot, ContourPlot, CondMeanPlot, ScatterPlot
 from ._utils import extract_random_elements, reorder_arrays, process_arrays
@@ -246,6 +247,16 @@ def contour_plot(X,
     cbar = plt.colorbar(contourf, shrink=cbar_shrink, aspect=15, fraction=.1,pad=.05)
     cbar.ax.tick_params(labelsize=ContourPlot.fontsize*3//4)
     cbar.ax.tick_params(labelsize=ContourPlot.fontsize*3//4)
+    if log:
+        # Get colorbar limits
+        vmin, vmax = cbar.mappable.get_clim()
+        # Get existing ticks, and keep only those within the colorbar range
+        ticks = [tick for tick in cbar.get_ticks() if vmin <= tick <= vmax]
+        # Format ticks as 10^n (using integer or float depending on tick)
+        tick_labels = [f'$10^{{{int(t)}}}$' if t == int(t) else f'$10^{{{t:.1f}}}$' for t in ticks]
+        # Set ticks and labels manually
+        cbar.set_ticks(ticks)
+        cbar.set_ticklabels(tick_labels)
     if cbar_title is not None:
         cbar.set_label(cbar_title, rotation=270, fontsize=ContourPlot.fontsize )
     
@@ -283,7 +294,6 @@ def contour_plot(X,
     plt.gca().set_aspect('equal', adjustable='box')
     if remove_cbar:
         cbar.remove()
-    figure = plt.gcf()
     if remove_x:
         plt.xlabel('')
         plt.xticks([])
@@ -527,7 +537,6 @@ def scatter(x, y,  logx=False,
     for spine in plt.gca().spines.values():
         spine.set_linewidth(ParityPlot.border_width )
 
-    figure = plt.gcf()
     if remove_x:
         plt.xlabel('')
         plt.xticks([])

@@ -8,6 +8,10 @@ version = "1.1.10"
 authors = [
   { name="Lorenzo Piu", email="lorenzo.piu@ulb.be" },
 ]
+license-files = [
+  "LICENSE",
+  "third_party/PyCSP/LICENSE"
+]
 description = "A python package to process Direct Numerical Simulations"
 readme = "README.md"
 requires-python = ">=3.8"

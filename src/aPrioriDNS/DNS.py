@@ -1,10 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Feb 26 17:17:23 2024
+"""DNS.py: the core module of the aPrioriDNS package.
 
 @author: Lorenzo Piu
 """
+
+__author__ = "Lorenzo Piu"
+__copyright__ = "Copyright (c) 2024-2025, Lorenzo Piu"
+__credits__ = ["Universite Libre de Bruxelles, Aero-Thermo-Mechanics Laboratory, Brussels, Belgium"]
+__license__ = "MIT"
+__version__ = "1.8.0"
+__maintainer__ = ["Lorenzo Piu"]
+__email__ = ["lorenzo.piu@ulb.be"]
+__status__ = "Production"
+
 
 import json
 import os
@@ -36,6 +45,7 @@ from ._utils import (
 from ._data_struct import folder_structure
 from .plot_utilities import contour_plot
 from .plot_utilities import scatter
+from .PyCSP import Functions as csp
 
 
 ###########################################################
@@ -1993,7 +2003,7 @@ class Field3D():
         del T_flux_Z # Release memory
         
         self.update()
-        
+    
     
     def compute_transport_properties(self, n_chunks = 5000, Cp=True, Lambda=True, verbose=False):
         # check if the paths already exist, and delete the files in case
@@ -2066,6 +2076,87 @@ class Field3D():
         output_file_Cp.close()
         
         self.update()
+        
+    def compute_tsr(self, n_chunks=1000, n_proc=None, parallel=False, debug=False, verbose=True):
+        if n_proc is None:
+            n_proc = max(1, cpu_count() // 2)  # Ensure at least one process
+        
+        # Step 1: Check that all the mass fractions are in the folder
+        check_mass_fractions(self.attr_list, self.bool_list, self.folder_path)
+        # Step 2: Understand if the reaction rates to be computed are in DNS or LFR mode
+        if self.filter_size == 1:
+            mode = 'DNS'
+        else:
+            mode = 'LES'
+        
+        # Step 4: build a list with reaction rates paths and one with the species' Mass fractions paths
+        # reaction_rates_paths = []
+        # for attr, path in zip(self.attr_list, self.paths_list):
+        #     if attr.startswith('R'):
+        #         if mode in attr:
+        #             if not ('RHO_' in attr):
+        #                 reaction_rates_paths.append(path)
+        species_paths = []
+        for attr, path in zip(self.attr_list, self.paths_list):
+            if attr.startswith('Y'):
+                species_paths.append(path)
+        
+        # if debug:
+        #   print( [len(species_paths), len(self.species),  len(reaction_rates_paths), ])
+                
+        if (len(species_paths)!=len(self.species)):
+            raise ValueError("Lenght of the lists must be equal to the number of species. "
+                             "Check that all the species molar concentrations and Reaction Rates are in the data folder."
+                             "\nYou can compute the reaction rates with the command:"
+                             "\n>>> your_filt_field.compute_reaction_rates()"
+                             "\n\nOperation aborted.")
+                    
+        # Step 5: Compute TSR and write it to files
+        chunk_size = self.shape[0] * self.shape [1] * self.shape[2] // n_chunks + 1
+        gas = csp.CanteraCSP(self.kinetic_mechanism)
+        gas.jacobiantype = 'full'
+        
+        # Open output files in writing mode
+        if mode == 'DNS':
+            TSR_path = self.find_path('TSR_DNS')
+        if mode =='LES':
+            TSR_path = self.find_path('TSR_LES')
+        output_file_TSR = open(TSR_path, 'ab')
+
+        # create generators to read files in chunks
+        T_chunk_generator = read_variable_in_chunks(self.T.path, chunk_size)
+        P_chunk_generator = read_variable_in_chunks(self.P.path, chunk_size)
+        species_chunk_generator = [read_variable_in_chunks(specie_path, chunk_size) for specie_path in species_paths]
+        print('Reading file in chunks: read 0/{}'.format(n_chunks))
+        for i in range(n_chunks):
+            T_chunk = next(T_chunk_generator)  # Read one step of this function
+            P_chunk = next(P_chunk_generator)
+            # Read a chunk for every specie
+            Y_chunk = [next(generator) for generator in species_chunk_generator]
+            Y_chunk = np.array(Y_chunk)  # Make the list an array
+            # Initialize the TSR variable
+            TSR_chunk = np.zeros_like(T_chunk)
+            
+            # iterate through the chunks and compute the Reaction Rates
+            for j in range(len(T_chunk)):
+                gas.TPY = T_chunk[j], P_chunk[j], Y_chunk[:, j]
+                gas.constP = True
+                lam,R,L,f = gas.get_kernel()
+                TSR_chunk[j] = gas.calc_TSR()            
+            
+            # Save files
+            save_file(TSR_chunk, output_file_TSR)
+
+            # Print advancement state
+            print('Reading file in chunks: read {}/{}'.format(i + 1, n_chunks))
+
+        # Close all output files
+        output_file_TSR.close()
+        
+        self.update()
+        
+        return
+        
         
     def compute_unresolved_pv_fluxes(self, mode='DNS'):
         valid_modes = ['DNS']

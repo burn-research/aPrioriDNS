@@ -54,6 +54,7 @@ variables_list = {
              "TAU_C_X"        : ["TAU_C_X_kgm-2s-1_{}.dat"      ,   False   ,       None              ,      False       , "Sub-filter PV flux in the X direction"  ],
              "TAU_C_Y"        : ["TAU_C_Y_kgm-2s-1_{}.dat"      ,   False   ,       None              ,      False       , "Sub-filter PV flux in the Y direction"  ],
              "TAU_C_Z"        : ["TAU_C_Z_kgm-2s-1_{}.dat"      ,   False   ,       None              ,      False       , "Sub-filter PV flux in the Y direction"  ],
+             "TSR_{}"         : ["TSR_{}_{}.dat"                ,   False   ,    ['DNS', 'LES']       ,      False       , "Tangential Stretching Rate"  ],
             }
 
 mesh_list  = {
