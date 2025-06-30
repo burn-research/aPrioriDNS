@@ -46,6 +46,7 @@ This will automatically install or update the following dependencies if necessar
 - cantera>=3.0.0,
 - tabulate>=0.9.0,
 - requests>=2.32.0.
+- PyCSP>=1.4.0
 
 ## Documentation
 
