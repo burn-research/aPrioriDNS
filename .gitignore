@@ -37,3 +37,4 @@ Temporary Items
 # End of https://www.toptal.com/developers/gitignore/api/macos
 /src/aPrioriDNS/__pycache__
 /paper_examples/data
+/paper_examples/DNS_turbulent_transport
