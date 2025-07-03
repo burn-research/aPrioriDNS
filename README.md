@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/LorenzoPiu/Images/refs/heads/main/Logo-0.0.8.png" width="35%">
+  <img src="branding/logo/aPriori-logo.png" width="35%">
 </p>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) 
@@ -27,7 +27,7 @@ The following figure displays the typical set of operations that using aPriori c
 code:
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/LorenzoPiu/Images/refs/heads/main/Library_description.png" width="85%">
+  <img src="paper_examples/figures/Graphical_abstract_2.png" width="100%">
 </p>
 
 ## Installation
