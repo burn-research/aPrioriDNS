@@ -12,9 +12,9 @@ The original snapshot of this flame is available on [Blastnet](https://blastnet.
 
 ## Forced HIT Re_lambda = 184
 
-This dataset originates from a Direct Numerical Simulation (DNS) of forced Homogeneous Isotropic Turbulence (HIT) at a turbulent Reynolds number Re_lambda equal to 184.
+This dataset originates from a Direct Numerical Simulation (DNS) of forced Homogeneous Isotropic Turbulence (HIT) at a turbulent Reynolds number Re_lambda equal to 184. The simulation was conducted as part of a study on the structure and kinematics of iso-scalar fields by Michael Gauding et al. [[4](10.1017/jfm.2022.367)].
 
-It is provided here as a reference case for demonstrating non-reactive applications of the library. The dataset is a subset of the original case available on Blastnet, selected to comply with GitHub’s storage constraints and to enable faster execution during tutorials.
+It is provided here as a reference case for demonstrating non-reactive applications of the library. The dataset is a subset of the original case available on [BLASTNet](https://blastnet.github.io/gauding2022), selected to comply with GitHub’s storage constraints and to enable faster execution during tutorials.
 
 <p align="center">
   <img src="img/Forced_HIT.png" width="100%">
