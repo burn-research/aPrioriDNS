@@ -7,7 +7,7 @@ This folder contains a dataset used as a reference to test the library. The data
 The original snapshot of this flame is available on [Blastnet](https://blastnet.github.io) [2, 3] The domain was reduced to a size of 200x200x100 grid points, without changing the formatting.
 
 <p align="center">
-  <img src="img/Lifted_H2_subset%20asymmetric_2.png" width="100%">
+  <img src="img/Lifted_H2_subset%20asymmetric_2.png" width="80%">
 </p>
 
 ## Forced HIT Re_lambda = 184
