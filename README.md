@@ -27,7 +27,7 @@ The following figure displays the typical set of operations that using aPriori c
 code:
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/LorenzoPiu/Images/refs/heads/main/Library_description.png" width="85%">
+  <img src="paper_examples/figures/Graphical_abstract_2.png" width="100%">
 </p>
 
 ## Installation
