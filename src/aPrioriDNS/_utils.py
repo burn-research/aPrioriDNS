@@ -11,6 +11,7 @@ import re
 from ._data_struct import folder_structure
 import cantera as ct
 import numpy as np
+from PyCSP.Functions import CanteraCSP
 
 class DataStructureException(Exception):
     pass
@@ -62,7 +63,7 @@ def check_data_files(main_folder):
     return True, id_part
 
 
-def check_folder_structure(folder_path):
+def check_folder_structure(folder_path, reactive=True):
     """
     Check if the folder structure is coherent with the blastnet one.
 
@@ -79,6 +80,9 @@ def check_folder_structure(folder_path):
     
     required_folders = [folder_structure["chem_path"], folder_structure["data_path"], folder_structure["grid_path"]]
     my_folder_structure = os.listdir(folder_path)
+    
+    if not reactive:
+        required_folders = [folder_structure["data_path"], folder_structure["grid_path"]]
 
     for folder in required_folders:
         if folder not in my_folder_structure:
@@ -110,6 +114,14 @@ def extract_species(file_path):
         #     mechanism_data = yaml.safe_load(file)
         #     species_names = mechanism_data.get('phases', ['species'])
         #     return species_names[0]['species']
+    except FileNotFoundError:
+        print(f"File '{file_path}' not found.")
+        return None   
+    
+def extract_reactions(file_path):
+    try:
+        gas = CanteraCSP(file_path)
+        return gas.reaction_names(), gas.reaction_equations()
     except FileNotFoundError:
         print(f"File '{file_path}' not found.")
         return None   

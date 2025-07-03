@@ -190,6 +190,7 @@ def contour_plot(X,
                  vmax=None,
                  transparent=True,
                  title=None,
+                 title_pad=20,
                  x_name='x',
                  y_name='y',
                  remove_cbar=False,
@@ -258,13 +259,22 @@ def contour_plot(X,
         cbar.set_ticks(ticks)
         cbar.set_ticklabels(tick_labels)
     if cbar_title is not None:
-        cbar.set_label(cbar_title, rotation=270, fontsize=ContourPlot.fontsize )
+        # cbar.set_label(cbar_title, rotation=270, fontsize=ContourPlot.fontsize )
+        
+        # bbox = cbar.ax.get_position()  # [x0, y0, width, height] in figure coords
+        # x = bbox.x0 #+ 0.5*bbox.width
+        # y = bbox.y1 + 0.10              # 0.01 pushes it a little above the bar
+        # plt.gca().text(x, y, cbar_title, ha='center', va='bottom', fontsize=fontsize)
+        cbar.ax.text(-0.05, 1.08, cbar_title,
+             ha='left', va='bottom',
+             transform=cbar.ax.transAxes,
+             fontsize=fontsize*1.1)
     
     # Add labels and title
     plt.xlabel(x_name, fontsize=fontsize)
     plt.ylabel(y_name, fontsize=fontsize)
     if title is not None:
-        plt.title(title, fontsize=fontsize)
+        plt.title(title, fontsize=fontsize, pad=title_pad)
     
     # x and y limits
     if x_lim is not None:
@@ -298,8 +308,8 @@ def contour_plot(X,
         plt.xlabel('')
         plt.xticks([])
     if remove_y:
-        plt.xlabel('')
-        plt.xticks([])
+        plt.ylabel('')
+        plt.yticks([])
     if remove_title:
         plt.title('')
     

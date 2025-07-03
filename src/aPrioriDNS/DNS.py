@@ -9,7 +9,7 @@ __author__ = "Lorenzo Piu"
 __copyright__ = "Copyright (c) 2024-2025, Lorenzo Piu"
 __credits__ = ["Universite Libre de Bruxelles, Aero-Thermo-Mechanics Laboratory, Brussels, Belgium"]
 __license__ = "MIT"
-__version__ = "1.8.0"
+__version__ = "1.11.0"
 __maintainer__ = ["Lorenzo Piu"]
 __email__ = ["lorenzo.piu@ulb.be"]
 __status__ = "Production"
@@ -29,6 +29,7 @@ import cantera as ct
 import gc
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import requests
+import re
 
 from ._variables import variables_list
 from ._variables import mesh_list
@@ -36,6 +37,7 @@ from ._utils import (
     check_data_files,
     check_folder_structure,
     extract_species,
+    extract_reactions,
     find_kinetic_mechanism,
     extract_filter,
     change_folder_name,
@@ -45,7 +47,7 @@ from ._utils import (
 from ._data_struct import folder_structure
 from .plot_utilities import contour_plot
 from .plot_utilities import scatter
-from .PyCSP import Functions as csp
+from PyCSP import Functions as csp
 
 
 ###########################################################
@@ -197,11 +199,11 @@ class Field3D():
     __field_dimension = 3
     
     
-    def __init__(self, folder_path):
+    def __init__(self, folder_path, reactive=True):
         print("\n---------------------------------------------------------------")
         print("Initializing 3D Field\n")
         # check the folder structure and files
-        check_folder_structure(folder_path)
+        check_folder_structure(folder_path, reactive=reactive)
         _, ids = check_data_files(folder_path)
         print("Folder structure OK")
         
@@ -209,6 +211,8 @@ class Field3D():
         self.data_path = os.path.join(folder_path, folder_structure["data_path"])
         self.chem_path = os.path.join(folder_path, folder_structure["chem_path"])
         self.grid_path = os.path.join(folder_path, folder_structure["grid_path"])
+        
+        self.reactive = reactive
         
         self.filter_size = extract_filter(folder_path)
         self.downsampled = False
@@ -231,14 +235,16 @@ class Field3D():
         self.mesh = Mesh3D(X, Y, Z)
         print ("Mesh fields read correctly")
         
-        
-        print("\n---------------------------------------------------------------")
-        print("Reading kinetic mechanism...")
-        self.kinetic_mechanism = find_kinetic_mechanism(self.chem_path)
-        print(f"Kinetic mechanism file found: {self.kinetic_mechanism}")
-        self.species = extract_species(self.kinetic_mechanism)
-        print("Species:")
-        print(self.species)
+        if reactive:
+            print("\n---------------------------------------------------------------")
+            print("Reading kinetic mechanism...")
+            self.kinetic_mechanism = find_kinetic_mechanism(self.chem_path)
+            print(f"Kinetic mechanism file found: {self.kinetic_mechanism}")
+            self.species = extract_species(self.kinetic_mechanism)
+            self.reactions, self.reaction_equations = extract_reactions(self.kinetic_mechanism)
+            self.reaction_names = [re.search(r'\(([^)]+)\)', r).group(1) for r in self.reactions]
+            print("Species:")
+            print(self.species)
         
         
         print("\n---------------------------------------------------------------")
@@ -297,36 +303,50 @@ class Field3D():
         paths_list = []
         # bool_list = []
         for attribute_name in variables_list:
-            if variables_list[attribute_name][1] == False: # non-species-dependent names
-                if variables_list[attribute_name][2] == None:
-                    file_name = variables_list[attribute_name][0].format(self.id_string)
-                    path = os.path.join(self.data_path, file_name)
-                    paths_list.append(path)
-                    attr_list.append(attribute_name)
-                else: # Handling multiple models variables
-                    if variables_list[attribute_name][3] == False:
-                        for model in variables_list[attribute_name][2]:
-                            file_name = variables_list[attribute_name][0].format(model, self.id_string)
+            f_name       = variables_list[attribute_name][0]   # Unformatted file name
+            species_attr = variables_list[attribute_name][1]   # True if there is one attribute for every species (e.g. mass fractions and reaction rates) 
+            models       = variables_list[attribute_name][2]   # Contains the different models available
+            tensor       = variables_list[attribute_name][3]   # True if the attribute is related to a tensor, 'Symmetric' if it's a symmetric tensor
+            reactions    = variables_list[attribute_name][4]   # True if there is one attribute for every reaction (e.g. Participation Indexes)
+            if species_attr == False: # non species-dependent names
+                if reactions == False: # non reactions-dependent names
+                    if models == None:  
+                        file_name = variables_list[attribute_name][0].format(self.id_string)
+                        path = os.path.join(self.data_path, file_name)
+                        paths_list.append(path)
+                        attr_list.append(attribute_name)
+                    else: # Handling multiple models variables
+                        if tensor == False:
+                            for model in models:
+                                file_name = f_name.format(model, self.id_string)
+                                path = os.path.join(self.data_path, file_name)
+                                paths_list.append(path)
+                                attr_list.append(attribute_name.format(model))
+                        else: # handling tensors that have multiple models. NOTE: 
+                              # for the moment I'm not handling species tensors or 
+                              # tensors without models
+                            for model in models:
+                                for j in range(1,4):
+                                    for i in range(1,4):
+                                        if (not tensor == 'Symmetric') or i<=j:
+                                            file_name = variables_list[attribute_name][0].format(i,j,model, self.id_string)
+                                            path = os.path.join(self.data_path, file_name)
+                                            paths_list.append(path)
+                                            attr_list.append(attribute_name.format(i,j,model))
+                else: # Handling reaction dependent attributes
+                    if self.reactive:
+                        for reaction_name in self.reaction_names:
+                            file_name = f_name.format(reaction_name, self.id_string)
                             path = os.path.join(self.data_path, file_name)
                             paths_list.append(path)
-                            attr_list.append(attribute_name.format(model))
-                    else: # handling tensors that have multiple models. NOTE: 
-                          # for the moment I'm not handling species tensors or 
-                          # tensors without models
-                        for model in variables_list[attribute_name][2]:
-                            for j in range(1,4):
-                                for i in range(1,4):
-                                    if (not variables_list[attribute_name][3] == 'Symmetric') or i<=j:
-                                        file_name = variables_list[attribute_name][0].format(i,j,model, self.id_string)
-                                        path = os.path.join(self.data_path, file_name)
-                                        paths_list.append(path)
-                                        attr_list.append(attribute_name.format(i,j,model))
+                            attr_list.append(attribute_name.format(reaction_name))
             else: #handling the species attributes
-                for specie in self.species:
-                    file_name = variables_list[attribute_name][0].format(specie, self.id_string)
-                    path = os.path.join(self.data_path, file_name)
-                    paths_list.append(path)
-                    attr_list.append(attribute_name.format(specie))
+                if self.reactive:
+                    for specie in self.species:
+                        file_name = f_name.format(specie, self.id_string)
+                        path = os.path.join(self.data_path, file_name)
+                        paths_list.append(path)
+                        attr_list.append(attribute_name.format(specie))
                     
         return attr_list, paths_list
     
@@ -417,7 +437,7 @@ class Field3D():
                 # information
             species_paths = []
             for attr, path in zip(self.attr_list, self.paths_list):
-                if attr.startswith('Y'):
+                if attr.startswith('Y') and (attr != 'Y'):
                     species_paths.append(path)
             
             if (len(species_paths)!=len(self.species)) or(len(reaction_rates_paths)!=len(self.species)):
@@ -1124,10 +1144,11 @@ class Field3D():
                 raise AttributeError("The filtered field does not have a value to identify the associated unfiltered data.\n"
                                  "The path of the unfiltered data folder must be assigned with the following command:\n"
                                  ">>> your_filtered_field.DNS_folder_path = 'your_unfiltered_DNS_folder_path'")
-            DNS_field = Field3D(self.DNS_folder_path)
+            DNS_field = Field3D(self.DNS_folder_path, reactive=self.reactive)
             
             #--------- Compute Anisotropic Residual Stress Tensor ------------#
             # Check what filter was used for the folder and keep consistency
+            favre=False
             if 'favre' in self.folder_path.lower():
                 favre = True
             if 'box' in self.folder_path.lower():
@@ -1233,7 +1254,7 @@ class Field3D():
                         reaction_rates_paths.append(path)
         species_paths = []
         for attr, path in zip(self.attr_list, self.paths_list):
-            if attr.startswith('Y'):
+            if attr.startswith('Y') and (attr != 'Y'):
                 species_paths.append(path)
                 
         print( [len(species_paths), len(self.species),  len(reaction_rates_paths), ])
@@ -1379,7 +1400,7 @@ class Field3D():
                     reaction_rates_paths.append(path)
         species_paths = []
         for attr, path in zip(self.attr_list, self.paths_list):
-            if attr.startswith('Y'):
+            if attr.startswith('Y') and (attr != 'Y'):
                 species_paths.append(path)
                 
         if (len(species_paths)!=len(self.species)) or(len(reaction_rates_paths)!=len(self.species)):
@@ -1528,7 +1549,7 @@ class Field3D():
         
         # Step 4: build a list with reaction rates paths and one with the species' Mass fractions paths
         reaction_rates_paths = [path for attr, path in zip(self.attr_list, self.paths_list) if attr.startswith('R') and mode in attr]
-        species_paths = [path for attr, path in zip(self.attr_list, self.paths_list) if attr.startswith('Y')]
+        species_paths = [path for attr, path in zip(self.attr_list, self.paths_list) if (attr.startswith('Y') and (attr != 'Y'))]
         
         if (len(species_paths) != len(self.species)) or (len(reaction_rates_paths) != len(self.species)):
             raise ValueError("Length of the lists must be equal to the number of species. "
@@ -2020,7 +2041,7 @@ class Field3D():
         
         species_paths = []
         for attr, path in zip(self.attr_list, self.paths_list):
-            if attr.startswith('Y'):
+            if attr.startswith('Y') and (attr != 'Y'):
                 species_paths.append(path)
                 
         if (len(species_paths)!=len(self.species)):
@@ -2098,7 +2119,7 @@ class Field3D():
         #                 reaction_rates_paths.append(path)
         species_paths = []
         for attr, path in zip(self.attr_list, self.paths_list):
-            if attr.startswith('Y'):
+            if attr.startswith('Y') and (attr != 'Y'):
                 species_paths.append(path)
         
         # if debug:
@@ -2110,7 +2131,36 @@ class Field3D():
                              "\nYou can compute the reaction rates with the command:"
                              "\n>>> your_filt_field.compute_reaction_rates()"
                              "\n\nOperation aborted.")
-                    
+        
+        # build paths for API files
+        api_tsr_paths = []
+        for attr, path in zip(self.attr_list, self.paths_list):
+            if attr.startswith('API_TSR_'):
+                api_tsr_paths.append(path)
+        
+        if (len(api_tsr_paths)!=len(self.reactions)):
+            raise ValueError("Lenght of the lists must be equal to the number of reactions. "
+                             "Check that all the species molar concentrations and Reaction Rates are in the data folder.")
+        
+        # Step 3: Check that the files of the reaction rates do not exist yet
+        count = 0
+        for path in api_tsr_paths:
+            if os.path.exists(path):
+                if count == 0: # only asks one time if they want to remove the files
+                    user_input = input(
+                            f"The folder '{self.data_path}' already contains the api indexes. "
+                            f"\nThis operation will overwrite the existing files. "
+                            f"\nDo you want to continue? ([yes]/no): "
+                                        )
+                    if user_input.lower() != "yes":
+                        print("Operation aborted.")
+                        sys.exit()
+                    else:
+                        count += 1
+                        delete_file(path)
+                else:
+                    delete_file(path)
+        
         # Step 5: Compute TSR and write it to files
         chunk_size = self.shape[0] * self.shape [1] * self.shape[2] // n_chunks + 1
         gas = csp.CanteraCSP(self.kinetic_mechanism)
@@ -2122,6 +2172,8 @@ class Field3D():
         if mode =='LES':
             TSR_path = self.find_path('TSR_LES')
         output_file_TSR = open(TSR_path, 'ab')
+        
+        output_files_api_tsr = [open(a, 'ab') for a in api_tsr_paths]
 
         # create generators to read files in chunks
         T_chunk_generator = read_variable_in_chunks(self.T.path, chunk_size)
@@ -2136,17 +2188,25 @@ class Field3D():
             Y_chunk = np.array(Y_chunk)  # Make the list an array
             # Initialize the TSR variable
             TSR_chunk = np.zeros_like(T_chunk)
+            api_tsr_chunk = dict()
+            for r in self.reaction_names:
+                api_tsr_chunk[r] = np.zeros_like(T_chunk)
             
             # iterate through the chunks and compute the Reaction Rates
             for j in range(len(T_chunk)):
                 gas.TPY = T_chunk[j], P_chunk[j], Y_chunk[:, j]
                 gas.constP = True
                 lam,R,L,f = gas.get_kernel()
-                TSR_chunk[j] = gas.calc_TSR()            
-            
+                TSR_chunk[j] = gas.calc_TSR()  
+                tsrapi = gas.calc_TSRindices(type='amplitude')
+                for k in range(len(self.reaction_names)):
+                    r = self.reaction_names[k]
+                    api_tsr_chunk[r][j] = tsrapi[k]
+                    
             # Save files
             save_file(TSR_chunk, output_file_TSR)
-
+            for r, f in zip(self.reaction_names, output_files_api_tsr):
+                save_file(api_tsr_chunk[r], f)
             # Print advancement state
             print('Reading file in chunks: read {}/{}'.format(i + 1, n_chunks))
 
@@ -2369,9 +2429,10 @@ class Field3D():
             os.makedirs(cut_data_path)
         if not os.path.exists(cut_grid_path):
             os.makedirs(cut_grid_path)
-        if not os.path.exists(cut_chem_path):
-            shutil.copytree(self.chem_path, cut_chem_path)
-            
+        if self.reactive:
+            if not os.path.exists(cut_chem_path):
+                shutil.copytree(self.chem_path, cut_chem_path)
+                
         for attribute, file_path, is_present in zip(self.attr_list, self.paths_list, self.bool_list):
             if is_present:
                 file_name = os.path.basename(file_path)
@@ -2442,9 +2503,10 @@ class Field3D():
             os.makedirs(ds_data_path)
         if not os.path.exists(ds_grid_path):
             os.makedirs(ds_grid_path)
-        if not os.path.exists(ds_chem_path):
-            shutil.copytree(self.chem_path, ds_chem_path)
-            
+        if self.reactive:
+            if not os.path.exists(ds_chem_path):
+                shutil.copytree(self.chem_path, ds_chem_path)
+                
         for attribute, file_path, is_present in zip(self.attr_list, self.paths_list, self.bool_list):
             if is_present:
                 file_name = os.path.basename(file_path)
@@ -2550,8 +2612,9 @@ class Field3D():
             os.makedirs(filt_data_path)
         if not os.path.exists(filt_grid_path):
             shutil.copytree(self.grid_path, filt_grid_path)
-        if not os.path.exists(filt_chem_path):
-            shutil.copytree(self.chem_path, filt_chem_path)
+        if self.reactive:
+            if not os.path.exists(filt_chem_path):
+                shutil.copytree(self.chem_path, filt_chem_path)
         if not os.path.exists(os.path.join(filt_folder_path, 'info.json')):
             # TODO: it's wrong handling this like that, because if the folder already existed with a different
             # size of the field, the file info.json is not updated. In summary, you have to delete the 
@@ -2655,8 +2718,9 @@ class Field3D():
             os.makedirs(filt_data_path)
         if not os.path.exists(filt_grid_path):
             shutil.copytree(self.grid_path, filt_grid_path)
-        if not os.path.exists(filt_chem_path):
-            shutil.copytree(self.chem_path, filt_chem_path)
+        if self.reactive:
+            if not os.path.exists(filt_chem_path):
+                shutil.copytree(self.chem_path, filt_chem_path)
         if not os.path.exists(os.path.join(filt_folder_path, 'info.json')):
             shutil.copy(os.path.join(self.folder_path, 'info.json'), os.path.join(filt_folder_path, 'info.json'))
         
@@ -2917,15 +2981,16 @@ class Field3D():
                         vmax=None,
                         transparent=True,
                         title=None,
-                        x_name='x [mm]',
-                        y_name='y [mm]',
+                        x_name=None,
+                        y_name=None,
                         remove_cbar=False,
                         remove_x=False,
                         remove_y=False,
                         remove_title=False,
                         transpose=False,
+                        scale='mm',
                         save=False,
-                        show=True
+                        show=True,
                         ):
         """
         Plots the z midplane of a specified attribute in the Field3D class.
@@ -2952,8 +3017,28 @@ class Field3D():
         """
         self.check_valid_attribute(attribute)
         #getattr(self, attribute).plot_z_midplane(self.mesh, title=attribute, vmin=vmin, vmax=vmax)
-        X = self.mesh.X_midZ * 1000
-        Y = self.mesh.Y_midZ * 1000
+        if scale.lower() == 'mm':
+            s = 1000
+        elif scale.lower() == 'm':
+            s = 1
+        else:
+            s = 1000
+            scale = 'mm'
+            raise Warning("\nAvailable options for the 'scale' parameter are 'm' or 'mm'.\n"
+                          "Value defaulted to 'mm'.")
+        
+        if x_name is None:
+            x_name = f'x [{scale}]'
+            if transpose:
+                x_name = f'y [{scale}]'
+        if y_name is None:
+            y_name = f'y [{scale}]'
+            if transpose:
+                y_name = f'x [{scale}]'
+            
+        
+        X = self.mesh.X_midZ * s
+        Y = self.mesh.Y_midZ * s
         Z = getattr(self, attribute).z_midplane
         
         if title is None:
