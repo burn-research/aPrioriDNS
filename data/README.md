@@ -16,7 +16,9 @@ This dataset originates from a Direct Numerical Simulation (DNS) of forced Homog
 
 It is provided here as a reference case for demonstrating non-reactive applications of the library. The dataset is a subset of the original case available on Blastnet, selected to comply with GitHub’s storage constraints and to enable faster execution during tutorials.
 
-
+<p align="center">
+  <img src="img/Forced_HIT.png" width="100%">
+</p>
 
 ## License
 
