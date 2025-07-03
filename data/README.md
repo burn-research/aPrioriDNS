@@ -1,4 +1,6 @@
-# Tutorial dataset
+# Tutorial datasets
+
+## Lifted H2 subdomain
 
 This folder contains a dataset used as a reference to test the library. The dataset was extracted from a DNS simulation of a [lifted non-premixed hydrogen jet flame](https://blastnet.github.io/jung2021.html) [1]. 
 
@@ -7,6 +9,14 @@ The original snapshot of this flame is available on [Blastnet](https://blastnet.
 <p align="center">
   <img src="https://raw.githubusercontent.com/LorenzoPiu/Images/refs/heads/main/Lifted_H2_subset%20asymmetric_2.png" width="100%">
 </p>
+
+## Forced HIT Re_lambda = 184
+
+This dataset originates from a Direct Numerical Simulation (DNS) of forced Homogeneous Isotropic Turbulence (HIT) at a turbulent Reynolds number Re_lambda equal to 184.
+
+It is provided here as a reference case for demonstrating non-reactive applications of the library. The dataset is a subset of the original case available on Blastnet, selected to comply with GitHub’s storage constraints and to enable faster execution during tutorials.
+
+
 
 ## License
 
@@ -27,3 +37,5 @@ https://doi.org/10.1016/j.combustflame.2021.111584.
 [2] W. T. Chung, B. Akoush, P. Sharma, A. Tamkin, K. S. Jung, J. H. Chen, J. Guo, D. Brouzet, M. Talei, B. Savard, A.Y. Poludnenko & M. Ihme. Turbulence in Focus: Benchmarking Scaling Behavior of 3D Volumetric Super-Resolution with BLASTNet 2.0 Data. Advances in Neural Information Processing Systems (2023) 36.
 
 [3] W. T. Chung, M. Ihme, K. S. Jung, J. H. Chen, J. Guo,  D. Brouzet, M. Talei, B. Jiang, B. Savard, A. Y. Poludnenko, B. Akoush, P. Sharma & A. Tamkin. BLASTNet Simulation Dataset (Version 2.0), 2023. https://blastnet.github.io/. 
+
+[4] Gauding M, Thiesset F, Varea E, Danaila L. Structure of iso-scalar sets. Journal of Fluid Mechanics. 2022;942:A14. doi:10.1017/jfm.2022.367
