@@ -1,10 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+""" Plotting Utilities
 """
-Created on Mon Jul 26 17:17:23 2024
 
-@author: Lorenzo Piu
-"""
+__authors__ = "Lorenzo Piu"
+__copyright__ = "Copyright (c) 2024-2025, Lorenzo Piu, Heinz Pitsch, and Alessandro Parente"
+__credits__ = ["Aero-Thermo-Mechanics laboratories - Universite Libre de Bruxelles, Brussels, Belgium"
+               "Institut für Technische Verbrennung (ITV) - RWTH Aachen University, Aachen, Germany"]
+__license__ = "MIT"
+__version__ = "1.11.0"
+__maintainer__ = ["Lorenzo Piu"]
+__email__ = ["lorenzo.piu@ulb.be"]
+__status__ = "Production"
 
 import matplotlib.pyplot as plt
 import matplotlib

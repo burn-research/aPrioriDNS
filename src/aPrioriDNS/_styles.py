@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon Jul 29 15:41:38 2024
-
-@author: lorenzo piu
+Reference plotting parameters and styles that will be used in the plot_utils module.
 """
+__authors__ = "Lorenzo Piu"
+__copyright__ = "Copyright (c) 2024-2025, Lorenzo Piu, Heinz Pitsch, and Alessandro Parente"
+__credits__ = ["Aero-Thermo-Mechanics laboratories - Universite Libre de Bruxelles, Brussels, Belgium"
+               "Institut für Technische Verbrennung (ITV) - RWTH Aachen University, Aachen, Germany"]
+__license__ = "MIT"
+__version__ = "1.11.0"
+__maintainer__ = ["Lorenzo Piu"]
+__email__ = ["lorenzo.piu@ulb.be"]
+__status__ = "Production"
 
-# -----------------------------------------------------------------------------
-#
-# Reference plotting parameters and styles that will be used in the aPriori 
-# plot_utils module.
-#
-# -----------------------------------------------------------------------------
 
 class ParityPlot():
     fig_size      = [8, 6]

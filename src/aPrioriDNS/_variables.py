@@ -1,10 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""List of attributes available for data processing
 """
-Created on Wed May  8 11:16:15 2024
 
-@author: lorenzo piu
-"""
+__authors__ = "Lorenzo Piu"
+__copyright__ = "Copyright (c) 2024-2025, Lorenzo Piu, Heinz Pitsch, and Alessandro Parente"
+__credits__ = ["Aero-Thermo-Mechanics laboratories - Universite Libre de Bruxelles, Brussels, Belgium"
+               "Institut für Technische Verbrennung (ITV) - RWTH Aachen University, Aachen, Germany"]
+__license__ = "MIT"
+__version__ = "1.11.0"
+__maintainer__ = ["Lorenzo Piu"]
+__email__ = ["lorenzo.piu@ulb.be"]
+__status__ = "Production"
+
 variables_list = {
            # Attribute Name   :           File Name             :  Species  :         Models          :      Tensor      :     Reactions      :     Variable Description
              "dU{}_dX{}_{}"   : ["dU{}_dX{}_{}_s-1_{}.dat"      ,   False   ,    ['DNS', 'LES']       ,      True        ,       False        , "Derivative with respect to j of the ith velocity component"],
