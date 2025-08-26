@@ -65,6 +65,7 @@ variables_list = {
              "TSR_{}"         : ["TSR_{}_{}.dat"                ,   False   ,    ['DNS', 'LES']       ,      False       ,       False        , "Tangential Stretching Rate"  ],
              "Y"              : ["Y_{}.dat"                     ,   False   ,       None              ,      False       ,       False        , "Generic transported scalar"  ],
              "API_TSR_{}"     : ["API_TSR_{}_{}.dat"            ,   False   ,       None              ,      False       ,       True         , "Participation indexes to the TSR"],
+             "API_{}_{}"      : ["API_{}_{}_{}.dat"             ,   True    ,       None              ,      False       ,       True         , "Participation indexes on species production rates"],
             }
 
 mesh_list  = {

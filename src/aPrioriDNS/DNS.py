@@ -283,7 +283,7 @@ class Field3D():
         self.update()
             
                         
-    def build_attributes_list(self):
+    def build_attributes_list(self, variable=None):
         """
         Build lists of attribute names and corresponding file paths 
         based on the configuration specified in variables_list.
@@ -302,7 +302,12 @@ class Field3D():
         attr_list = []
         paths_list = []
         # bool_list = []
-        for attribute_name in variables_list:
+        if variable is None:
+            variables_list_ = variables_list.copy()
+        else:
+            variables_list_ = {variable : variables_list[variable]}
+
+        for attribute_name in variables_list_:
             f_name       = variables_list[attribute_name][0]   # Unformatted file name
             species_attr = variables_list[attribute_name][1]   # True if there is one attribute for every species (e.g. mass fractions and reaction rates) 
             models       = variables_list[attribute_name][2]   # Contains the different models available
@@ -333,7 +338,7 @@ class Field3D():
                                             path = os.path.join(self.data_path, file_name)
                                             paths_list.append(path)
                                             attr_list.append(attribute_name.format(i,j,model))
-                else: # Handling reaction dependent attributes
+                else: # Handling reaction dependent attributes (so far only the Participation Indexes)
                     if self.reactive:
                         for reaction_name in self.reaction_names:
                             file_name = f_name.format(reaction_name, self.id_string)
@@ -342,12 +347,20 @@ class Field3D():
                             attr_list.append(attribute_name.format(reaction_name))
             else: #handling the species attributes
                 if self.reactive:
-                    for specie in self.species:
-                        file_name = f_name.format(specie, self.id_string)
-                        path = os.path.join(self.data_path, file_name)
-                        paths_list.append(path)
-                        attr_list.append(attribute_name.format(specie))
-                    
+                    if not reactions:
+                        for specie in self.species:
+                            file_name = f_name.format(specie, self.id_string)
+                            path = os.path.join(self.data_path, file_name)
+                            paths_list.append(path)
+                            attr_list.append(attribute_name.format(specie))
+                    else:
+                        for specie in self.species:
+                            for reaction in self.reaction_names:
+                                file_name = f_name.format(specie, reaction, self.id_string)
+                                path = os.path.join(self.data_path, file_name)
+                                paths_list.append(path)
+                                attr_list.append(attribute_name.format(specie, reaction))
+
         return attr_list, paths_list
     
     def check_valid_attribute(self, input_attribute):
@@ -505,6 +518,7 @@ class Field3D():
         the gradient of Z. The result is saved to a file.
     
         Prerequisites:
+        --------------
         - The mixture fraction Z must be computed and available as an attribute.
         - The thermal conductivity Lambda and specific heat Cp must be computed.
         - The gradient of Z (Z_grad) should be available or will be computed if missing.
@@ -2098,29 +2112,31 @@ class Field3D():
         
         self.update()
         
-    def compute_tsr(self, n_chunks=1000, n_proc=None, parallel=False, debug=False, verbose=True):
+    def compute_tsr(self, 
+                    n_chunks=1000, 
+                    TSR=True,
+                    API_TSR=True, 
+                    API_species=False,
+                    n_proc=None, 
+                    parallel=False, 
+                    debug=False, 
+                    overwrite_files=False,
+                    verbose=True,
+                    ):
+
         if n_proc is None:
             n_proc = max(1, cpu_count() // 2)  # Ensure at least one process
         
         # Step 1: Check that all the mass fractions are in the folder
         check_mass_fractions(self.attr_list, self.bool_list, self.folder_path)
-        # Step 2: Understand if the reaction rates to be computed are in DNS or LFR mode
+        # Step 2: Understand if the field is filtered or not
         if self.filter_size == 1:
             mode = 'DNS'
         else:
             mode = 'LES'
         
-        # Step 4: build a list with reaction rates paths and one with the species' Mass fractions paths
-        # reaction_rates_paths = []
-        # for attr, path in zip(self.attr_list, self.paths_list):
-        #     if attr.startswith('R'):
-        #         if mode in attr:
-        #             if not ('RHO_' in attr):
-        #                 reaction_rates_paths.append(path)
-        species_paths = []
-        for attr, path in zip(self.attr_list, self.paths_list):
-            if attr.startswith('Y') and (attr != 'Y'):
-                species_paths.append(path)
+        # Step 3: build a list with species paths and one with the species' Mass fractions paths
+        _, species_paths = self.build_attributes_list("Y{}")
         
         # if debug:
         #   print( [len(species_paths), len(self.species),  len(reaction_rates_paths), ])
@@ -2132,36 +2148,37 @@ class Field3D():
                              "\n>>> your_filt_field.compute_reaction_rates()"
                              "\n\nOperation aborted.")
         
-        # build paths for API files
-        api_tsr_paths = []
-        for attr, path in zip(self.attr_list, self.paths_list):
-            if attr.startswith('API_TSR_'):
-                api_tsr_paths.append(path)
+        # Initialize list for API TSR
+        if API_TSR:
+            # build paths for API_TSR files
+            _, api_tsr_paths = self.build_attributes_list("API_TSR_{}")
+            if (len(api_tsr_paths)!=len(self.reactions)):
+                raise ValueError("Lenght of the lists must be equal to the number of reactions. ")
+            # Check that the files of the APIs do not exist yet
+            overwrite_files = delete_existing_files(api_tsr_paths, context="API_TSR indexes", delete=overwrite_files)
+
+        # Initialize list for species APIs 
+        if API_species is not False:
+            # Check that API_species is a list of strings
+            if not isinstance(API_species, list):
+                raise TypeError("API_species must be a list of strings")
+            for s in API_species:
+                if not isinstance(s, str):
+                    raise TypeError("API_species must be a list of strings")
+            # Build the list of API_species attributes and paths
+            api_species_attr, api_species_paths = self.build_attributes_list("API_{}_{}")
+            api_species = [s.split('_')[1] for s in api_species_attr]
+            api_species_paths_dict = {}
+            for species in API_species:
+                if species not in self.species:
+                    raise ValueError("Species {} was not found in the kinetic mechanism".format(species))
+                api_species_paths_dict[species] = []
+                for i, name in enumerate(api_species):
+                    if name == species:
+                        api_species_paths_dict[species].append(api_species_paths[i])
+                overwrite_files = delete_existing_files(api_species_paths_dict[species], context="API_{} indexes".format(species), delete=overwrite_files)
         
-        if (len(api_tsr_paths)!=len(self.reactions)):
-            raise ValueError("Lenght of the lists must be equal to the number of reactions. "
-                             "Check that all the species molar concentrations and Reaction Rates are in the data folder.")
-        
-        # Step 3: Check that the files of the reaction rates do not exist yet
-        count = 0
-        for path in api_tsr_paths:
-            if os.path.exists(path):
-                if count == 0: # only asks one time if they want to remove the files
-                    user_input = input(
-                            f"The folder '{self.data_path}' already contains the api indexes. "
-                            f"\nThis operation will overwrite the existing files. "
-                            f"\nDo you want to continue? ([yes]/no): "
-                                        )
-                    if user_input.lower() != "yes":
-                        print("Operation aborted.")
-                        sys.exit()
-                    else:
-                        count += 1
-                        delete_file(path)
-                else:
-                    delete_file(path)
-        
-        # Step 5: Compute TSR and write it to files
+        # Initialise chunk size and CSP class (Inherited from ct.Solution)
         chunk_size = self.shape[0] * self.shape [1] * self.shape[2] // n_chunks + 1
         gas = csp.CanteraCSP(self.kinetic_mechanism)
         gas.jacobiantype = 'full'
@@ -2171,9 +2188,19 @@ class Field3D():
             TSR_path = self.find_path('TSR_DNS')
         if mode =='LES':
             TSR_path = self.find_path('TSR_LES')
-        output_file_TSR = open(TSR_path, 'ab')
-        
-        output_files_api_tsr = [open(a, 'ab') for a in api_tsr_paths]
+
+        if TSR:
+            output_file_TSR = open(TSR_path, 'ab')
+
+        if API_TSR:
+            output_files_api_tsr = [open(a, 'ab') for a in api_tsr_paths]
+
+        if API_species:
+            # Generate a dictionary with the species as entries, each entry then opens a file
+            # for each reaction (for a total of n_reactions*n_species opened files)
+            output_files_api_species = {}
+            for key in API_species:
+                output_files_api_species[key] = [open(a, 'ab') for a in api_species_paths_dict[key]]
 
         # create generators to read files in chunks
         T_chunk_generator = read_variable_in_chunks(self.T.path, chunk_size)
@@ -2186,27 +2213,56 @@ class Field3D():
             # Read a chunk for every specie
             Y_chunk = [next(generator) for generator in species_chunk_generator]
             Y_chunk = np.array(Y_chunk)  # Make the list an array
-            # Initialize the TSR variable
+            # Initialise the TSR variable
             TSR_chunk = np.zeros_like(T_chunk)
-            api_tsr_chunk = dict()
-            for r in self.reaction_names:
-                api_tsr_chunk[r] = np.zeros_like(T_chunk)
+            # Initialise API chunks
+            if API_TSR:
+                api_tsr_chunk = dict()
+                for r in self.reaction_names:
+                    api_tsr_chunk[r] = np.zeros_like(T_chunk)
+            if API_species:
+                api_species_chunk = dict()
+                for s in API_species:
+                    api_species_chunk[s] = dict()
+                    for r in self.reaction_names:
+                        api_species_chunk[s][r] = np.zeros_like(T_chunk)
             
-            # iterate through the chunks and compute the Reaction Rates
+            # iterate through the chunks and compute the CSP-TSR parameters cellwise
             for j in range(len(T_chunk)):
                 gas.TPY = T_chunk[j], P_chunk[j], Y_chunk[:, j]
                 gas.constP = True
                 lam,R,L,f = gas.get_kernel()
-                TSR_chunk[j] = gas.calc_TSR()  
-                tsrapi = gas.calc_TSRindices(type='amplitude')
+                if TSR:
+                    TSR_chunk[j] = gas.calc_TSR()
+                if API_TSR:
+                    tsrapi = gas.calc_TSRindices(type='amplitude')
+                if API_species:
+                    api, tpi, ifast, islow, species_type = gas.calc_CSPindices(API=True,Impo=False,species_type=False,TPI=False)
+                # Save results in the chunk
                 for k in range(len(self.reaction_names)):
+                    # k is the number that tracks a certain reaction during the cycle
+                    # r is the k-th reaction name
+                    # j is the index during the chunk cycle
+                    # s is the index of the species
                     r = self.reaction_names[k]
-                    api_tsr_chunk[r][j] = tsrapi[k]
-                    
+                    if API_TSR:
+                        api_tsr_chunk[r][j] = tsrapi[k]
+                    if API_species:
+                        for key in API_species:
+                            s = self.species.index(key)
+                            api_species_chunk[key][r][j] = api[s][k]
+            
             # Save files
-            save_file(TSR_chunk, output_file_TSR)
-            for r, f in zip(self.reaction_names, output_files_api_tsr):
-                save_file(api_tsr_chunk[r], f)
+            if TSR:
+                save_file(TSR_chunk, output_file_TSR)
+            if API_TSR:
+                for r, f in zip(self.reaction_names, output_files_api_tsr):
+                    save_file(api_tsr_chunk[r], f)
+            if API_species:
+                for s in API_species:
+                    for r, f in zip(self.reaction_names, output_files_api_species[s]):
+                        save_file(api_species_chunk[s][r], f)
+            
             # Print advancement state
             print('Reading file in chunks: read {}/{}'.format(i + 1, n_chunks))
 
@@ -2216,7 +2272,7 @@ class Field3D():
         self.update()
         
         return
-        
+    
         
     def compute_unresolved_pv_fluxes(self, mode='DNS'):
         valid_modes = ['DNS']
@@ -4200,6 +4256,33 @@ def compute_cell_volumes(x, y, z):
     
     return cell_volumes
 
+def delete_existing_files(paths, delete=False, context="the API indexes"):
+    """
+    Checks if any of the given paths exist. If so, prompts the user once to confirm deletion.
+    Deletes the files if confirmed.
+
+    :param paths: List of file paths to check and possibly delete
+    :param context: Optional string to clarify what the files represent (for user message)
+    """
+
+    for path in paths:
+        if os.path.exists(path):
+            if not delete:
+                user_input = input(
+                    f"The folder already contains {context}. "
+                    f"\nThis operation will overwrite the existing files. "
+                    f"\nDo you want to continue? ([yes]/no): "
+                )
+                if (user_input.lower() != "yes") and (user_input.lower() != "y"):
+                    print("Operation aborted.")
+                    sys.exit()
+                delete = True
+
+            delete_file(path)
+    
+    # returns True if the user asked to delete the files or if the function was called with delete=True
+    return delete
+
 def delete_file(file_path):
     """
     Deletes the specified file from the file system.
@@ -4229,7 +4312,7 @@ def delete_file(file_path):
     if os.path.isfile(file_path):
         os.remove(file_path)
     else:
-        print(f"No such file: '{file_path}'")
+        raise Warning(f"No such file: '{file_path}'")
 
 def download(repo_url="https://github.com/LorenzoPiu/aPrioriDNS/tree/main/data", dest_folder="./"):
     """

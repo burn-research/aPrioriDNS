@@ -49,8 +49,6 @@ for s in light_scalars:
     t_load.append(t1-t0)
 
 # %% Plot
-import matplotlib.pyplot as plt
-import numpy as np
 
 # Create figure and primary axis
 fig, ax1 = plt.subplots(figsize=(6.3, 4.4), dpi=500)
