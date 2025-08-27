@@ -4314,7 +4314,7 @@ def delete_file(file_path):
     else:
         raise Warning(f"No such file: '{file_path}'")
 
-def download(repo_url="https://github.com/LorenzoPiu/aPrioriDNS/tree/main/data", dest_folder="./"):
+def download(repo_url="https://github.com/LorenzoPiu/aPrioriDNS/tree/main/data", dest_folder="./", dataset=None):
     """
     Downloads all files from a specified GitHub repository directory and saves them to the destination folder,
     including files in subdirectories.
@@ -4327,6 +4327,19 @@ def download(repo_url="https://github.com/LorenzoPiu/aPrioriDNS/tree/main/data",
     list: A list of paths to the downloaded files.
     """
     
+    if dataset is not None:
+        datasets_list = ['h2_lifted', 'h2_premixed', 'hit']
+        if dataset.lower() == 'h2_lifted':
+            repo_url = "https://github.com/LorenzoPiu/aPrioriDNS/tree/main/data/Lifted_H2_subdomain"
+        elif dataset.lower() == 'h2_premixed':
+            repo_url = "https://github.com/LorenzoPiu/aPrioriDNS/tree/main/data/Premixed_H2_Phi0.5"
+        elif dataset.lower() == 'hit':
+            repo_url = "https://github.com/LorenzoPiu/aPrioriDNS/tree/main/data/Forced_HIT_ReL184"
+        if dataset.lower() not in datasets_list:
+            raise ValueError(
+            f"Invalid dataset '{dataset}'. Expected one of {datasets_list}."
+        )
+            
     if not os.path.exists(dest_folder):
         os.makedirs(dest_folder)
 
