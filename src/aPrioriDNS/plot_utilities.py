@@ -83,28 +83,29 @@ def parity_plot(x,
         R2 = 1 - np.sum((x-y)**2) / np.sum((x-np.average(x))**2)
     
     if density:
-        if len(x) > max_dim:
-            print(f"\nParity Plot:\nThe vector size is too large to compute"
-                  f" the Gaussian kde. A random sample of {max_dim} elements "
-                  "will be extracted from the vector for the plot. You can "
-                  "change this limit with the parameter max_dim")
-            x = extract_random_elements(x, max_dim, seed=42)
-            y = extract_random_elements(y, max_dim, seed=42)
-        # Perform KDE
-        x = np.reshape(x, [1, len(x)])
-        y = np.reshape(y, [1, len(y)])
+
+        # if len(x) > max_dim:
+        #     print(f"\nParity Plot:\nThe vector size is too large to compute"
+        #           f" the Gaussian kde. A random sample of {max_dim} elements "
+        #           "will be extracted from the vector for the plot. You can "
+        #           "change this limit with the parameter max_dim")
+        #     x = extract_random_elements(x, max_dim, seed=42)
+        #     y = extract_random_elements(y, max_dim, seed=42)
+        # # Perform KDE
+        # x = np.reshape(x, [1, len(x)])
+        # y = np.reshape(y, [1, len(y)])
         
-        xy = np.vstack([x, y])
-        z = gaussian_kde(xy)(xy)
-        z = z/max(z)
+        # xy = np.vstack([x, y])
+        # z = gaussian_kde(xy)(xy)
+        # z = z/max(z)
         
-        # Sort the points by density, so densest points are plotted last
-        x = x.flatten()
-        y = y.flatten()
-        idx = z.argsort()
-        x, y, z = x[idx], y[idx], z[idx]
+        # # Sort the points by density, so densest points are plotted last
+        # x = x.flatten()
+        # y = y.flatten()
+        # idx = z.argsort()
+        # x, y, z = x[idx], y[idx], z[idx]
         
-        c = z
+        # c = z
         cbar_title='Density'
 
     # PLOT
@@ -115,12 +116,14 @@ def parity_plot(x,
                      [min_x, max_x*(1+rel_error)], 
                      color='grey', alpha=0.5)
     
-    if c is None:
-        c='blue'
-    
-    plt.scatter(x, y, marker=marker, c=c, s=s, 
-                cmap=colormap, alpha=alpha, vmin=vmin, vmax=vmax)
-    
+    if not density:
+        if c is None:
+            c='blue'
+        plt.scatter(x, y, marker=marker, c=c, s=s, 
+                    cmap=colormap, alpha=alpha, vmin=vmin, vmax=vmax)
+    else:
+        plt.hist2d(x, y, bins=200, cmin=1)
+        
     if (not isinstance(c, str)) and (c is not None): # if c is a string means it was initialized as a single color, so no need for colormap
         cbar = plt.colorbar(shrink=.9, aspect=15, fraction=.1,pad=.05)
         cbar.ax.tick_params(labelsize=ParityPlot.fontsize*3//4)
