@@ -14,7 +14,9 @@ __email__ = ["lorenzo.piu@ulb.be"]
 __status__ = "Production"
 
 # Import useful functions and classes from the DNS module
-from .DNS import (delete_file, 
+from .DNS import (
+                 add_variable,
+                 delete_file, 
                  download, 
                  process_file, 
                  filter_gauss, 
