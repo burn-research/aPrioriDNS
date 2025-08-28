@@ -30,6 +30,7 @@ import gc
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import requests
 import re
+from itertools import zip_longest
 
 from ._variables import variables_list
 from ._variables import mesh_list
@@ -258,7 +259,7 @@ class Field3D():
         if not isinstance(attr_name, str):
             raise TypeError("attr_name must be a string.")
         if not isinstance(file_name, str):
-            raise TypeError("path must be a string.")
+            raise TypeError("file_name must be a string.")
         # check that the name format is correct
         else:
             if not file_name.endswith(".dat"):
@@ -271,17 +272,15 @@ class Field3D():
         # check that an attribute with the same name does not exist yet
         if attr_name in self.attr_list:
             raise ValueError(f"The object already has an attribute named {attr_name}.")
-        elif file_name in self.paths_list:
+        if file_name in self.paths_list:
             raise ValueError(f"The path {os.path.join(self.data_path, file_name)} is already in the list.\n"
                              "Please choose a different file name")
         
-        else:
-            self.attr_list.append(attr_name)
-            self.paths_list.append(os.path.join(self.data_path, file_name))
-            setattr(self, attr_name, Scalar3D(self.shape, path=os.path.join(self.data_path, file_name)))
-            
+        self.attr_list.append(attr_name)
+        self.paths_list.append(os.path.join(self.data_path, file_name))
+        setattr(self, attr_name, Scalar3D(self.shape, path=os.path.join(self.data_path, file_name)))
+        
         self.update()
-            
                         
     def build_attributes_list(self, variable=None):
         """
@@ -303,7 +302,7 @@ class Field3D():
         paths_list = []
         # bool_list = []
         if variable is None:
-            variables_list_ = variables_list.copy()
+            variables_list_ = Field3D.variables.copy()
         else:
             variables_list_ = {variable : variables_list[variable]}
 
@@ -3238,18 +3237,22 @@ class Field3D():
         - verbose (bool, optional): If True, prints information about the initialization of new attributes.
                                    Default is False.
         """
+        # Rebuild attributes and paths lists in case new variables were added
+        self.attr_list, self.paths_list = self.build_attributes_list()
+        
         files_in_folder = os.listdir(self.data_path)
-        bool_list = []
+        bool_list = [] # 
         for attribute_name, path in zip(self.attr_list, self.paths_list):
             file_name = os.path.basename(path)
-            if file_name in files_in_folder:
+            if (file_name in files_in_folder) :
                 bool_list.append(True)
             else:
                 bool_list.append(False)
         if not hasattr(self, 'bool_list'): # means that the field is being initialized
-            new_list = bool_list
+            new_list = bool_list # in this case all the files in the folder will be used to create an attribute
         else:
-            new_list = [a and (not b) for a, b in zip(bool_list, self.bool_list)]
+            # new_list = [a and (not b) for a, b in zip(bool_list, self.bool_list)]
+            new_list = [a and (not b) for a, b in zip_longest(bool_list, self.bool_list, fillvalue=False)]
         self.bool_list = bool_list
         
         remove_list = []
@@ -4182,12 +4185,12 @@ class Mesh3D:
 #                               Functions
 ###############################################################################
 
-def add_variable(attribute_name, file_name, species=False, models=None, tensor=False, description=''):
+def add_variable(attribute_name, file_name, species=False, models=None, tensor=False, reactions=False, description=''):
     # TODO: add a check that an attribute with the same name does not exist yet
     
     # TODO: Check in general that the files have the correct form
     
-    variables_list[attribute_name] = [file_name, species, models, tensor, description]
+    Field3D.variables[attribute_name] = [file_name, species, models, tensor, reactions, description]
     
     return
 
