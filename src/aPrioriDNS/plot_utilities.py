@@ -18,6 +18,7 @@ import matplotlib
 import numpy as np
 from scipy.stats import gaussian_kde
 from matplotlib import ticker
+from matplotlib.colors import LogNorm
 
 from ._styles import ParityPlot, ContourPlot, CondMeanPlot, ScatterPlot
 from ._utils import extract_random_elements, reorder_arrays, process_arrays
@@ -48,8 +49,11 @@ def parity_plot(x,
                 y_name='y',
                 title=None,
                 density=False, 
+                bins=200,
+                cmin=1,
                 c=None, 
-                linewidth=3,
+                linestyle='--',
+                linewidth=2.5,
                 vmin=None,
                 vmax=None,
                 cbar_title=None,
@@ -57,6 +61,7 @@ def parity_plot(x,
                 s=1, 
                 alpha=1,
                 R2=True,
+                RMSE=True,
                 ticks=None,
                 limits=None,
                 save=False,
@@ -76,45 +81,23 @@ def parity_plot(x,
     max_x = np.maximum(np.max(x), np.max(y))
     
     if limits is None:
-        limits=[min_x, max_x]
+        limits = [min_x, max_x]
+    else:
+        min_x = limits[0]
+        max_x = limits[1]
         
-    # Compute the R2 score if required:
+    # Compute the error metrics if required:
     if R2:
         R2 = 1 - np.sum((x-y)**2) / np.sum((x-np.average(x))**2)
+    if RMSE:
+        RMSE = np.sqrt(np.mean((x - y) ** 2))
     
     if density:
-
-        # if len(x) > max_dim:
-        #     print(f"\nParity Plot:\nThe vector size is too large to compute"
-        #           f" the Gaussian kde. A random sample of {max_dim} elements "
-        #           "will be extracted from the vector for the plot. You can "
-        #           "change this limit with the parameter max_dim")
-        #     x = extract_random_elements(x, max_dim, seed=42)
-        #     y = extract_random_elements(y, max_dim, seed=42)
-        # # Perform KDE
-        # x = np.reshape(x, [1, len(x)])
-        # y = np.reshape(y, [1, len(y)])
-        
-        # xy = np.vstack([x, y])
-        # z = gaussian_kde(xy)(xy)
-        # z = z/max(z)
-        
-        # # Sort the points by density, so densest points are plotted last
-        # x = x.flatten()
-        # y = y.flatten()
-        # idx = z.argsort()
-        # x, y, z = x[idx], y[idx], z[idx]
-        
-        # c = z
-        cbar_title='Density'
+        cbar_title='PDF'
 
     # PLOT
     fig = plt.figure(figsize=ParityPlot.fig_size, 
                      dpi=ParityPlot.dpi)
-    plt.fill_between(limits, 
-                     [min_x, max_x*(1-rel_error),], 
-                     [min_x, max_x*(1+rel_error)], 
-                     color='grey', alpha=0.5)
     
     if not density:
         if c is None:
@@ -122,9 +105,21 @@ def parity_plot(x,
         plt.scatter(x, y, marker=marker, c=c, s=s, 
                     cmap=colormap, alpha=alpha, vmin=vmin, vmax=vmax)
     else:
-        plt.hist2d(x, y, bins=200, cmin=1)
+        plt.hist2d(x, y, 
+                   bins=bins, 
+                   cmin=cmin, 
+                   density=True, 
+                   cmap=colormap,
+                   norm=LogNorm()
+                   )
+    
+    if rel_error is not None:
+        plt.fill_between(limits, 
+                         [min_x*(1-rel_error), max_x*(1-rel_error)], 
+                         [min_x*(1+rel_error), max_x*(1+rel_error)], 
+                         color='grey', alpha=0.4)
         
-    if (not isinstance(c, str)) and (c is not None): # if c is a string means it was initialized as a single color, so no need for colormap
+    if (not isinstance(c, str)) or (c is None): # if c is a string means it was initialized as a single color, so no need for colormap
         cbar = plt.colorbar(shrink=.9, aspect=15, fraction=.1,pad=.05)
         cbar.ax.tick_params(labelsize=ParityPlot.fontsize*3//4)
         if cbar_title is not None:
@@ -138,18 +133,27 @@ def parity_plot(x,
     plt.xticks(fontsize=ParityPlot.fontsize*3//4)
     plt.yticks(fontsize=ParityPlot.fontsize*3//4)
     if ticks is not None:
-        if isinstance(ticks, int):
-            xmin    = plt.gca().get_xlim()[0]
-            xmax    = plt.gca().get_xlim()[1]
-            ticks = np.linspace(xmin, xmax, ticks)
+        # if isinstance(ticks, int):
+        # These lines create n equispaced ticks
+        #     xmin    = plt.gca().get_xlim()[0]
+        #     xmax    = plt.gca().get_xlim()[1]
+        #     ticks = np.linspace(xmin, xmax, ticks)
         plt.xticks(ticks=ticks)
         plt.yticks(ticks=ticks)
-    plt.plot(limits, limits, 'k--', linewidth=linewidth)
-    if R2:
-        plt.text(0.02, 0.92, rf'$R^2 = {R2:.4f}$', 
+    plt.plot(limits, limits, 'k', linestyle=linestyle, linewidth=linewidth)
+    
+    # Write the error metrics if required
+    lines = []
+    if R2:   lines.append(rf'$R^2 = {R2:.4f}$')
+    if RMSE:  lines.append(rf'$\mathrm{{RMSE}} = {RMSE:.4f}$')
+    annotation = "\n".join(lines)
+    if annotation:
+        plt.text(0.02, 0.98, annotation, 
                  transform=plt.gca().transAxes, 
-                 fontsize=ParityPlot().fontsize//2)
-        
+                 fontsize=ParityPlot().fontsize*0.65,
+                 va='top',
+                 ha='left'
+                 )
     # Adjust borders tickness
     for spine in plt.gca().spines.values():
         spine.set_linewidth(ParityPlot.border_width )
