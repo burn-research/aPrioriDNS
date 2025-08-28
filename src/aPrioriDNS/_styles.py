@@ -15,7 +15,7 @@ __status__ = "Production"
 
 
 class ParityPlot():
-    fig_size      = [8, 6]
+    fig_size      = [10, 8]
     dpi           = 400
     fontsize      = 48
     border_width  = 2
