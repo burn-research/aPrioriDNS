@@ -161,13 +161,14 @@ def parity_plot(x,
     plt.gca().set_aspect('equal', adjustable='box')
     if remove_cbar:
         cbar.remove()
-    figure = plt.gcf()
     if remove_x:
         plt.xlabel('')
         plt.xticks([])
     if remove_y:
         plt.xlabel('')
         plt.xticks([])
+    figure = plt.gcf()
+    axes = plt.gca()
     
     if save:
         if title is None:
@@ -177,10 +178,10 @@ def parity_plot(x,
     if show:
         plt.show()
         
-    # Close the figure to prevent it from displaying when returned
-    plt.close(figure)
+    # # Close the figure to prevent it from displaying when returned
+    # plt.close(figure)
     
-    return figure
+    return figure, axes
     
 
 def contour_plot(X, 
