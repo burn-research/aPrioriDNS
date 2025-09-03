@@ -1947,12 +1947,14 @@ class Field3D():
                 raise AttributeError("The filtered field does not have a value to identify the associated unfiltered data.\n"
                                  "The path of the unfiltered data folder must be assigned with the following command:\n"
                                  ">>> your_filtered_field.DNS_folder_path = 'your_unfiltered_DNS_folder_path'")
-            DNS_field = Field3D(self.DNS_folder_path)
+            DNS_field = Field3D(self.DNS_folder_path, reactive=self.reactive)
             
             #--------- Compute Anisotropic Residual Stress Tensor ------------#
             # Check what filter was used for the folder and keep consistency
             if 'favre' in self.folder_path.lower():
                 favre = True
+            else:
+                favre = False
             if 'box' in self.folder_path.lower():
                 filter_type = 'box'
             elif 'gauss' in self.folder_path.lower():
