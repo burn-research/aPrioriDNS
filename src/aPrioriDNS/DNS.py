@@ -1193,6 +1193,10 @@ class Field3D():
                         Tau_r_ij = Ui_Uj_DNS - (getattr(self, f'U_{direction[i]}')._3d * getattr(self, f'U_{direction[j]}')._3d)
                         # TODO: check that this formulation is consistent for compressible flows
                         # with Favre averaging. Source: Poinsot pag 173 footnote
+                        # TODO: I should subtract the trace to the tensor, as the current code
+                        # considers the full residual stress tensor, while it should
+                        # only consider the deviatoric part. See Pope pag 585, eq. 13.123, where Tau_r 
+                        # (lowercase r) represents the deviatoric part of the stress tensor
                         del Ui_Uj_DNS
                         epsilon_r       += -Tau_r_ij*getattr(self, f"S{i+1}{j+1}_LES")._3d
                         if i!=j:  # take into account the sub-diagonal element in the computation of the module
@@ -1205,7 +1209,7 @@ class Field3D():
         if mode=='Smag':
             # Check that the smagorinsky constant is defined
             if not hasattr(self, 'Cs'):
-                Warning("The field does not have an attribute Cs.\n The Smagorinsky constant Cs will be initialized by default to 0.1")
+                raise Warning("The field does not have an attribute Cs.\n The Smagorinsky constant Cs will be initialized by default to 0.1")
                 self.Cs = 0.1
             Cs = self.Cs
             if not hasattr(self, 'S_LES'):
