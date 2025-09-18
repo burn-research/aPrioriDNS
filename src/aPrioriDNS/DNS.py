@@ -31,6 +31,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 import requests
 import re
 from itertools import zip_longest
+import warnings
 
 from ._variables import variables_list
 from ._variables import mesh_list
@@ -1205,7 +1206,6 @@ class Field3D():
             file_name=  self.find_path(f"Epsilon_r_{mode}")
             save_file(epsilon_r, file_name)
             
-            
         if mode=='Smag':
             # Check that the smagorinsky constant is defined
             if not hasattr(self, 'Cs'):
@@ -1303,7 +1303,7 @@ class Field3D():
                     delete_file(path)
         delete_file(self.find_path('Mu'))
         delete_file(self.find_path(f'HRR_{mode}'))
-        
+
                     
         # Step 5: Compute reaction rates
         chunk_size = self.shape[0] * self.shape [1] * self.shape[2] // n_chunks + 1
@@ -4321,7 +4321,7 @@ def delete_file(file_path):
     if os.path.isfile(file_path):
         os.remove(file_path)
     else:
-        raise Warning(f"No such file: '{file_path}'")
+        warnings.warn(f"No such file: '{file_path}'")
 
 def download(repo_url="https://github.com/LorenzoPiu/aPrioriDNS/tree/main/data", dest_folder="./", dataset=None):
     """
