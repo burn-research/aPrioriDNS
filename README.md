@@ -11,7 +11,7 @@
 A Python package to process Direct Numerical Simulations of reacting and non-reacting flows.
 
 ## Purpose of the project
-The project aims to help make large DNS (Direct Numerical Simulations) datasets more accessible to everyone, both to those who come from the field of Combustion and Fluid Dynamics, and who come from other fields.
+The project seeks to make large DNS (Direct Numerical Simulation) datasets more accessible to a broad audience, including both specialists in Combustion and Fluid Dynamics and researchers from other disciplines.
 Processing DNS data can be challenging in several ways. This package offers:
 - **Field3D**: An object that automatically reads formatted data aligned with [Blastnet](https://blastnet.github.io) [1, 2], an open source scientific repository.
 - **Scalar3D**: An object that efficiently manages pointers to local files, preventing memory overload.
