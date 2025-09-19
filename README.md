@@ -67,11 +67,6 @@ The following code can be used to test the library once installed. A detailed ex
 
 ```python
 """
-Created on Fri May 24 14:50:44 2024
-
-@author: lorenzo piu
-"""
-
 import aPrioriDNS as ap
 
 # Download the dataset
