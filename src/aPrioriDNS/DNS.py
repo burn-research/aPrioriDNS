@@ -618,6 +618,34 @@ class Field3D():
         del grad_C # release memory
         
         return
+
+    def compute_laplacian_C(self):
+        # Check that the mixture fraction is available
+        self.update(verbose=False)
+        if (not hasattr(self, 'C_grad_X')) or (not hasattr(self, 'C_grad_Y') or (not hasattr(self, 'C_grad_Z'))):
+            raise ValueError("To compute the progress variable gradient, the progress variable C is needed.\n"
+                             "You can compute C using the function compute_progress_variable.\n"
+                             "Example usage:\n"
+                             ">>> import aPrioriDNS as ap"
+                             ">>> my_field = ap.Field3D('path_to_your_folder')\n"
+                             ">>> my_field.compute_progress_variable(species='H2O')"
+                             )
+        
+        if self.downsampled is True:
+            filter_size = 1
+        else:
+            filter_size = self.filter_size
+
+        # Computing the laplacian incrementally to avoid memory overload
+        laplacian =  gradient_x(self.C_grad_X, self.mesh, filter_size)
+        laplacian += gradient_y(self.C_grad_Y, self.mesh, filter_size)
+        laplacian += gradient_y(self.C_grad_Y, self.mesh, filter_size)
+
+        save_file(laplacian, self.find_path('C_laplacian'))
+
+        self.update()
+        
+        return
     
     def compute_kinetic_energy(self):
         """
