@@ -46,6 +46,7 @@ variables_list = {
              "C_grad_X"       : ["C_grad_X_m-1_{}.dat"          ,   False   ,       None              ,      False       ,       False        , "Progress variable gradient (x component)"],
              "C_grad_Y"       : ["C_grad_Y_m-1_{}.dat"          ,   False   ,       None              ,      False       ,       False        , "Progress variable gradient (y component)"],
              "C_grad_Z"       : ["C_grad_Z_m-1_{}.dat"          ,   False   ,       None              ,      False       ,       False        , "Progress variable gradient (z component)"],
+             "C_laplacian"    : ["C_laplacian_m-2_{}.dat"       ,   False   ,       None              ,      False       ,       False        , "Progress variable laplacian"],
              "Z"              : ["Z_{}.dat"                     ,   False   ,       None              ,      False       ,       False        , "Mixture fraction"],
              "Z_grad"         : ["Z_grad_m-1_{}.dat"            ,   False   ,       None              ,      False       ,       False        , "Mixture fraction gradient modulus"],
              "Chi_Z"          : ["Chi_Z_ms-1_{}.dat"            ,   False   ,       None              ,      False       ,       False        , "Mixture fraction Dissipation rate"],
