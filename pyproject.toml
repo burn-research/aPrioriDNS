@@ -27,8 +27,8 @@ dependencies = [
     "matplotlib>=3.2.0",
 	 "cantera>=3.0.0",
     "tabulate>=0.9.0",
-    "requests>=2.32.0,
-	 "PyCSP-lib">=1.4.0,
+    "requests>=2.32.0",
+	 "PyCSP-lib">=1.4.0",
     # Add more dependencies here
 ]
 
