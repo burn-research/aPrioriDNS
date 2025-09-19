@@ -19,13 +19,13 @@ import json
 import os
 from os import cpu_count
 import sys
-from tabulate import tabulate
+from tabulate import tabulate # type: ignore - comment to suppress warning
 import shutil
 from scipy.ndimage import convolve
 from scipy.ndimage import gaussian_filter
 import matplotlib.pyplot as plt
 import numpy as np
-import cantera as ct
+import cantera as ct # type: ignore - comment to suppress warning
 import gc
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import requests
@@ -49,7 +49,7 @@ from ._utils import (
 from ._data_struct import folder_structure
 from .plot_utilities import contour_plot
 from .plot_utilities import scatter
-from PyCSP import Functions as csp
+from PyCSP import Functions as csp   # type: ignore - comment to suppress warning
 
 
 ###########################################################
