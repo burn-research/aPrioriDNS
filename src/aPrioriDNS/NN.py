@@ -180,16 +180,49 @@ class TrainingBuilder(dict):
             
         return X
     
+    # def fit(self, field):
+    #     """
+    #     Old function, only able to handle one field at a time.
+    #     Delete after testing the new utility.
+    #     Fit each VectorScaler in the TrainingBuilder to the corresponding data in the Field3D.
+
+    #     Parameters:
+    #     -----------
+    #         - field (Field3D): The field with data to fit each scaler.
+    #     """
+    #     for variable_name in self.keys():
+    #         self[variable_name].fit(getattr(field, variable_name).value)
+    
     def fit(self, field):
         """
-        Fit each VectorScaler in the TrainingBuilder to the corresponding data in the Field3D.
+        Fit each VectorScaler in the TrainingBuilder to the corresponding data in the Field3D or list of Field3D objects.
 
         Parameters:
         -----------
-            - field (Field3D): The field with data to fit each scaler.
+            - field (Field3D or list of Field3D): The field(s) with data to fit each scaler.
         """
+        # Handle single field case
+        if isinstance(field, Field3D):
+            fields = [field]
+        # Handle list of fields case
+        elif isinstance(field, list) and all(isinstance(f, Field3D) for f in field):
+            fields = field
+        else:
+            raise TypeError("Input must be a Field3D object or a list of Field3D objects")
+        
+        # Collect data from all fields for each variable
         for variable_name in self.keys():
-            self[variable_name].fit(getattr(field, variable_name).value)
+            # Gather data from all fields for this variable
+            all_data = []
+            for f in fields:
+                variable_data = getattr(f, variable_name).value
+                all_data.append(variable_data.flatten())  # Flatten to 1D array
+            
+            # Concatenate all data for this variable
+            combined_data = np.concatenate(all_data)
+            
+            # Fit the scaler to the combined data
+            self[variable_name].fit(combined_data)
             
     def load(self, file_path):
         """
