@@ -843,7 +843,7 @@ class Field3D():
         elif mode.lower() == 'int':
             # Check that the C_mix constant is defined
             if not hasattr(self, 'C_mix'):
-                Warning("The field does not have an attribute C_mix.\n The integral lengthscale model constant C_mix will be initialized by default to 0.1")
+                warnings.warn("The field does not have an attribute C_mix.\n The integral lengthscale model constant C_mix will be initialized by default to 0.1")
                 self.C_mix = 0.1
             
             C_mix = self.C_mix
@@ -1096,7 +1096,7 @@ class Field3D():
         if mode=='Yosh':
             # Check that the Yoshizawa constant C_i is defined
             if not hasattr(self, 'Ci'):
-                Warning("The field does not have an attribute Ci.\n The Yoshizawa model constant Ci will be initialized by default to 0.1")
+                warnings.warn("The field does not have an attribute Ci.\n The Yoshizawa model constant Ci will be initialized by default to 0.1")
                 self.Ci = 0.1
             Ci = self.Ci
             K_r_Yosh = 2*Ci*self.RHO._3d*(self.filter_size*self.mesh.l)**2*self.S_LES._3d**2
@@ -1237,7 +1237,7 @@ class Field3D():
         if mode=='Smag':
             # Check that the smagorinsky constant is defined
             if not hasattr(self, 'Cs'):
-                raise Warning("The field does not have an attribute Cs.\n The Smagorinsky constant Cs will be initialized by default to 0.1")
+                warnings.warn("The field does not have an attribute Cs.\n The Smagorinsky constant Cs will be initialized by default to 0.1")
                 self.Cs = 0.1
             Cs = self.Cs
             if not hasattr(self, 'S_LES'):
@@ -1580,7 +1580,7 @@ class Field3D():
         elif n_chunks < 1:
             raise ValueError("n_chunks must be at least 1. Value set to 1")
         elif n_chunks > 10000:
-            raise Warning("maximum allowed number of chunks is 10000. Value is set to the maximum limit.")
+            warnings.warn("maximum allowed number of chunks is 10000. Value is set to the maximum limit.")
             n_chunks = 10000
         
         # Step 1: Check that all the mass fractions are in the folder
@@ -1935,7 +1935,7 @@ class Field3D():
             #----------------- Compute Turbulent Viscosity -------------------#
             # Check that the smagorinsky constant is defined
             if not hasattr(self, 'Cs'):
-                Warning("The field does not have an attribute Cs.\n The Smagorinsky constant Cs will be initialized by default to 0.1")
+                warnings.warn("The field does not have an attribute Cs.\n The Smagorinsky constant Cs will be initialized by default to 0.1")
                 self.Cs = 0.1
             Cs = self.Cs
             if not hasattr(self, 'S_LES'):
@@ -3113,7 +3113,7 @@ class Field3D():
         else:
             s = 1000
             scale = 'mm'
-            raise Warning("\nAvailable options for the 'scale' parameter are 'm' or 'mm'.\n"
+            warnings.warn("\nAvailable options for the 'scale' parameter are 'm' or 'mm'.\n"
                           "Value defaulted to 'mm'.")
         
         if x_name is None:
