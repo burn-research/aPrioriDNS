@@ -378,7 +378,7 @@ class Field3D():
             valid_attributes_str = '\n'.join(valid_attributes)
             raise ValueError(f"The attribute '{input_attribute}' is not valid. \nValid attributes are: \n{valid_attributes_str}")
 
-    def compute_chemical_timescale(self, mode='SFR', verbose=False):
+    def compute_chemical_timescale(self, mode='SFR', verbose=False, threshold=1e-15):
         '''
         Computes the chemical timescale for the field, useful in Partially Stirred Reactor (PaSR) modeling.
         
@@ -392,6 +392,8 @@ class Field3D():
             The mode of timescale computation. Valid options are 'SFR', 'FFR', and 'Ch'. Default is 'SFR'.
         verbose : bool, optional
             If True, prints detailed information during the computation. Default is False.
+        threshold: float, optional
+            Minimum value of the species formation rates to consider the cell reactive
         
         Raises:
         -------
@@ -473,7 +475,7 @@ class Field3D():
                 Y          = Scalar3D(self.shape, path=Y_path)
                 R          = Scalar3D(self.shape, path=R_path)
                 tau_2      = np.abs(Y.value/R.value)
-                idx        = np.abs(R.value)<1e-10 # indexes of the dormant species
+                idx        = np.abs(R.value)<threshold # indexes of the dormant species
                 tau_2[idx] = -inf_time     # in this way the dormant species should not be considered
                 tau_c_SFR  = np.maximum(tau_c_SFR, tau_2)
                 tau_2[idx] = inf_time
@@ -503,7 +505,7 @@ class Field3D():
             R_fuel = Scalar3D(shape=self.shape, path=self.find_path(f"R{self.fuel}_LFR"))
             RHO    = Scalar3D(shape=self.shape, path=self.find_path('RHO'))
             
-            tau_chomiak = RHO.value*np.minimum( Y_ox.value/np.maximum(np.abs(R_ox.value),1e-10), Y_fuel.value/np.maximum(np.abs(R_fuel.value),1e-10) )
+            tau_chomiak = RHO.value*np.minimum( Y_ox.value/np.maximum(np.abs(R_ox.value),threshold), Y_fuel.value/np.maximum(np.abs(R_fuel.value),threshold) )
             save_file(tau_chomiak, self.find_path('Tau_c_Ch'))
             
         self.update()
