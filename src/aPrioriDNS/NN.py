@@ -498,7 +498,10 @@ class VectorScaler():
         """
         x = self._preprocess_input(x)
         
-        if self.mode.lower()=='minmax':
+        if self.mode is None:
+            pass
+        
+        elif self.mode.lower()=='minmax':
             x = (x-self.min)/(self.max-self.min)
             
         elif self.mode.lower() == 'standard':
@@ -507,9 +510,6 @@ class VectorScaler():
         elif self.mode.lower() == 'mean':
             # Scale between -1 and 1 using mean and range
             x = (x - self.mean) / (self.ptp / 2)
-            
-        elif self.mode is None:
-            pass
         
         else:
             raise ValueError(f"Unknown scaling mode {self.mode}")
