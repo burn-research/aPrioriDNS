@@ -1,6 +1,6 @@
 # Third-Party Notices
 
-The *aPrioriDNS* project itself is licensed under the **MIT License** (see [`LICENSE`](./LICENSE)).
+The *aPriori* project itself is licensed under the **MIT License** (see [`LICENSE`](./LICENSE)).
 
 This project relies on several third-party Python libraries distributed via PyPI.  
 These dependencies are **not bundled** within the source or binary distributions of aPrioriDNS; they are installed separately by users.  
