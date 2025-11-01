@@ -4371,7 +4371,7 @@ def download(repo_url="https://github.com/LorenzoPiu/aPrioriDNS/tree/main/data",
         if dataset.lower() == 'h2_lifted':
             repo_url = "https://github.com/LorenzoPiu/aPrioriDNS/tree/main/data/Lifted_H2_subdomain"
         elif dataset.lower() == 'h2_premixed':
-            repo_url = "https://github.com/LorenzoPiu/aPrioriDNS/tree/main/data/Premixed_H2_Phi0.5"
+            repo_url = "https://github.com/LorenzoPiu/aPrioriDNS/tree/dev/data/Premixed_H2_Phi0.5"
         elif dataset.lower() == 'hit':
             repo_url = "https://github.com/LorenzoPiu/aPrioriDNS/tree/main/data/Forced_HIT_ReL184"
         if dataset.lower() not in datasets_list:
