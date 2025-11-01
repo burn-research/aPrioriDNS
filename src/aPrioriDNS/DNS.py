@@ -378,7 +378,7 @@ class Field3D():
             valid_attributes_str = '\n'.join(valid_attributes)
             raise ValueError(f"The attribute '{input_attribute}' is not valid. \nValid attributes are: \n{valid_attributes_str}")
 
-    def compute_chemical_timescale(self, mode='SFR', verbose=False, threshold=1e-15):
+    def compute_chemical_timescale(self, mode='SFR', verbose=False, threshold=1e-15, replace_nonreacting=False):
         '''
         Computes the chemical timescale for the field, useful in Partially Stirred Reactor (PaSR) modeling.
         
@@ -480,6 +480,19 @@ class Field3D():
                 tau_c_SFR  = np.maximum(tau_c_SFR, tau_2)
                 tau_2[idx] = inf_time
                 tau_c_FFR  = np.minimum(tau_c_FFR, tau_2)
+            
+            if replace_nonreacting is not False:
+                non_reactive_indices = tau_c_FFR == inf_time
+                if isinstance(replace_nonreacting, (int,float)): # if it's a number
+                    replacement_SFR = replace_nonreacting
+                    replacement_FFR = replace_nonreacting
+                if replace_nonreacting.lower() == 'max':
+                    replacement_SFR = np.max(tau_c_SFR)
+                    tau_c_FFR[non_reactive_indices] = -inf_time # otherwise the max will always be inf_time
+                    replacement_FFR = np.max(tau_c_FFR)
+                # Replace values
+                tau_c_SFR[non_reactive_indices] = replacement_SFR
+                tau_c_FFR[non_reactive_indices] = replacement_FFR
             
             tau_c_SFR = self.RHO.value * tau_c_SFR
             tau_c_FFR = self.RHO.value * tau_c_FFR
