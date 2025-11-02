@@ -205,7 +205,7 @@ class TrainingBuilder(dict):
         if isinstance(field, Field3D):
             fields = [field]
         # Handle list of fields case
-        elif isinstance(field, list) and all(isinstance(f, Field3D) for f in field):
+        elif isinstance(field, list) and all(isinstance(f,Field3D) for f in field):
             fields = field
         else:
             raise TypeError("Input must be a Field3D object or a list of Field3D objects")
