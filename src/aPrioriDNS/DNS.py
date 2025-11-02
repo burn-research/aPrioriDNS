@@ -2526,7 +2526,7 @@ class Field3D():
         
         return ds_folder_path    
         
-    def filter_favre(self, filter_size, filter_type='Gauss', exist_ok=False):
+    def filter_favre(self, filter_size, filter_type='Gauss', exist_ok=False, overwrite=False):
         """
         Filter every scalar in the field object using Favre-averaging.
         
@@ -2593,7 +2593,10 @@ class Field3D():
         else:
             if exist_ok:
                 return filt_folder_path
-            user_input = input(f"The folder '{filt_folder_path}' already exists. This operation will overwrite the content of the folder. Do you want to continue? (yes/no): ")
+            if overwrite:
+                user_input = 'yes'
+            else:
+                user_input = input(f"The folder '{filt_folder_path}' already exists. This operation will overwrite the content of the folder. Do you want to continue? (yes/no): ")
             if user_input.lower() != "yes":
                 print("Operation aborted.")
                 sys.exit()
@@ -2639,7 +2642,7 @@ class Field3D():
         
         return filt_folder_path
     
-    def filter(self, filter_size, filter_type='Gauss', exist_ok=False):
+    def filter(self, filter_size, filter_type='Gauss', exist_ok=False, overwrite=False):
         """
         Filter every scalar in the field object.
         
@@ -2701,7 +2704,10 @@ class Field3D():
         else:
             if exist_ok:
                 return filt_folder_path
-            user_input = input(f"The folder '{filt_folder_path}' already exists. This operation will overwrite the content of the folder. Do you want to continue? (yes/no): ")
+            if overwrite:
+                user_input = 'yes'
+            else:
+                user_input = input(f"The folder '{filt_folder_path}' already exists. This operation will overwrite the content of the folder. Do you want to continue? (yes/no): ")
             if user_input.lower() != "yes":
                 print("Operation aborted.")
                 sys.exit()
