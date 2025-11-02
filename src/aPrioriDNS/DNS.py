@@ -1276,7 +1276,7 @@ class Field3D():
         
         self.update()
             
-    def compute_reaction_rates(self, n_chunks = 1000, parallel=False, n_proc=None, ):
+    def compute_reaction_rates(self, n_chunks = 1000, parallel=False, n_proc=None, exist_ok=False, overwrite=False):
         """
         Computes the source terms for a given chemical reaction system.
         
@@ -1303,7 +1303,6 @@ class Field3D():
         """
         if n_proc is None:
             n_proc = max(1, cpu_count() // 2)  # Ensure at least one process
-        
         
         # Step 1: Check that all the mass fractions are in the folder
         check_mass_fractions(self.attr_list, self.bool_list, self.folder_path)
@@ -1339,11 +1338,16 @@ class Field3D():
         for path in reaction_rates_paths:
             if os.path.exists(path):
                 if count == 0: # only asks one time if they want to remove the files
-                    user_input = input(
-                            f"The folder '{self.data_path}' already contains the reaction rates. "
-                            f"\nThis operation will overwrite the content of the folder. "
-                            f"\nDo you want to continue? ([yes]/no): "
-                                        )
+                    if exist_ok:
+                        return
+                    if overwrite: # if overwrite is true then automatically recompute the reaction rates
+                        user_input = 'yes'
+                    else:
+                        user_input = input(
+                                f"The folder '{self.data_path}' already contains the reaction rates. "
+                                f"\nThis operation will overwrite the content of the folder. "
+                                f"\nDo you want to continue? ([yes]/no): "
+                                            )
                     if user_input.lower() != "yes":
                         print("Operation aborted.")
                         sys.exit()
@@ -1354,7 +1358,6 @@ class Field3D():
                     delete_file(path)
         delete_file(self.find_path('Mu'))
         delete_file(self.find_path(f'HRR_{mode}'))
-
                     
         # Step 5: Compute reaction rates
         chunk_size = self.shape[0] * self.shape [1] * self.shape[2] // n_chunks + 1
@@ -1406,7 +1409,6 @@ class Field3D():
                     HRR_chunk[j] = gas.heat_release_rate 
                     Mu_chunk[j] = gas.viscosity # dynamic viscosity, Pa*s
                 
-            
             # Save files
             save_file(HRR_chunk, output_file_HRR)
             save_file(Mu_chunk, output_file_Mu)
@@ -1425,139 +1427,9 @@ class Field3D():
         
         self.update()
         
-        return
-
-    def compute_reaction_rates_serial(self, n_chunks = 5000):
-        """
-        Computes the source terms for a given chemical reaction system.
-        
-        This function performs several steps:
-        1. Checks that all the mass fractions are in the folder.
-        2. Determines if the reaction rates to be computed are in DNS or LFR mode based on the filter size.
-        3. Builds a list with reaction rates paths and one with the species' Mass fractions paths.
-        4. Checks that the files of the reaction rates do not exist yet. If they do, asks the user if they want to overwrite them.
-        5. Computes the reaction rates in chunks to handle large data sets efficiently.
-        6. Saves the computed reaction rates, heat release rate, and dynamic viscosity to files.
-        7. Updates the object's state.
-        
-        Parameters:
-        n_chunks (int, optional): The number of chunks to divide the data into for efficient computation. Default is 5000.
-        
-        Returns:
-        None
-        
-        Raises:
-        SystemExit: If the user chooses not to overwrite existing reaction rate files, or if there is a mismatch in the number of species and the length of the species paths list.
-        
-        Note:
-        This function uses the Cantera library to compute the reaction rates, heat release rate, and dynamic viscosity. It assumes that the object has the following attributes: attr_list, bool_list, folder_path, filter_size, species, shape, kinetic_mechanism, T, P, and paths_list. It also assumes that the object has the following methods: find_path and update.
-        """
-        # Step 1: Check that all the mass fractions are in the folder
-        check_mass_fractions(self.attr_list, self.bool_list, self.folder_path)
-        # Step 2: Understand if the reaction rates to be computed are in DNS or LFR mode
-        if self.filter_size == 1:
-            mode = 'DNS'
-        else:
-            mode = 'LFR'
-            
-        # Step 4: build a list with reaction rates paths and one with the species' Mass fractions paths
-        reaction_rates_paths = []
-        for attr, path in zip(self.attr_list, self.paths_list):
-            if attr.startswith('R'):
-                if mode in attr:
-                    reaction_rates_paths.append(path)
-        species_paths = []
-        for attr, path in zip(self.attr_list, self.paths_list):
-            if attr.startswith('Y') and (attr != 'Y'):
-                species_paths.append(path)
-                
-        if (len(species_paths)!=len(self.species)) or(len(reaction_rates_paths)!=len(self.species)):
-            raise ValueError("Lenght of the lists must be equal to the number of species. "
-                             "Check that all the species molar concentrations and Reaction Rates are in the data folder."
-                             "\nYou can compute the reaction rates with the command:"
-                             "\n>>> your_filt_field.compute_reaction_rates()"
-                             "\n\nOperation aborted.")
-        
-        # Step 3: Check that the files of the reaction rates do not exist yet
-        count = 0
-        for path in reaction_rates_paths:
-            if os.path.exists(path):
-                if count == 0: # only asks one time if they want to remove the files
-                    user_input = input(
-                            f"The folder '{self.data_path}' already contains the reaction rates. "
-                            f"\nThis operation will overwrite the content of the folder. "
-                            f"\nDo you want to continue? ([yes]/no): "
-                                        )
-                    if user_input.lower() != "yes":
-                        print("Operation aborted.")
-                        sys.exit()
-                    else:
-                        count += 1
-                        delete_file(path)
-                else:
-                    delete_file(path)
-        delete_file(self.find_path('Mu'))
-        delete_file(self.find_path(f'HRR_{mode}'))
-        
-                    
-        # Step 5: Compute reaction rates
-        chunk_size = self.shape[0] * self.shape [1] * self.shape[2] // n_chunks + 1
-        gas = ct.Solution(self.kinetic_mechanism)
-        
-        # Open output files in writing mode
-        output_files_R = [open(reaction_rate_path, 'ab') for reaction_rate_path in reaction_rates_paths]
-        if mode == 'DNS':
-            HRR_path = self.find_path('HRR_DNS')
-        if mode =='LFR':
-            HRR_path = self.find_path('HRR_LFR')
-        output_file_HRR = open(HRR_path, 'ab')
-        Mu_path = self.find_path('Mu')
-        output_file_Mu = open(Mu_path, 'ab')
-        
-        # create generators to read files in chunks
-        T_chunk_generator = read_variable_in_chunks(self.T.path, chunk_size)
-        P_chunk_generator = read_variable_in_chunks(self.P.path, chunk_size)
-        species_chunk_generator = [read_variable_in_chunks(specie_path, chunk_size) for specie_path in species_paths]
-        print('Reading file in chunks: read 0/{}'.format(n_chunks))
-        for i in range(n_chunks):
-            T_chunk = next(T_chunk_generator)  # Read one step of this function
-            P_chunk = next(P_chunk_generator)
-            # Read a chunk for every specie
-            Y_chunk = [next(generator) for generator in species_chunk_generator]
-            Y_chunk = np.array(Y_chunk)  # Make the list an array
-            # Initialize R for the source Terms, HRR and Mu
-            R_chunk = np.zeros_like(Y_chunk)
-            HRR_chunk = np.zeros_like(T_chunk)
-            Mu_chunk = np.zeros_like(T_chunk) #if it's a scalar I use T_chunk as a reference size
-            
-            # iterate through the chunks and compute the Reaction Rates
-            for j in range(len(T_chunk)):
-                gas.TPY = T_chunk[j], P_chunk[j], Y_chunk[:, j]
-                R_chunk[:, j] = gas.net_production_rates * gas.molecular_weights
-                HRR_chunk[j] = gas.heat_release_rate 
-                Mu_chunk[j] = gas.viscosity # dynamic viscosity, Pa*s
-            
-            # Save files
-            save_file(HRR_chunk, output_file_HRR)
-            save_file(Mu_chunk, output_file_Mu)
-            R_chunk = R_chunk.tolist()
-            for k in range(len(self.species)):
-                save_file(np.array(R_chunk[k]), output_files_R[k])
-            
-            # Print advancement state
-            print('Reading file in chunks: read {}/{}'.format(i + 1, n_chunks))
-
-        # Close all output files
-        for output_file in output_files_R:
-            output_file.close()
-        output_file_HRR.close()
-        output_file_Mu.close()
-        
-        self.update()
-        
-        return    
+        return 
     
-    def compute_reaction_rates_batch(self, n_chunks=1000, tau_c='SFR', tau_m='Kolmo', parallel=True, n_proc=None):
+    def compute_reaction_rates_batch(self, n_chunks=1000, tau_c='SFR', tau_m='Kolmo', parallel=False, n_proc=None, exist_ok=False, overwrite=False):
         '''
         Computes the reaction rates in batches for a filtered field.
     
@@ -1631,7 +1503,12 @@ class Field3D():
         for path in reaction_rates_paths:
             if os.path.exists(path):
                 if not already_asked:
-                    user_input = input(f"The folder '{self.data_path}' already contains the reaction rates. \nThis operation will overwrite the content of the folder. \nDo you want to continue? ([yes]/no): ")
+                    if exist_ok:
+                        return
+                    if overwrite:
+                        user_input = 'yes'
+                    else:
+                        user_input = input(f"The folder '{self.data_path}' already contains the reaction rates. \nThis operation will overwrite the content of the folder. \nDo you want to continue? ([yes]/no): ")
                     already_asked = True
                 else:
                     user_input = "yes"
