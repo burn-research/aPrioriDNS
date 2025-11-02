@@ -964,7 +964,7 @@ class Field3D():
         
         return Z_st
     
-    def compute_progress_variable(self, species=None, Y_b=None, Y_u=None):
+    def compute_progress_variable(self, species=None, Y_b=None, Y_u=None, reactant=False):
         """
         Computes the progress variable based on the mass fraction of a specified species 
         (default is 'O2') and saves the result.
@@ -997,7 +997,7 @@ class Field3D():
         """
         # Default specie is oxygen
         if species is None:
-            species = 'O2'
+            species = 'H2O'
             
         Y_ox_str = 'Y' + species
         Y = getattr(self, Y_ox_str)
@@ -1006,11 +1006,19 @@ class Field3D():
         # maximum specie mass fraction value. The unburnt gas mass fraction
         # is set by default to the minimum value.
         if Y_b is None:
-            Y_b = np.max(Y.value)
+            if reactant:
+                Y_b = np.min(Y.value)
+            else:
+                Y_b = np.max(Y.value)
         if Y_u is None:
-            Y_u = np.min(Y.value)
+            if reactant:
+                Y_u = np.max(Y.value)
+            else:
+                Y_u = np.min(Y.value)
 
-        C = 1 - (Y.value - Y_u) / (Y_b - Y_u)
+        C = (Y.value - Y_u) / (Y_b - Y_u)
+        # if reactant == True:
+        #     C = 1 - C
         save_file(C, self.find_path("C"))
         self.update()
         
@@ -1268,7 +1276,7 @@ class Field3D():
         
         self.update()
             
-    def compute_reaction_rates(self, n_chunks = 1000, parallel=False, n_proc=None):
+    def compute_reaction_rates(self, n_chunks = 1000, parallel=False, n_proc=None, ):
         """
         Computes the source terms for a given chemical reaction system.
         
@@ -2641,7 +2649,7 @@ class Field3D():
         
         return ds_folder_path    
         
-    def filter_favre(self, filter_size, filter_type='Gauss'):
+    def filter_favre(self, filter_size, filter_type='Gauss', exist_ok=False):
         """
         Filter every scalar in the field object using Favre-averaging.
         
@@ -2706,6 +2714,8 @@ class Field3D():
         if not os.path.exists(filt_folder_path):
             os.makedirs(filt_folder_path)
         else:
+            if exist_ok:
+                return filt_folder_path
             user_input = input(f"The folder '{filt_folder_path}' already exists. This operation will overwrite the content of the folder. Do you want to continue? (yes/no): ")
             if user_input.lower() != "yes":
                 print("Operation aborted.")
@@ -2752,7 +2762,7 @@ class Field3D():
         
         return filt_folder_path
     
-    def filter(self, filter_size, filter_type='Gauss'):
+    def filter(self, filter_size, filter_type='Gauss', exist_ok=False):
         """
         Filter every scalar in the field object.
         
@@ -2812,6 +2822,8 @@ class Field3D():
         if not os.path.exists(filt_folder_path):
             os.makedirs(filt_folder_path)
         else:
+            if exist_ok:
+                return filt_folder_path
             user_input = input(f"The folder '{filt_folder_path}' already exists. This operation will overwrite the content of the folder. Do you want to continue? (yes/no): ")
             if user_input.lower() != "yes":
                 print("Operation aborted.")
