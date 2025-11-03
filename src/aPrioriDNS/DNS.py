@@ -2368,7 +2368,7 @@ class Field3D():
         return
         
     
-    def cut(self, cut_size, mode='xyz'):
+    def cut(self, cut_size, mode='xyz', exist_ok=False, overwrite=False):
         """
         Cut a field into smaller sections based on a specified cut size.
     
@@ -2408,7 +2408,12 @@ class Field3D():
         if not os.path.exists(cut_folder_path):
             os.makedirs(cut_folder_path)
         else:
-            user_input = input("The folder already exists. This operation will overwrite the content of the folder. Do you want to continue? (yes/no): ")
+            if exist_ok:
+                return cut_folder_path
+            if overwrite:
+                user_input = 'yes'
+            else:
+                user_input = input("The folder already exists. This operation will overwrite the content of the folder. Do you want to continue? (yes/no): ")
             if user_input.lower() != "yes":
                 print("Operation aborted.")
                 sys.exit()
