@@ -62,6 +62,7 @@ def parity_plot(x,
                 alpha=1,
                 R2=True,
                 RMSE=True,
+                NRMSE=False,
                 ticks=None,
                 limits=None,
                 save=False,
@@ -91,6 +92,8 @@ def parity_plot(x,
         R2 = 1 - np.sum((x-y)**2) / np.sum((x-np.average(x))**2)
     if RMSE:
         RMSE = np.sqrt(np.mean((x - y) ** 2))
+    if NRMSE:
+        NRMSE = np.sqrt(np.mean((x - y) ** 2))/np.max(x)
     
     if density:
         cbar_title='PDF'
@@ -127,11 +130,11 @@ def parity_plot(x,
     plt.xlabel(x_name, fontsize=ParityPlot.fontsize)
     plt.ylabel(y_name, fontsize=ParityPlot.fontsize)
     if title is not None:
-        plt.title(title)
+        plt.title(title, fontsize=ParityPlot.fontsize)
     plt.xlim(limits)
     plt.ylim(limits)
-    plt.xticks(fontsize=ParityPlot.fontsize*3//4)
-    plt.yticks(fontsize=ParityPlot.fontsize*3//4)
+    plt.xticks(fontsize=ParityPlot.fontsize*4//5)
+    plt.yticks(fontsize=ParityPlot.fontsize*4//5)
     if ticks is not None:
         # if isinstance(ticks, int):
         # These lines create n equispaced ticks
@@ -144,6 +147,7 @@ def parity_plot(x,
     
     # Write the error metrics if required
     lines = []
+    if NRMSE:  lines.append(rf'$\mathrm{{NRMSE}} = {NRMSE:.2e}$')
     if R2:   lines.append(rf'$R^2 = {R2:.4f}$')
     if RMSE:  lines.append(rf'$\mathrm{{RMSE}} = {RMSE:.4f}$')
     annotation = "\n".join(lines)
@@ -165,8 +169,8 @@ def parity_plot(x,
         plt.xlabel('')
         plt.xticks([])
     if remove_y:
-        plt.xlabel('')
-        plt.xticks([])
+        plt.ylabel('')
+        plt.yticks([])
     figure = plt.gcf()
     axes = plt.gca()
     
