@@ -216,10 +216,15 @@ def contour_plot(X,
                  remove_x=False,
                  remove_y=False,
                  remove_title=False,
+                 dpi=None,
                  transpose=False,
                  save=False,
+                 save_path=None,
                  show=True
                  ):
+    
+    if dpi is None:
+        dpi = ContourPlot.dpi
     
     Z = Z.copy() # so it won't be modified inside the funciton
     X = X.copy()
@@ -335,14 +340,17 @@ def contour_plot(X,
     figure = plt.gcf()
     axes = plt.gca()
     
-    if save:
-        if title is None:
-            title=f'Contour_plot'
-            if cbar_title is not None:
-                title = title+'_'+cbar_title
+    if save or (save_path is not None):
+        if save_path is None:
+            if title is None:
+                title=f'Contour_plot'
+                if cbar_title is not None:
+                    title = title+'_'+cbar_title
+            else:
+                title = 'contour_plot' + title
         else:
-            title = 'Scatter_plot' + title
-        plt.savefig(title, dpi=ContourPlot.dpi, bbox_inches = "tight")
+            title = save_path
+        plt.savefig(title, dpi=dpi, bbox_inches = "tight")
     
     if show:
         plt.show()
