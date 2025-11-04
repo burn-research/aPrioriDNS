@@ -47,7 +47,7 @@ from ._utils import (
     check_reaction_rates
 )
 from ._data_struct import folder_structure
-from .plot_utilities import contour_plot
+from .plot_utilities import contour_plot, plot_multifield
 from .plot_utilities import scatter
 from PyCSP import Functions as csp   # type: ignore - comment to suppress warning
 
@@ -590,6 +590,170 @@ class Field3D():
         save_file(Chi_Z, self.find_path('Chi_Z'))
         
         return
+    
+    
+    def compute_csp(self, 
+                    n_chunks=1000, 
+                    TSR=True,
+                    API_TSR=True, 
+                    API_species=False,
+                    n_proc=None, 
+                    parallel=False, 
+                    debug=False, 
+                    overwrite=True,
+                    verbose=True,
+                    ):
+
+        if n_proc is None:
+            n_proc = max(1, cpu_count() // 2)  # Ensure at least one process
+        
+        # Step 1: Check that all the mass fractions are in the folder
+        check_mass_fractions(self.attr_list, self.bool_list, self.folder_path)
+        # Step 2: Understand if the field is filtered or not
+        if self.filter_size == 1:
+            mode = 'DNS'
+        else:
+            mode = 'LES'
+        
+        # Step 3: build a list with species paths and one with the species' Mass fractions paths
+        _, species_paths = self.build_attributes_list("Y{}")
+        
+        # if debug:
+        #   print( [len(species_paths), len(self.species),  len(reaction_rates_paths), ])
+                
+        if (len(species_paths)!=len(self.species)):
+            raise ValueError("Lenght of the lists must be equal to the number of species. "
+                             "Check that all the species molar concentrations and Reaction Rates are in the data folder."
+                             "\nYou can compute the reaction rates with the command:"
+                             "\n>>> your_filt_field.compute_reaction_rates()"
+                             "\n\nOperation aborted.")
+        
+        # Initialize list for API TSR
+        if API_TSR:
+            # build paths for API_TSR files
+            _, api_tsr_paths = self.build_attributes_list("API_TSR_{}")
+            if (len(api_tsr_paths)!=len(self.reactions)):
+                raise ValueError("Lenght of the lists must be equal to the number of reactions. ")
+            # Check that the files of the APIs do not exist yet
+            overwrite = delete_existing_files(api_tsr_paths, context="API_TSR indexes", delete=overwrite)
+
+        # Initialize list for species APIs 
+        if API_species is not False:
+            # Check that API_species is a list of strings
+            if not isinstance(API_species, list):
+                raise TypeError("API_species must be a list of strings")
+            for s in API_species:
+                if not isinstance(s, str):
+                    raise TypeError("API_species must be a list of strings")
+            # Build the list of API_species attributes and paths
+            api_species_attr, api_species_paths = self.build_attributes_list("API_{}_{}")
+            api_species = [s.split('_')[1] for s in api_species_attr]
+            api_species_paths_dict = {}
+            for species in API_species:
+                if species not in self.species:
+                    raise ValueError("Species {} was not found in the kinetic mechanism".format(species))
+                api_species_paths_dict[species] = []
+                for i, name in enumerate(api_species):
+                    if name == species:
+                        api_species_paths_dict[species].append(api_species_paths[i])
+                overwrite = delete_existing_files(api_species_paths_dict[species], context="API_{} indexes".format(species), delete=overwrite)
+        
+        # Initialise chunk size and CSP class (Inherited from ct.Solution)
+        chunk_size = self.shape[0]*self.shape [1]*self.shape[2]//n_chunks + 1
+        gas = csp.CanteraCSP(self.kinetic_mechanism)
+        gas.jacobiantype = 'full'
+        
+        # Open output files in writing mode
+        if mode == 'DNS':
+            TSR_path = self.find_path('TSR_DNS')
+        if mode =='LES':
+            TSR_path = self.find_path('TSR_LES')
+
+        if TSR:
+            overwrite = delete_existing_files(TSR_path, delete=overwrite, context='the Tangential stretching rate (TSR)')
+            output_file_TSR = open(TSR_path, 'ab')
+
+        if API_TSR:
+            output_files_api_tsr = [open(a, 'ab') for a in api_tsr_paths]
+
+        if API_species:
+            # Generate a dictionary with the species as entries, each entry then opens a file
+            # for each reaction (for a total of n_reactions*n_species opened files)
+            output_files_api_species = {}
+            for key in API_species:
+                output_files_api_species[key] = [open(a, 'ab') for a in api_species_paths_dict[key]]
+
+        # create generators to read files in chunks
+        T_chunk_generator = read_variable_in_chunks(self.T.path, chunk_size)
+        P_chunk_generator = read_variable_in_chunks(self.P.path, chunk_size)
+        species_chunk_generator = [read_variable_in_chunks(specie_path, chunk_size) for specie_path in species_paths]
+        print('Reading file in chunks: read 0/{}'.format(n_chunks))
+        for i in range(n_chunks):
+            T_chunk = next(T_chunk_generator)  # Read one step of this function
+            P_chunk = next(P_chunk_generator)
+            # Read a chunk for every specie
+            Y_chunk = [next(generator) for generator in species_chunk_generator]
+            Y_chunk = np.array(Y_chunk)  # Make the list an array
+            # Initialise the TSR variable
+            TSR_chunk = np.zeros_like(T_chunk)
+            # Initialise API chunks
+            if API_TSR:
+                api_tsr_chunk = dict()
+                for r in self.reaction_names:
+                    api_tsr_chunk[r] = np.zeros_like(T_chunk)
+            if API_species:
+                api_species_chunk = dict()
+                for s in API_species:
+                    api_species_chunk[s] = dict()
+                    for r in self.reaction_names:
+                        api_species_chunk[s][r] = np.zeros_like(T_chunk)
+            
+            # iterate through the chunks and compute the CSP-TSR parameters cellwise
+            for j in range(len(T_chunk)):
+                gas.TPY = T_chunk[j], P_chunk[j], Y_chunk[:, j]
+                gas.constP = True
+                lam,R,L,f = gas.get_kernel()
+                if TSR:
+                    TSR_chunk[j] = gas.calc_TSR()
+                if API_TSR:
+                    tsrapi = gas.calc_TSRindices(type='amplitude')
+                if API_species:
+                    api, tpi, ifast, islow, species_type = gas.calc_CSPindices(API=True,Impo=False,species_type=False,TPI=False)
+                # Save results in the chunk
+                for k in range(len(self.reaction_names)):
+                    # k is the number that tracks a certain reaction during the cycle
+                    # r is the k-th reaction name
+                    # j is the index during the chunk cycle
+                    # s is the index of the species
+                    r = self.reaction_names[k]
+                    if API_TSR:
+                        api_tsr_chunk[r][j] = tsrapi[k]
+                    if API_species:
+                        for key in API_species:
+                            s = self.species.index(key)
+                            api_species_chunk[key][r][j] = api[s][k]
+            
+            # Save files
+            if TSR:
+                save_file(TSR_chunk, output_file_TSR)
+            if API_TSR:
+                for r, f in zip(self.reaction_names, output_files_api_tsr):
+                    save_file(api_tsr_chunk[r], f)
+            if API_species:
+                for s in API_species:
+                    for r, f in zip(self.reaction_names, output_files_api_species[s]):
+                        save_file(api_species_chunk[s][r], f)
+            
+            # Print advancement state
+            print('Reading file in chunks: read {}/{}'.format(i + 1, n_chunks))
+
+        # Close all output files
+        output_file_TSR.close()
+        
+        self.update()
+        
+        return
+    
     
     def compute_gradient_C(self):
         # Check that the mixture fraction is available
@@ -2045,167 +2209,6 @@ class Field3D():
         
         self.update()
         
-    def compute_tsr(self, 
-                    n_chunks=1000, 
-                    TSR=True,
-                    API_TSR=True, 
-                    API_species=False,
-                    n_proc=None, 
-                    parallel=False, 
-                    debug=False, 
-                    overwrite_files=False,
-                    verbose=True,
-                    ):
-
-        if n_proc is None:
-            n_proc = max(1, cpu_count() // 2)  # Ensure at least one process
-        
-        # Step 1: Check that all the mass fractions are in the folder
-        check_mass_fractions(self.attr_list, self.bool_list, self.folder_path)
-        # Step 2: Understand if the field is filtered or not
-        if self.filter_size == 1:
-            mode = 'DNS'
-        else:
-            mode = 'LES'
-        
-        # Step 3: build a list with species paths and one with the species' Mass fractions paths
-        _, species_paths = self.build_attributes_list("Y{}")
-        
-        # if debug:
-        #   print( [len(species_paths), len(self.species),  len(reaction_rates_paths), ])
-                
-        if (len(species_paths)!=len(self.species)):
-            raise ValueError("Lenght of the lists must be equal to the number of species. "
-                             "Check that all the species molar concentrations and Reaction Rates are in the data folder."
-                             "\nYou can compute the reaction rates with the command:"
-                             "\n>>> your_filt_field.compute_reaction_rates()"
-                             "\n\nOperation aborted.")
-        
-        # Initialize list for API TSR
-        if API_TSR:
-            # build paths for API_TSR files
-            _, api_tsr_paths = self.build_attributes_list("API_TSR_{}")
-            if (len(api_tsr_paths)!=len(self.reactions)):
-                raise ValueError("Lenght of the lists must be equal to the number of reactions. ")
-            # Check that the files of the APIs do not exist yet
-            overwrite_files = delete_existing_files(api_tsr_paths, context="API_TSR indexes", delete=overwrite_files)
-
-        # Initialize list for species APIs 
-        if API_species is not False:
-            # Check that API_species is a list of strings
-            if not isinstance(API_species, list):
-                raise TypeError("API_species must be a list of strings")
-            for s in API_species:
-                if not isinstance(s, str):
-                    raise TypeError("API_species must be a list of strings")
-            # Build the list of API_species attributes and paths
-            api_species_attr, api_species_paths = self.build_attributes_list("API_{}_{}")
-            api_species = [s.split('_')[1] for s in api_species_attr]
-            api_species_paths_dict = {}
-            for species in API_species:
-                if species not in self.species:
-                    raise ValueError("Species {} was not found in the kinetic mechanism".format(species))
-                api_species_paths_dict[species] = []
-                for i, name in enumerate(api_species):
-                    if name == species:
-                        api_species_paths_dict[species].append(api_species_paths[i])
-                overwrite_files = delete_existing_files(api_species_paths_dict[species], context="API_{} indexes".format(species), delete=overwrite_files)
-        
-        # Initialise chunk size and CSP class (Inherited from ct.Solution)
-        chunk_size = self.shape[0] * self.shape [1] * self.shape[2] // n_chunks + 1
-        gas = csp.CanteraCSP(self.kinetic_mechanism)
-        gas.jacobiantype = 'full'
-        
-        # Open output files in writing mode
-        if mode == 'DNS':
-            TSR_path = self.find_path('TSR_DNS')
-        if mode =='LES':
-            TSR_path = self.find_path('TSR_LES')
-
-        if TSR:
-            output_file_TSR = open(TSR_path, 'ab')
-
-        if API_TSR:
-            output_files_api_tsr = [open(a, 'ab') for a in api_tsr_paths]
-
-        if API_species:
-            # Generate a dictionary with the species as entries, each entry then opens a file
-            # for each reaction (for a total of n_reactions*n_species opened files)
-            output_files_api_species = {}
-            for key in API_species:
-                output_files_api_species[key] = [open(a, 'ab') for a in api_species_paths_dict[key]]
-
-        # create generators to read files in chunks
-        T_chunk_generator = read_variable_in_chunks(self.T.path, chunk_size)
-        P_chunk_generator = read_variable_in_chunks(self.P.path, chunk_size)
-        species_chunk_generator = [read_variable_in_chunks(specie_path, chunk_size) for specie_path in species_paths]
-        print('Reading file in chunks: read 0/{}'.format(n_chunks))
-        for i in range(n_chunks):
-            T_chunk = next(T_chunk_generator)  # Read one step of this function
-            P_chunk = next(P_chunk_generator)
-            # Read a chunk for every specie
-            Y_chunk = [next(generator) for generator in species_chunk_generator]
-            Y_chunk = np.array(Y_chunk)  # Make the list an array
-            # Initialise the TSR variable
-            TSR_chunk = np.zeros_like(T_chunk)
-            # Initialise API chunks
-            if API_TSR:
-                api_tsr_chunk = dict()
-                for r in self.reaction_names:
-                    api_tsr_chunk[r] = np.zeros_like(T_chunk)
-            if API_species:
-                api_species_chunk = dict()
-                for s in API_species:
-                    api_species_chunk[s] = dict()
-                    for r in self.reaction_names:
-                        api_species_chunk[s][r] = np.zeros_like(T_chunk)
-            
-            # iterate through the chunks and compute the CSP-TSR parameters cellwise
-            for j in range(len(T_chunk)):
-                gas.TPY = T_chunk[j], P_chunk[j], Y_chunk[:, j]
-                gas.constP = True
-                lam,R,L,f = gas.get_kernel()
-                if TSR:
-                    TSR_chunk[j] = gas.calc_TSR()
-                if API_TSR:
-                    tsrapi = gas.calc_TSRindices(type='amplitude')
-                if API_species:
-                    api, tpi, ifast, islow, species_type = gas.calc_CSPindices(API=True,Impo=False,species_type=False,TPI=False)
-                # Save results in the chunk
-                for k in range(len(self.reaction_names)):
-                    # k is the number that tracks a certain reaction during the cycle
-                    # r is the k-th reaction name
-                    # j is the index during the chunk cycle
-                    # s is the index of the species
-                    r = self.reaction_names[k]
-                    if API_TSR:
-                        api_tsr_chunk[r][j] = tsrapi[k]
-                    if API_species:
-                        for key in API_species:
-                            s = self.species.index(key)
-                            api_species_chunk[key][r][j] = api[s][k]
-            
-            # Save files
-            if TSR:
-                save_file(TSR_chunk, output_file_TSR)
-            if API_TSR:
-                for r, f in zip(self.reaction_names, output_files_api_tsr):
-                    save_file(api_tsr_chunk[r], f)
-            if API_species:
-                for s in API_species:
-                    for r, f in zip(self.reaction_names, output_files_api_species[s]):
-                        save_file(api_species_chunk[s][r], f)
-            
-            # Print advancement state
-            print('Reading file in chunks: read {}/{}'.format(i + 1, n_chunks))
-
-        # Close all output files
-        output_file_TSR.close()
-        
-        self.update()
-        
-        return
-    
         
     def compute_unresolved_pv_fluxes(self, mode='DNS'):
         valid_modes = ['DNS']
@@ -2992,8 +2995,10 @@ class Field3D():
                         remove_y=False,
                         remove_title=False,
                         transpose=False,
+                        dpi=None,
                         scale='mm',
                         save=False,
+                        save_path=None,
                         show=True,
                         ):
         """
@@ -3074,11 +3079,128 @@ class Field3D():
                     remove_y=remove_y,
                     remove_title=remove_title,
                     transpose=transpose,
+                    dpi=dpi,
                     save=save,
+                    save_path=save_path,
                     show=show
                     )
         
         return fig, ax
+    
+    def plot_api(self, api_type="TSR", n=4, plane='z_midplane', 
+             vmin=None, vmax=None, cmap='viridis', n_cols=None, 
+             figsize=None, include_reactions=True, save_path=None, 
+             dpi=400, **kwargs):
+        """
+        Plot the top N reactions by API (Analytical Projected Integral) norm.
+        
+        This method identifies the reactions with the highest L1 norm of their API
+        values, extracts the specified 2D plane for each, and plots them as subplots
+        with a shared colorbar.
+        
+        Parameters:
+        -----------
+        api_type : str, optional
+            Type of API to plot (e.g., "TSR"). Default is "TSR"
+        n : int, optional
+            Number of top reactions to plot. Default is 4
+        plane : str, optional
+            Plane attribute to extract from API fields. Default is 'z_midplane'
+            Other options depend on your Field3D implementation (e.g., 'x_midplane', 'y_midplane')
+        vmin : float, optional
+            Minimum value for colorbar. If None, uses global minimum of fields
+        vmax : float, optional
+            Maximum value for colorbar. If None, uses global maximum of fields
+        cmap : str, optional
+            Colormap name. Default is 'viridis'
+        n_cols : int, optional
+            Number of columns in the subplot grid. If None, automatically determined
+        figsize : tuple, optional
+            Figure size (width, height). If None, automatically computed
+        include_reactions : bool, optional
+            If True, includes reaction equations as side text. Default is True
+        save_path : str, optional
+            If provided, saves the figure to this path. Default is None (no save)
+        dpi : int, optional
+            DPI for saved figure. Default is 400
+        **kwargs : dict
+            Additional keyword arguments passed to plot_multifield()
+        
+        Returns:
+        --------
+        fig : matplotlib.figure.Figure
+            The figure object
+        axes : numpy.ndarray
+            Array of subplot axes
+        top_reactions : list of tuple
+            List of (name, norm, reaction_string) for the top N reactions
+        
+        Example:
+        --------
+        >>> field = ap.Field3D('DNS_DATA_2d_cut_cut')
+        >>> fig, axes, top_rxns = field.plot_api(api_type="TSR", n=4, 
+        ...                                       vmin=-1, vmax=1, 
+        ...                                       save_path="APIs_TSR.png")
+        """
+        
+        # Calculate L1 norms for all reactions
+        norm_list = []
+        for r in self.reaction_names:
+            api_attr = f"API_{api_type}_{r}"
+            api = getattr(self, api_attr).value
+            api_norm = np.linalg.norm(api, ord=1)
+            norm_list.append(api_norm)
+        
+        # Create (reaction_name, norm_value, reaction_string) tuples
+        paired_list = list(zip(self.reaction_names, norm_list, self.reactions))
+        
+        # Sort by norm descending
+        sorted_list = sorted(paired_list, key=lambda x: x[1], reverse=True)
+        
+        # Get top n reactions
+        top_n = sorted_list[:n]
+        
+        # Extract components
+        top_n_names = [name for name, val, _ in top_n]
+        top_n_reactions = [r for _, _, r in top_n]
+        
+        # Extract 2D fields for plotting
+        api_2d_list = []
+        for r, _, _ in top_n:
+            api_attr = f"API_{api_type}_{r}"
+            api_field = getattr(self, api_attr)
+            
+            # Get the specified plane and transpose
+            plane_data = getattr(api_field, plane).T
+            api_2d_list.append(plane_data)
+        
+        # Get mesh coordinates (in mm)
+        X = self.mesh.Y_midZ.T * 1000
+        Y = self.mesh.X_midZ.T * 1000
+        
+        # Prepare side text if requested
+        side_text = "\n\n".join(top_n_reactions) if include_reactions else None
+        
+        # Create the plot
+        fig, axes = plot_multifield(
+            X, Y, 
+            api_2d_list, 
+            titles=top_n_names,
+            n_cols=n_cols,
+            figsize=figsize,
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax,
+            side_text=side_text,
+            **kwargs
+        )
+        
+        # Save figure if path provided
+        if save_path is not None:
+            fig.savefig(save_path, dpi=dpi, bbox_inches='tight', transparent=True)
+            print(f"Figure saved to: {save_path}")
+        
+        return fig, axes, top_n
     
     def print_attributes(self):
         """
@@ -4219,16 +4341,19 @@ def delete_existing_files(paths, delete=False, context="the API indexes"):
 
     for path in paths:
         if os.path.exists(path):
-            if not delete:
+            if delete:
+                user_input = 'yes'
+            else:
                 user_input = input(
                     f"The folder already contains {context}. "
                     f"\nThis operation will overwrite the existing files. "
                     f"\nDo you want to continue? ([yes]/no): "
                 )
-                if (user_input.lower() != "yes") and (user_input.lower() != "y"):
-                    print("Operation aborted.")
-                    sys.exit()
-                delete = True
+            if (user_input.lower() != "yes") and (user_input.lower() != "y"):
+                print("Operation aborted.")
+                sys.exit()
+            
+            delete = True
 
             delete_file(path)
     
