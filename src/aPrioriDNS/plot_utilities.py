@@ -590,6 +590,157 @@ def scatter(x, y,  logx=False,
     
     return figure
 
+def plot_multifield(X, Y, 
+                    fields, 
+                    titles=None, 
+                    n_cols=None, 
+                    figsize=None, 
+                    cmap='viridis',
+                    vmin=None,
+                    vmax=None,
+                    side_text=None):
+    """
+    Plot multiple 2D fields as subplots with shared colorbar and scaling.
+    
+    Parameters:
+    -----------
+    X : array-like
+        2D mesh for X coordinates
+    Y : array-like  
+        2D mesh for Y coordinates
+    fields : array-like
+        3D array of shape (n_fields, ny, nx) or list of 2D arrays
+        Each field represents the same variable at different conditions
+    titles : list of str, optional
+        Titles for each subplot. If None, uses "Field 1", "Field 2", etc.
+    n_cols : int, optional
+        Number of columns in the subplot grid. If None, automatically determined
+    figsize : tuple, optional
+        Figure size (width, height). If None, automatically computed based on data aspect ratio
+    cmap : str, optional
+        Colormap name (default: 'viridis')
+    vmin : float, optional
+        Minimum value for colorbar. If None, uses global minimum of fields
+    vmax : float, optional
+        Maximum value for colorbar. If None, uses global maximum of fields
+    side_text : str, optional
+        Text to display on the right side of the figure
+    
+    Returns:
+    --------
+    fig : matplotlib.figure.Figure
+        The figure object
+    axes : numpy.ndarray
+        Array of subplot axes
+    """
+    
+    # Convert fields to numpy array if it's a list
+    fields = np.array(fields)
+    
+    # Get dimensions
+    if fields.ndim == 3:
+        n_fields, ny, nx = fields.shape
+    else:
+        raise ValueError("fields must be 3D array (n_fields, ny, nx) or list of 2D arrays")
+    
+    # Calculate grid layout
+    if n_cols is None:
+        # Try to make it as square as possible
+        n_cols = int(np.ceil(np.sqrt(n_fields)))
+    n_rows = int(np.ceil(n_fields / n_cols))
+    
+    # Calculate data aspect ratio and extent
+    x_extent = np.max(X) - np.min(X)
+    y_extent = np.max(Y) - np.min(Y)
+    data_aspect_ratio = y_extent / x_extent
+    
+    # Set figure size if not provided
+    if figsize is None:
+        # Base subplot size considering data aspect ratio
+        base_width = 1.5  # Base width for each subplot
+        subplot_height = base_width * data_aspect_ratio
+        
+        # Calculate total figure size
+        total_width = base_width * (n_cols*1.1 + 1)  # Extra space for colorbar
+        total_height = subplot_height * (n_rows + 0.2)  # Extra space for titles
+        
+        figsize = (total_width, total_height)
+    
+    # Create figure and subplots
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=figsize)
+    
+    # Handle single subplot case
+    if n_fields == 1:
+        axes = np.array([axes])
+    elif axes.ndim == 1:
+        axes = axes.reshape(n_rows, n_cols)
+    
+    # Calculate global vmin and vmax for consistent scaling
+    if vmin is None:
+        vmin = np.min(fields)
+    if vmax is None:
+        vmax = np.max(fields)
+    
+    # Create default titles if not provided
+    if titles is None:
+        titles = [f"Field {i+1}" for i in range(n_fields)]
+    
+    # Plot each field
+    images = []
+    for i in range(n_fields):
+        row = i // n_cols
+        col = i % n_cols
+        ax = axes[row, col] if n_rows > 1 else axes[col]
+        
+        # Create the plot
+        im = ax.pcolormesh(X, Y, fields[i], vmin=vmin, vmax=vmax, cmap=cmap, shading='auto')
+        images.append(im)
+        
+        # Set equal aspect ratio
+        ax.set_aspect('equal', adjustable='box')
+        
+        # Set title
+        ax.set_title(titles[i])
+        
+        # Handle axis labels based on position
+        # Y-axis labels only for leftmost column
+        if col == 0:
+            ax.set_ylabel('Y [mm]')
+        else:
+            ax.set_yticklabels([])
+        
+        # X-axis labels only for bottom row
+        if row == n_rows - 1:
+            ax.set_xlabel('X [mm]')
+        else:
+            ax.set_xticklabels([])
+    
+    # Hide unused subplots
+    for i in range(n_fields, n_rows * n_cols):
+        row = i // n_cols
+        col = i % n_cols
+        ax = axes[row, col] if n_rows > 1 else axes[col]
+        ax.set_visible(False)
+    
+    # Add single colorbar on the right
+    plt.tight_layout()
+    
+    # Adjust layout to make room for colorbar
+    plt.subplots_adjust(right=0.9)
+    
+    # Create colorbar axes
+    cbar_ax = fig.add_axes([0.94, 0.15, 0.02, 0.7])
+    cbar = fig.colorbar(images[0], cax=cbar_ax)
+    
+    # Add side text if provided (after everything is laid out)
+    if side_text is not None:
+        # Add text outside the figure area - matplotlib will expand as needed
+        fig.text(1.07, 0.5, side_text, 
+                rotation=0, verticalalignment='center', 
+                fontsize=22, ha='left', transform=fig.transFigure)
+    
+    return fig, axes
+
 def bins(x, y, n=40, log=False):
     """
     Bins the data in x and y into n bins and computes the average, max, and min of y for each bin.
