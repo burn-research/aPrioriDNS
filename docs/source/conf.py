@@ -45,7 +45,8 @@ extensions = [
     "sphinx.ext.napoleon",        # Google/Numpy style docstrings
     "sphinx.ext.viewcode",
     "sphinx.ext.intersphinx",
-    "myst_parser",
+    # "myst_parser",                # if myst_nb is active, comment this line to avoid conflicts.
+    "myst_nb",                    # Jupyter notebook tutorials
     "sphinx_autodoc_typehints",
     "autoapi.extension",
 ]
@@ -67,6 +68,9 @@ myst_enable_extensions = [
 
 templates_path = ['_templates']
 exclude_patterns = []
+
+# Option for myst_nb
+nb_execution_mode = "auto"  # "off" I don't know what it does, or "auto" if you want the notebooks to run at build time
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

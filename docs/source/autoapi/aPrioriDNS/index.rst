@@ -1,4 +1,4 @@
-API documentation
+aPrioriDNS
 ==========
 
 .. py:module:: aPrioriDNS

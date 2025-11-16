@@ -3,12 +3,13 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="aPrioriDNS.DNS" href="DNS/index.html"><link rel="prev" title="Getting started" href="../../getting_started.html">
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="aPrioriDNS.DNS" href="DNS/index.html"><link rel="prev" title="Tutorial 2: Simple plotting" href="../../tutorials/02_simple_plotting.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.09.25 -->
         <title>aPrioriDNS - aPriori 1.1.10 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=580074bf" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     
@@ -191,11 +192,16 @@
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+  <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting started</a></li>
-<li class="toctree-l1 current has-children current-page"><a class="current reference internal" href="#">aPrioriDNS</a><input aria-label="Toggle navigation of aPrioriDNS" checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l2 has-children"><a class="reference internal" href="DNS/index.html">aPrioriDNS.DNS</a><input aria-label="Toggle navigation of aPrioriDNS.DNS" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a><input aria-label="Toggle navigation of Tutorials" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/01_basic_field_operations.html">Tutorial 1: Basic field operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/02_simple_plotting.html">Tutorial 2: Simple plotting</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current has-children current-page"><a class="current reference internal" href="#">API Guide</a><input aria-label="Toggle navigation of API Guide" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="DNS/index.html">aPrioriDNS.DNS</a><input aria-label="Toggle navigation of aPrioriDNS.DNS" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="DNS/Field3D.html">aPrioriDNS.DNS.Field3D</a></li>
 <li class="toctree-l3"><a class="reference internal" href="DNS/Scalar3D.html">aPrioriDNS.DNS.Scalar3D</a></li>
 <li class="toctree-l3"><a class="reference internal" href="DNS/Mesh3D.html">aPrioriDNS.DNS.Mesh3D</a></li>
@@ -227,13 +233,13 @@
 <li class="toctree-l3"><a class="reference internal" href="DNS/z_midplane.html">aPrioriDNS.DNS.z_midplane</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="NN/index.html">aPrioriDNS.NN</a><input aria-label="Toggle navigation of aPrioriDNS.NN" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="NN/index.html">aPrioriDNS.NN</a><input aria-label="Toggle navigation of aPrioriDNS.NN" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="NN/TrainingBuilder.html">aPrioriDNS.NN.TrainingBuilder</a></li>
 <li class="toctree-l3"><a class="reference internal" href="NN/VectorScaler.html">aPrioriDNS.NN.VectorScaler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="NN/is_json_file.html">aPrioriDNS.NN.is_json_file</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="plot_utilities/index.html">aPrioriDNS.plot_utilities</a><input aria-label="Toggle navigation of aPrioriDNS.plot_utilities" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="plot_utilities/index.html">aPrioriDNS.plot_utilities</a><input aria-label="Toggle navigation of aPrioriDNS.plot_utilities" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="plot_utilities/parity_plot.html">aPrioriDNS.plot_utilities.parity_plot</a></li>
 <li class="toctree-l3"><a class="reference internal" href="plot_utilities/contour_plot.html">aPrioriDNS.plot_utilities.contour_plot</a></li>
 <li class="toctree-l3"><a class="reference internal" href="plot_utilities/cond_mean_plot.html">aPrioriDNS.plot_utilities.cond_mean_plot</a></li>
@@ -408,14 +414,14 @@
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../../getting_started.html">
+          <a class="prev-page" href="../../tutorials/02_simple_plotting.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Getting started</div>
+                <div class="title">Tutorial 2: Simple plotting</div>
                 
               </div>
             </a>
