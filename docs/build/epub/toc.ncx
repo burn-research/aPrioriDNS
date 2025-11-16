@@ -42,12 +42,12 @@
     </navPoint>
     <navPoint id="navPoint6" playOrder="5">
       <navLabel>
-        <text>aPrioriDNS</text>
+        <text>API documentation</text>
       </navLabel>
       <content src="autoapi/aPrioriDNS/index.xhtml" />  
       <navPoint id="navPoint7" playOrder="5">
         <navLabel>
-          <text>aPrioriDNS</text>
+          <text>API documentation</text>
         </navLabel>
         <content src="autoapi/aPrioriDNS/index.xhtml" />  
       </navPoint>
