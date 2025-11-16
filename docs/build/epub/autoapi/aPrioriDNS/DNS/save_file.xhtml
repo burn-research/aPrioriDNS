@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>aPrioriDNS.DNS.save_file</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/epub.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="aprioridns-dns-save-file">
+<h1>aPrioriDNS.DNS.save_file</h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="aPrioriDNS.DNS.save_file">
+<span class="sig-prename descclassname"><span class="pre">aPrioriDNS.DNS.</span></span><span class="sig-name descname"><span class="pre">save_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Saves the given array to a file in binary format.</p>
+<p>This function converts the input array to a 32-bit float representation and saves it
+to a file using the specified file name. The file is saved in a binary format.</p>
+<section id="parameters">
+<h2>Parameters:</h2>
+<dl class="simple">
+<dt>X<span class="classifier">np.ndarray</span></dt><dd><p>The array to be saved. It will be converted to a 32-bit float array before saving.</p>
+</dd>
+<dt>file_name<span class="classifier">str</span></dt><dd><p>The name of the file where the array will be saved.</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h2>Returns:</h2>
+<p>:
+None</p>
+</section>
+<section id="example">
+<h2>Example:</h2>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">save_file</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="s2">&quot;test.bin&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">loaded_X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="s2">&quot;test.bin&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">loaded_X</span><span class="p">)</span>
+<span class="go">[1.5 2.5 3.5]</span>
+</pre></div>
+</div>
+</section>
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

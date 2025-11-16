@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>aPrioriDNS.DNS.compute_cell_volumes</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/epub.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="aprioridns-dns-compute-cell-volumes">
+<h1>aPrioriDNS.DNS.compute_cell_volumes</h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="aPrioriDNS.DNS.compute_cell_volumes">
+<span class="sig-prename descclassname"><span class="pre">aPrioriDNS.DNS.</span></span><span class="sig-name descname"><span class="pre">compute_cell_volumes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Compute the volumes of the cells in a 3D mesh grid.</p>
+<p>This function calculates the cell volumes for a given set of x, y, and z coordinates.
+The coordinates are provided as 1D vectors. The function computes the distances between
+consecutive points in each direction, constructs a 3D meshgrid of these distances, and
+then calculates the volume of each cell.</p>
+<section id="parameters">
+<h2>Parameters:</h2>
+<dl class="simple">
+<dt>x<span class="classifier">array-like</span></dt><dd><p>A 1D array of x coordinates.</p>
+</dd>
+<dt>y<span class="classifier">array-like</span></dt><dd><p>A 1D array of y coordinates.</p>
+</dd>
+<dt>z<span class="classifier">array-like</span></dt><dd><p>A 1D array of z coordinates.</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h2>Returns:</h2>
+<p>:
+cell_volumes : ndarray</p>
+<blockquote>
+<div><p>A 3D array where each element represents the volume of a cell in the mesh grid.</p>
+</div></blockquote>
+</section>
+<section id="example">
+<h2>Example:</h2>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">volumes</span> <span class="o">=</span> <span class="n">compute_cell_volumes</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">volumes</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="go">(4, 3, 5)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">volumes</span><span class="p">)</span>
+<span class="go">array([[[1, 1, 1, 1, 1],</span>
+<span class="go">        [1, 1, 1, 1, 1],</span>
+<span class="go">        [1, 1, 1, 1, 1]],</span>
+<span class="go">       [[1, 1, 1, 1, 1],</span>
+<span class="go">        [1, 1, 1, 1, 1],</span>
+<span class="go">        [1, 1, 1, 1, 1]],</span>
+<span class="go">       [[1, 1, 1, 1, 1],</span>
+<span class="go">        [1, 1, 1, 1, 1],</span>
+<span class="go">        [1, 1, 1, 1, 1]],</span>
+<span class="go">       [[1, 1, 1, 1, 1],</span>
+<span class="go">        [1, 1, 1, 1, 1],</span>
+<span class="go">        [1, 1, 1, 1, 1]]])</span>
+</pre></div>
+</div>
+</section>
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

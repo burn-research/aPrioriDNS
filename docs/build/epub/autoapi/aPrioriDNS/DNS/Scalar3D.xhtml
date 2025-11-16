@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>aPrioriDNS.DNS.Scalar3D</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/epub.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="aprioridns-dns-scalar3d">
+<h1>aPrioriDNS.DNS.Scalar3D</h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="aPrioriDNS.DNS.Scalar3D">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aPrioriDNS.DNS.</span></span><span class="sig-name descname"><span class="pre">Scalar3D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>A class representing a 3D scalar field.</p>
+<section id="attributes">
+<h2>Attributes:</h2>
+<dl class="simple">
+<dt>__scalar_dimension<span class="classifier">int</span></dt><dd><p>The dimension of the scalar field.</p>
+</dd>
+<dt>test_phase<span class="classifier">bool</span></dt><dd><p>A flag indicating whether the test phase is active.</p>
+</dd>
+<dt>VALID_DIMENSIONS<span class="classifier">list</span></dt><dd><p>A list of valid dimensions for the scalar field.</p>
+</dd>
+</dl>
+</section>
+<section id="methods">
+<h2>Methods:</h2>
+<dl class="simple">
+<dt>__init__(shape, value=None, path=’’):</dt><dd><p>Initializes a Scalar3D object.</p>
+</dd>
+<dt>value</dt><dd><p>Getter and setter for the value attribute.</p>
+</dd>
+<dt>shape</dt><dd><p>Getter and setter for the shape attribute.</p>
+</dd>
+<dt>path</dt><dd><p>Getter and setter for the path attribute.</p>
+</dd>
+<dt>Nx</dt><dd><p>Getter and setter for the Nx attribute.</p>
+</dd>
+<dt>Ny</dt><dd><p>Getter and setter for the Ny attribute.</p>
+</dd>
+<dt>Nz</dt><dd><p>Getter and setter for the Nz attribute.</p>
+</dd>
+<dt>file_name</dt><dd><p>Getter and setter for the file_name attribute.</p>
+</dd>
+<dt>file_id</dt><dd><p>Getter and setter for the file_id attribute.</p>
+</dd>
+<dt>filter_size</dt><dd><p>Getter and setter for the filter_size attribute.</p>
+</dd>
+<dt>_3d</dt><dd><p>Getter for the 3D reshaped scalar field.</p>
+</dd>
+<dt>is_light_mode():</dt><dd><p>Checks if the scalar field is in light mode.</p>
+</dd>
+<dt>reshape_3d():</dt><dd><p>Reshapes the scalar field to 3D.</p>
+</dd>
+<dt>reshape_column():</dt><dd><p>Reshapes the scalar field to a column vector.</p>
+</dd>
+<dt>reshape_line():</dt><dd><p>Reshapes the scalar field to a row vector.</p>
+</dd>
+<dt>cut(n_cut=1, mode=’equal’):</dt><dd><p>Cuts the scalar field.</p>
+</dd>
+<dt>filter_gauss(delta, n_cut=0, mute=False):</dt><dd><p>Filters the scalar field with a Gaussian function.</p>
+</dd>
+<dt>plot_x_midplane(mesh, title=’’, colormap=’viridis’, vmin=None, vmax=None)</dt><dd><p>Plots the x midplane of a 3D field.</p>
+</dd>
+<dt>plot_y_midplane(mesh, title=’’, colormap=’viridis’, vmin=None, vmax=None)</dt><dd><p>Plots the y midplane of a 3D field.</p>
+</dd>
+<dt>plot_z_midplane(mesh, title=’’, colormap=’viridis’, vmin=None, vmax=None)</dt><dd><p>Plots the z midplane of a 3D field.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aPrioriDNS.DNS.Scalar3D.test_phase">
+<span class="sig-name descname"><span class="pre">test_phase</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aPrioriDNS.DNS.Scalar3D.VALID_DIMENSIONS">
+<span class="sig-name descname"><span class="pre">VALID_DIMENSIONS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[3,</span> <span class="pre">1]</span></em></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aPrioriDNS.DNS.Scalar3D.shape">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">shape</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aPrioriDNS.DNS.Scalar3D.value">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aPrioriDNS.DNS.Scalar3D.path">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aPrioriDNS.DNS.Scalar3D.Nx">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Nx</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aPrioriDNS.DNS.Scalar3D.Ny">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Ny</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aPrioriDNS.DNS.Scalar3D.Nz">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Nz</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aPrioriDNS.DNS.Scalar3D.file_name">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">file_name</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aPrioriDNS.DNS.Scalar3D.file_id">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">file_id</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aPrioriDNS.DNS.Scalar3D.filter_size">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">filter_size</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aPrioriDNS.DNS.Scalar3D.x_midplane">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x_midplane</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aPrioriDNS.DNS.Scalar3D.y_midplane">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y_midplane</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aPrioriDNS.DNS.Scalar3D.z_midplane">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">z_midplane</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aPrioriDNS.DNS.Scalar3D.is_light_mode">
+<span class="sig-name descname"><span class="pre">is_light_mode</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Checks if the scalar field is in light mode, that is when only the
+path is specified without specifying the value as an array.</p>
+<section id="returns">
+<h3>Returns:</h3>
+<p>:
+bool</p>
+<blockquote>
+<div><p>True if the scalar field is in light mode, False otherwise.</p>
+</div></blockquote>
+</section>
+<section id="raises">
+<h3>Raises:</h3>
+<dl class="simple">
+<dt>ValueError</dt><dd><p>If neither the value nor the path is specified.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aPrioriDNS.DNS.Scalar3D.lenght">
+<span class="sig-name descname"><span class="pre">lenght</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aPrioriDNS.DNS.Scalar3D.reshape_3d">
+<span class="sig-name descname"><span class="pre">reshape_3d</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Reshapes the scalar field to 3D.</p>
+<section id="id1">
+<h3>Returns:</h3>
+<p>:
+array-like</p>
+<blockquote>
+<div><p>The scalar field reshaped to 3D.</p>
+</div></blockquote>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aPrioriDNS.DNS.Scalar3D.reshape_column">
+<span class="sig-name descname"><span class="pre">reshape_column</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Reshapes the scalar field to a column vector.</p>
+<section id="id2">
+<h3>Returns:</h3>
+<p>:
+array-like</p>
+<blockquote>
+<div><p>The scalar field reshaped to a column vector.</p>
+</div></blockquote>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aPrioriDNS.DNS.Scalar3D.reshape_line">
+<span class="sig-name descname"><span class="pre">reshape_line</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Reshapes the scalar field to a row vector.</p>
+<section id="id3">
+<h3>Returns:</h3>
+<p>:
+array-like</p>
+<blockquote>
+<div><p>The scalar field reshaped to a row vector.</p>
+</div></blockquote>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aPrioriDNS.DNS.Scalar3D.cut">
+<span class="sig-name descname"><span class="pre">cut</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'equal'</span></span></em><span class="sig-paren">)</span></dt>
+<dd><blockquote>
+<div><p>Cuts the scalar field.</p>
+<dl class="simple">
+<dt>n_cut<span class="classifier">int or tuple, optional</span></dt><dd><p>The number of samples to cut at the extrema. If mode is ‘equal’, n_cut is an integer
+specifying the number of samples to cut from each side. If mode is ‘xyz’, n_cut is a
+tuple specifying the number of samples to cut for each dimension. Default is 1.</p>
+</dd>
+<dt>mode<span class="classifier">{‘equal’, ‘xyz’}, optional</span></dt><dd><p>The mode of cutting. ‘equal’ cuts the same number of samples from each side,
+‘xyz’ allows specifying the number of samples to cut for each dimension. Default is ‘equal’.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>array-like</dt><dd><p>The cut scalar field.</p>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Example of cutting a scalar field</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">field</span> <span class="o">=</span> <span class="n">Scalar3D</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="n">value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Cut the field with equal number of samples removed from each side</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cut_field_equal</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">cut</span><span class="p">(</span><span class="n">n_cut</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cut field with equal mode:&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">cut_field_equal</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Cut the field with specified number of samples removed for each dimension</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cut_field_xyz</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">cut</span><span class="p">(</span><span class="n">n_cut</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;xyz&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+</div></blockquote>
+<dl>
+<dt>Cut field with xyz mode:”)</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">cut_field_xyz</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aPrioriDNS.DNS.Scalar3D.filter_gauss">
+<span class="sig-name descname"><span class="pre">filter_gauss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Filters the scalar field with a Gaussian function.
+The variance sigma is considered equal to:</p>
+<blockquote>
+<div><p>sigma = sqrt(1/12*delta**2)</p>
+</div></blockquote>
+<p>where delta is the filter size (in this case specified as
+the number of cells and not in meters)</p>
+<section id="parameters">
+<h3>Parameters:</h3>
+<dl class="simple">
+<dt>delta<span class="classifier">float</span></dt><dd><p>The amplitude of the Gaussian filter.</p>
+</dd>
+<dt>n_cut<span class="classifier">int, optional</span></dt><dd><p>The number of samples to cut at the extrema. Default is 0.</p>
+</dd>
+<dt>mute<span class="classifier">bool, optional</span></dt><dd><p>A flag indicating whether to mute the output. Default is False.</p>
+</dd>
+</dl>
+</section>
+<section id="id4">
+<h3>Returns:</h3>
+<p>:
+array-like</p>
+<blockquote>
+<div><p>The filtered scalar field.</p>
+</div></blockquote>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aPrioriDNS.DNS.Scalar3D.plot_x_midplane">
+<span class="sig-name descname"><span class="pre">plot_x_midplane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'viridis'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Plots the x midplane of a 3D field.</p>
+<section id="description">
+<h3>Description:</h3>
+<p>This method plots the x midplane of a 3D field using the provided mesh. It uses the midpoint
+of the x-axis to generate a 2D plot of the field values at that plane.</p>
+</section>
+<section id="id5">
+<h3>Parameters:</h3>
+<dl class="simple">
+<dt>mesh<span class="classifier">object</span></dt><dd><p>The mesh object containing the coordinates.</p>
+</dd>
+<dt>title<span class="classifier">str, optional</span></dt><dd><p>The title of the plot. Default is an empty string.</p>
+</dd>
+<dt>colormap<span class="classifier">str, optional</span></dt><dd><p>The colormap to use for the plot. Default is ‘viridis’.</p>
+</dd>
+<dt>vmin<span class="classifier">float, optional</span></dt><dd><p>The minimum value for the color scale. Default is None.</p>
+</dd>
+<dt>vmax<span class="classifier">float, optional</span></dt><dd><p>The maximum value for the color scale. Default is None.</p>
+</dd>
+</dl>
+</section>
+<section id="id6">
+<h3>Returns:</h3>
+<p>:
+None</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aPrioriDNS.DNS.Scalar3D.plot_y_midplane">
+<span class="sig-name descname"><span class="pre">plot_y_midplane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'viridis'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Plots the y midplane of a 3D field.</p>
+<section id="id7">
+<h3>Description:</h3>
+<p>This method plots the y midplane of a 3D field using the provided mesh. It uses the midpoint
+of the x-axis to generate a 2D plot of the field values at that plane.</p>
+</section>
+<section id="id8">
+<h3>Parameters:</h3>
+<dl class="simple">
+<dt>mesh<span class="classifier">object</span></dt><dd><p>The mesh object containing the coordinates.</p>
+</dd>
+<dt>title<span class="classifier">str, optional</span></dt><dd><p>The title of the plot. Default is an empty string.</p>
+</dd>
+<dt>colormap<span class="classifier">str, optional</span></dt><dd><p>The colormap to use for the plot. Default is ‘viridis’.</p>
+</dd>
+<dt>vmin<span class="classifier">float, optional</span></dt><dd><p>The minimum value for the color scale. Default is None.</p>
+</dd>
+<dt>vmax<span class="classifier">float, optional</span></dt><dd><p>The maximum value for the color scale. Default is None.</p>
+</dd>
+</dl>
+</section>
+<section id="id9">
+<h3>Returns:</h3>
+<p>:
+None</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aPrioriDNS.DNS.Scalar3D.plot_z_midplane">
+<span class="sig-name descname"><span class="pre">plot_z_midplane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'viridis'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Plots the x midplane of a 3D field.</p>
+<section id="id10">
+<h3>Description:</h3>
+<p>This method plots the x midplane of a 3D field using the provided mesh. It uses the midpoint
+of the x-axis to generate a 2D plot of the field values at that plane.</p>
+</section>
+<section id="id11">
+<h3>Parameters:</h3>
+<dl class="simple">
+<dt>mesh<span class="classifier">object</span></dt><dd><p>The mesh object containing the coordinates.</p>
+</dd>
+<dt>title<span class="classifier">str, optional</span></dt><dd><p>The title of the plot. Default is an empty string.</p>
+</dd>
+<dt>colormap<span class="classifier">str, optional</span></dt><dd><p>The colormap to use for the plot. Default is ‘viridis’.</p>
+</dd>
+<dt>vmin<span class="classifier">float, optional</span></dt><dd><p>The minimum value for the color scale. Default is None.</p>
+</dd>
+<dt>vmax<span class="classifier">float, optional</span></dt><dd><p>The maximum value for the color scale. Default is None.</p>
+</dd>
+</dl>
+</section>
+<section id="id12">
+<h3>Returns:</h3>
+<p>:
+None</p>
+</section>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

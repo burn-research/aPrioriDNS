@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>aPrioriDNS.DNS</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/epub.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="module-aPrioriDNS.DNS">
+<span id="aprioridns-dns"></span><h1>aPrioriDNS.DNS</h1>
+<p>DNS.py: the core module of the aPrioriDNS package.</p>
+<section id="classes">
+<h2>Classes</h2>
+<div class="toctree-wrapper compound">
+</div>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="Field3D.xhtml#aPrioriDNS.DNS.Field3D" title="aPrioriDNS.DNS.Field3D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Field3D</span></code></a></p></td>
+<td><p>Class representing a 3D field with various attributes and methods for visualization and data management.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="Scalar3D.xhtml#aPrioriDNS.DNS.Scalar3D" title="aPrioriDNS.DNS.Scalar3D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Scalar3D</span></code></a></p></td>
+<td><p>A class representing a 3D scalar field.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="Mesh3D.xhtml#aPrioriDNS.DNS.Mesh3D" title="aPrioriDNS.DNS.Mesh3D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mesh3D</span></code></a></p></td>
+<td><p>A class used to represent a 3D mesh.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="functions">
+<h2>Functions</h2>
+<div class="toctree-wrapper compound">
+</div>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="add_variable.xhtml#aPrioriDNS.DNS.add_variable" title="aPrioriDNS.DNS.add_variable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_variable</span></code></a>(attribute_name, file_name[, species, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="compute_cell_volumes.xhtml#aPrioriDNS.DNS.compute_cell_volumes" title="aPrioriDNS.DNS.compute_cell_volumes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_cell_volumes</span></code></a>(x, y, z)</p></td>
+<td><p>Compute the volumes of the cells in a 3D mesh grid.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="delete_existing_files.xhtml#aPrioriDNS.DNS.delete_existing_files" title="aPrioriDNS.DNS.delete_existing_files"><code class="xref py py-obj docutils literal notranslate"><span class="pre">delete_existing_files</span></code></a>(paths[, delete, context])</p></td>
+<td><p>Checks if any of the given paths exist. If so, prompts the user once to confirm deletion.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="delete_file.xhtml#aPrioriDNS.DNS.delete_file" title="aPrioriDNS.DNS.delete_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">delete_file</span></code></a>(file_path)</p></td>
+<td><p>Deletes the specified file from the file system.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="download.xhtml#aPrioriDNS.DNS.download" title="aPrioriDNS.DNS.download"><code class="xref py py-obj docutils literal notranslate"><span class="pre">download</span></code></a>([repo_url, dest_folder, dataset])</p></td>
+<td><p>Downloads all files from a specified GitHub repository directory and saves them to the destination folder,</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="downsample.xhtml#aPrioriDNS.DNS.downsample" title="aPrioriDNS.DNS.downsample"><code class="xref py py-obj docutils literal notranslate"><span class="pre">downsample</span></code></a>(array, N)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="process_file.xhtml#aPrioriDNS.DNS.process_file" title="aPrioriDNS.DNS.process_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">process_file</span></code></a>(file_path)</p></td>
+<td><p>Read a binary file and convert its contents into a numpy array.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="filter_gauss.xhtml#aPrioriDNS.DNS.filter_gauss" title="aPrioriDNS.DNS.filter_gauss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_gauss</span></code></a>(field, delta[, mode])</p></td>
+<td><p>Apply a Gaussian filter to a 3D numpy array.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="filter_box.xhtml#aPrioriDNS.DNS.filter_box" title="aPrioriDNS.DNS.filter_box"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_box</span></code></a>(field, delta[, mode])</p></td>
+<td><p>Apply a box filter to a 3D numpy array using scipy's convolve function.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="filter_3D.xhtml#aPrioriDNS.DNS.filter_3D" title="aPrioriDNS.DNS.filter_3D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_3D</span></code></a>(field, filter_size[, RHO, favre, filter_type])</p></td>
+<td><p>Apply a 3D filter (Gaussian or box) to a numpy array, with optional Favre filtering.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="save_file.xhtml#aPrioriDNS.DNS.save_file" title="aPrioriDNS.DNS.save_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_file</span></code></a>(X, file_name)</p></td>
+<td><p>Saves the given array to a file in binary format.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="gradient_x.xhtml#aPrioriDNS.DNS.gradient_x" title="aPrioriDNS.DNS.gradient_x"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gradient_x</span></code></a>(F, mesh[, filter_size])</p></td>
+<td><p>Description</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="gradient_y.xhtml#aPrioriDNS.DNS.gradient_y" title="aPrioriDNS.DNS.gradient_y"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gradient_y</span></code></a>(F, mesh[, filter_size])</p></td>
+<td><p>Computes the gradient of a 3D, non downsampled, filtered field. Numpy is</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="gradient_z.xhtml#aPrioriDNS.DNS.gradient_z" title="aPrioriDNS.DNS.gradient_z"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gradient_z</span></code></a>(F, mesh[, filter_size])</p></td>
+<td><p>Computes the z component of the gradient of a 3D, non downsampled, filtered field.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generate_mask.xhtml#aPrioriDNS.DNS.generate_mask" title="aPrioriDNS.DNS.generate_mask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_mask</span></code></a>(start, shape, delta)</p></td>
+<td><p>Computes the downsampled mask of a 3D field.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="check_same_shape.xhtml#aPrioriDNS.DNS.check_same_shape" title="aPrioriDNS.DNS.check_same_shape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_same_shape</span></code></a>(*args)</p></td>
+<td><p>Checks if the shape of the input arguments <a href="#id1"><span class="problematic" id="id2">*</span></a>args is the same</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="check_input_string.xhtml#aPrioriDNS.DNS.check_input_string" title="aPrioriDNS.DNS.check_input_string"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_input_string</span></code></a>(input_string, valid_strings, input_name)</p></td>
+<td><p>Checks if the value of input_string is contained in the list valid_strings.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="plot_power_spectrum.xhtml#aPrioriDNS.DNS.plot_power_spectrum" title="aPrioriDNS.DNS.plot_power_spectrum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_power_spectrum</span></code></a>(field[, C])</p></td>
+<td><p>Plots the power spectrum of a 3D field.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="process_chunk_LFR.xhtml#aPrioriDNS.DNS.process_chunk_LFR" title="aPrioriDNS.DNS.process_chunk_LFR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">process_chunk_LFR</span></code></a>(j, T_chunk, P_chunk, Y_chunk, ...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="process_chunk_PSR.xhtml#aPrioriDNS.DNS.process_chunk_PSR" title="aPrioriDNS.DNS.process_chunk_PSR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">process_chunk_PSR</span></code></a>(j, T_j, P_j, RHO_j, Tau_c_j, ...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="section_and_average.xhtml#aPrioriDNS.DNS.section_and_average" title="aPrioriDNS.DNS.section_and_average"><code class="xref py py-obj docutils literal notranslate"><span class="pre">section_and_average</span></code></a>(x, y, n_sections)</p></td>
+<td><p>Divides the given array into sections and computes the average for each section.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="read_variable_in_chunks.xhtml#aPrioriDNS.DNS.read_variable_in_chunks" title="aPrioriDNS.DNS.read_variable_in_chunks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_variable_in_chunks</span></code></a>(file_path, chunk_size)</p></td>
+<td><p>Generator to read a binary file in chunks.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="process_species_in_chunks.xhtml#aPrioriDNS.DNS.process_species_in_chunks" title="aPrioriDNS.DNS.process_species_in_chunks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">process_species_in_chunks</span></code></a>(file_paths, species_file, ...)</p></td>
+<td><p>Reads species mass fractions in chunks from the specified files.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="x_midplane.xhtml#aPrioriDNS.DNS.x_midplane" title="aPrioriDNS.DNS.x_midplane"><code class="xref py py-obj docutils literal notranslate"><span class="pre">x_midplane</span></code></a>(array)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="y_midplane.xhtml#aPrioriDNS.DNS.y_midplane" title="aPrioriDNS.DNS.y_midplane"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_midplane</span></code></a>(array)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="z_midplane.xhtml#aPrioriDNS.DNS.z_midplane" title="aPrioriDNS.DNS.z_midplane"><code class="xref py py-obj docutils literal notranslate"><span class="pre">z_midplane</span></code></a>(array)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

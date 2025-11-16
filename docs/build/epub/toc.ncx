@@ -1,0 +1,98 @@
+<?xml version="1.0"?>
+<ncx version="2005-1" xmlns="http://www.daisy.org/z3986/2005/ncx/">
+  <head>
+    <meta name="dtb:uid" content="unknown"/>
+    <meta name="dtb:depth" content="3"/>
+    <meta name="dtb:totalPageCount" content="0"/>
+    <meta name="dtb:maxPageNumber" content="0"/>
+  </head>
+  <docTitle>
+    <text>aPriori</text>
+  </docTitle>
+  <navMap>    
+    <navPoint id="navPoint1" playOrder="1">
+      <navLabel>
+        <text>Welcome to aPriori’s documentation!</text>
+      </navLabel>
+      <content src="index.xhtml" />  
+    </navPoint>
+    <navPoint id="navPoint2" playOrder="2">
+      <navLabel>
+        <text>Getting started</text>
+      </navLabel>
+      <content src="getting_started.xhtml" />  
+      <navPoint id="navPoint3" playOrder="2">
+        <navLabel>
+          <text>Getting started</text>
+        </navLabel>
+        <content src="getting_started.xhtml" />  
+      </navPoint>
+      <navPoint id="navPoint4" playOrder="3">
+        <navLabel>
+          <text>Installation</text>
+        </navLabel>
+        <content src="getting_started.xhtml#installation" />  
+      </navPoint>
+      <navPoint id="navPoint5" playOrder="4">
+        <navLabel>
+          <text>Quick example</text>
+        </navLabel>
+        <content src="getting_started.xhtml#quick-example" />  
+      </navPoint>
+    </navPoint>
+    <navPoint id="navPoint6" playOrder="5">
+      <navLabel>
+        <text>aPrioriDNS</text>
+      </navLabel>
+      <content src="autoapi/aPrioriDNS/index.xhtml" />  
+      <navPoint id="navPoint7" playOrder="5">
+        <navLabel>
+          <text>aPrioriDNS</text>
+        </navLabel>
+        <content src="autoapi/aPrioriDNS/index.xhtml" />  
+      </navPoint>
+      <navPoint id="navPoint8" playOrder="6">
+        <navLabel>
+          <text>Submodules</text>
+        </navLabel>
+        <content src="autoapi/aPrioriDNS/index.xhtml#submodules" />  
+        <navPoint id="navPoint9" playOrder="6">
+          <navLabel>
+            <text>Submodules</text>
+          </navLabel>
+          <content src="autoapi/aPrioriDNS/index.xhtml#submodules" />  
+        </navPoint>
+        <navPoint id="navPoint10" playOrder="7">
+          <navLabel>
+            <text>aPrioriDNS.DNS</text>
+          </navLabel>
+          <content src="autoapi/aPrioriDNS/DNS/index.xhtml" />  
+        </navPoint>
+        <navPoint id="navPoint11" playOrder="8">
+          <navLabel>
+            <text>aPrioriDNS.NN</text>
+          </navLabel>
+          <content src="autoapi/aPrioriDNS/NN/index.xhtml" />  
+        </navPoint>
+        <navPoint id="navPoint12" playOrder="9">
+          <navLabel>
+            <text>aPrioriDNS.plot_utilities</text>
+          </navLabel>
+          <content src="autoapi/aPrioriDNS/plot_utilities/index.xhtml" />  
+        </navPoint>
+      </navPoint>
+      <navPoint id="navPoint13" playOrder="10">
+        <navLabel>
+          <text>Classes</text>
+        </navLabel>
+        <content src="autoapi/aPrioriDNS/index.xhtml#classes" />  
+      </navPoint>
+      <navPoint id="navPoint14" playOrder="11">
+        <navLabel>
+          <text>Functions</text>
+        </navLabel>
+        <content src="autoapi/aPrioriDNS/index.xhtml#functions" />  
+      </navPoint>
+    </navPoint>
+  </navMap>
+</ncx>

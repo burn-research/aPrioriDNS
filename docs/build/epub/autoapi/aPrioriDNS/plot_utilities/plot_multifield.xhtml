@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>aPrioriDNS.plot_utilities.plot_multifield</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/epub.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="aprioridns-plot-utilities-plot-multifield">
+<h1>aPrioriDNS.plot_utilities.plot_multifield</h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="aPrioriDNS.plot_utilities.plot_multifield">
+<span class="sig-prename descclassname"><span class="pre">aPrioriDNS.plot_utilities.</span></span><span class="sig-name descname"><span class="pre">plot_multifield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fields</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">titles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'viridis'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">side_text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Plot multiple 2D fields as subplots with shared colorbar and scaling.</p>
+<section id="parameters">
+<h2>Parameters:</h2>
+<dl class="simple">
+<dt>X<span class="classifier">array-like</span></dt><dd><p>2D mesh for X coordinates</p>
+</dd>
+<dt>Y<span class="classifier">array-like</span></dt><dd><p>2D mesh for Y coordinates</p>
+</dd>
+<dt>fields<span class="classifier">array-like</span></dt><dd><p>3D array of shape (n_fields, ny, nx) or list of 2D arrays
+Each field represents the same variable at different conditions</p>
+</dd>
+<dt>titles<span class="classifier">list of str, optional</span></dt><dd><p>Titles for each subplot. If None, uses “Field 1”, “Field 2”, etc.</p>
+</dd>
+<dt>n_cols<span class="classifier">int, optional</span></dt><dd><p>Number of columns in the subplot grid. If None, automatically determined</p>
+</dd>
+<dt>figsize<span class="classifier">tuple, optional</span></dt><dd><p>Figure size (width, height). If None, automatically computed based on data aspect ratio</p>
+</dd>
+<dt>cmap<span class="classifier">str, optional</span></dt><dd><p>Colormap name (default: ‘viridis’)</p>
+</dd>
+<dt>vmin<span class="classifier">float, optional</span></dt><dd><p>Minimum value for colorbar. If None, uses global minimum of fields</p>
+</dd>
+<dt>vmax<span class="classifier">float, optional</span></dt><dd><p>Maximum value for colorbar. If None, uses global maximum of fields</p>
+</dd>
+<dt>side_text<span class="classifier">str, optional</span></dt><dd><p>Text to display on the right side of the figure</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h2>Returns:</h2>
+<p>:
+fig : matplotlib.figure.Figure</p>
+<blockquote>
+<div><p>The figure object</p>
+</div></blockquote>
+<dl class="simple">
+<dt>axes<span class="classifier">numpy.ndarray</span></dt><dd><p>Array of subplot axes</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

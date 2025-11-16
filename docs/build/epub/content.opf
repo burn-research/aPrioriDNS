@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package xmlns="http://www.idpf.org/2007/opf" version="3.0" xml:lang="en"
+ unique-identifier="unknown"
+ prefix="ibooks: http://vocabulary.itunes.apple.com/rdf/ibooks/vocabulary-extensions-1.0/">
+  <metadata xmlns:opf="http://www.idpf.org/2007/opf"
+        xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <dc:language>en</dc:language>
+    <dc:title>aPriori</dc:title>
+    <dc:description>unknown</dc:description>
+    <dc:creator>Lorenzo Piu</dc:creator>
+    <dc:contributor>unknown</dc:contributor>
+    <dc:publisher>Lorenzo Piu</dc:publisher>
+    <dc:rights>2025, Lorenzo Piu, Heinz Pitsch, Alessandro Parente</dc:rights>
+    <dc:identifier id="unknown">unknown</dc:identifier>
+    <dc:date>2025-11-16T11:04:24Z</dc:date>
+    <meta property="dcterms:modified">2025-11-16T11:04:24Z</meta>
+    <meta property="ibooks:version"></meta>
+    <meta property="ibooks:specified-fonts">true</meta>
+    <meta property="ibooks:binding">true</meta>
+    <meta property="ibooks:scroll-axis">vertical</meta>
+  </metadata>
+  <manifest>
+    <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml" />
+    <item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>
+    <item id="epub-0" href="genindex.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-1" href="getting_started.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-2" href="index.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-3" href="py-modindex.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-4" href=".doctrees/images/11a507134ac4551fb6746ff54174e78f1824780a/aprioridns.svg" media-type="image/svg+xml" />
+    <item id="epub-5" href=".doctrees/images/3a63170a1fa3dfd2b44967852ab5ab2189d1ffbe/Documentation-Gitbook-green.svg" media-type="image/svg+xml" />
+    <item id="epub-6" href=".doctrees/images/7a4eb7dde90b3c6effc80e7c87d5259e805747df/License-MIT-yellow.svg" media-type="image/svg+xml" />
+    <item id="epub-7" href=".doctrees/images/8ef7ebdb232149849c4e69c61e1cbcd21f936439/Issues-Github-02bfa6.svg" media-type="image/svg+xml" />
+    <item id="epub-8" href=".doctrees/images/9ae1ffdf7bf53cfc46ddf0f980939f8c1eb1f966/zenodo.13793622.svg" media-type="image/svg+xml" />
+    <item id="epub-9" href="_images/Documentation-Gitbook-green.svg" media-type="image/svg+xml" />
+    <item id="epub-10" href="_images/Issues-Github-02bfa6.svg" media-type="image/svg+xml" />
+    <item id="epub-11" href="_images/License-MIT-yellow.svg" media-type="image/svg+xml" />
+    <item id="epub-12" href="_images/aprioridns.svg" media-type="image/svg+xml" />
+    <item id="epub-13" href="_images/zenodo.13793622.svg" media-type="image/svg+xml" />
+    <item id="epub-14" href="_static/basic.css" media-type="text/css" />
+    <item id="epub-15" href="_static/epub.css" media-type="text/css" />
+    <item id="epub-16" href="_static/file.png" media-type="image/png" />
+    <item id="epub-17" href="_static/graphviz.css" media-type="text/css" />
+    <item id="epub-18" href="_static/minus.png" media-type="image/png" />
+    <item id="epub-19" href="_static/plus.png" media-type="image/png" />
+    <item id="epub-20" href="_static/pygments.css" media-type="text/css" />
+    <item id="epub-21" href="autoapi/aPrioriDNS/Field3D.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-22" href="autoapi/aPrioriDNS/Mesh3D.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-23" href="autoapi/aPrioriDNS/Scalar3D.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-24" href="autoapi/aPrioriDNS/add_variable.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-25" href="autoapi/aPrioriDNS/cond_mean_plot.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-26" href="autoapi/aPrioriDNS/contour_plot.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-27" href="autoapi/aPrioriDNS/delete_file.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-28" href="autoapi/aPrioriDNS/download.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-29" href="autoapi/aPrioriDNS/filter_3D.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-30" href="autoapi/aPrioriDNS/filter_box.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-31" href="autoapi/aPrioriDNS/filter_gauss.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-32" href="autoapi/aPrioriDNS/gradient_x.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-33" href="autoapi/aPrioriDNS/gradient_y.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-34" href="autoapi/aPrioriDNS/gradient_z.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-35" href="autoapi/aPrioriDNS/index.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-36" href="autoapi/aPrioriDNS/parity_plot.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-37" href="autoapi/aPrioriDNS/process_file.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-38" href="autoapi/aPrioriDNS/save_file.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-39" href="autoapi/aPrioriDNS/scatter.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-40" href="autoapi/aPrioriDNS/DNS/Field3D.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-41" href="autoapi/aPrioriDNS/DNS/Mesh3D.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-42" href="autoapi/aPrioriDNS/DNS/Scalar3D.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-43" href="autoapi/aPrioriDNS/DNS/add_variable.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-44" href="autoapi/aPrioriDNS/DNS/check_input_string.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-45" href="autoapi/aPrioriDNS/DNS/check_same_shape.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-46" href="autoapi/aPrioriDNS/DNS/compute_cell_volumes.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-47" href="autoapi/aPrioriDNS/DNS/delete_existing_files.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-48" href="autoapi/aPrioriDNS/DNS/delete_file.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-49" href="autoapi/aPrioriDNS/DNS/download.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-50" href="autoapi/aPrioriDNS/DNS/downsample.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-51" href="autoapi/aPrioriDNS/DNS/filter_3D.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-52" href="autoapi/aPrioriDNS/DNS/filter_box.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-53" href="autoapi/aPrioriDNS/DNS/filter_gauss.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-54" href="autoapi/aPrioriDNS/DNS/generate_mask.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-55" href="autoapi/aPrioriDNS/DNS/gradient_x.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-56" href="autoapi/aPrioriDNS/DNS/gradient_y.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-57" href="autoapi/aPrioriDNS/DNS/gradient_z.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-58" href="autoapi/aPrioriDNS/DNS/index.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-59" href="autoapi/aPrioriDNS/DNS/plot_power_spectrum.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-60" href="autoapi/aPrioriDNS/DNS/process_chunk_LFR.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-61" href="autoapi/aPrioriDNS/DNS/process_chunk_PSR.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-62" href="autoapi/aPrioriDNS/DNS/process_file.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-63" href="autoapi/aPrioriDNS/DNS/process_species_in_chunks.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-64" href="autoapi/aPrioriDNS/DNS/read_variable_in_chunks.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-65" href="autoapi/aPrioriDNS/DNS/save_file.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-66" href="autoapi/aPrioriDNS/DNS/section_and_average.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-67" href="autoapi/aPrioriDNS/DNS/x_midplane.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-68" href="autoapi/aPrioriDNS/DNS/y_midplane.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-69" href="autoapi/aPrioriDNS/DNS/z_midplane.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-70" href="autoapi/aPrioriDNS/NN/TrainingBuilder.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-71" href="autoapi/aPrioriDNS/NN/VectorScaler.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-72" href="autoapi/aPrioriDNS/NN/index.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-73" href="autoapi/aPrioriDNS/NN/is_json_file.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-74" href="autoapi/aPrioriDNS/plot_utilities/bins.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-75" href="autoapi/aPrioriDNS/plot_utilities/cond_mean_plot.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-76" href="autoapi/aPrioriDNS/plot_utilities/contour_plot.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-77" href="autoapi/aPrioriDNS/plot_utilities/generate_colors.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-78" href="autoapi/aPrioriDNS/plot_utilities/generate_lines.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-79" href="autoapi/aPrioriDNS/plot_utilities/generate_markers.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-80" href="autoapi/aPrioriDNS/plot_utilities/index.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-81" href="autoapi/aPrioriDNS/plot_utilities/parity_plot.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-82" href="autoapi/aPrioriDNS/plot_utilities/plot_multifield.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-83" href="autoapi/aPrioriDNS/plot_utilities/scatter.xhtml" media-type="application/xhtml+xml" />
+  </manifest>
+  <spine toc="ncx" page-progression-direction="ltr">
+    <itemref idref="epub-2" />
+    <itemref idref="epub-1" />
+    <itemref idref="epub-35" />
+    <itemref idref="epub-58" />
+    <itemref idref="epub-40" />
+    <itemref idref="epub-42" />
+    <itemref idref="epub-41" />
+    <itemref idref="epub-43" />
+    <itemref idref="epub-46" />
+    <itemref idref="epub-47" />
+    <itemref idref="epub-48" />
+    <itemref idref="epub-49" />
+    <itemref idref="epub-50" />
+    <itemref idref="epub-62" />
+    <itemref idref="epub-53" />
+    <itemref idref="epub-52" />
+    <itemref idref="epub-51" />
+    <itemref idref="epub-65" />
+    <itemref idref="epub-55" />
+    <itemref idref="epub-56" />
+    <itemref idref="epub-57" />
+    <itemref idref="epub-54" />
+    <itemref idref="epub-45" />
+    <itemref idref="epub-44" />
+    <itemref idref="epub-59" />
+    <itemref idref="epub-60" />
+    <itemref idref="epub-61" />
+    <itemref idref="epub-66" />
+    <itemref idref="epub-64" />
+    <itemref idref="epub-63" />
+    <itemref idref="epub-67" />
+    <itemref idref="epub-68" />
+    <itemref idref="epub-69" />
+    <itemref idref="epub-72" />
+    <itemref idref="epub-70" />
+    <itemref idref="epub-71" />
+    <itemref idref="epub-73" />
+    <itemref idref="epub-80" />
+    <itemref idref="epub-81" />
+    <itemref idref="epub-76" />
+    <itemref idref="epub-75" />
+    <itemref idref="epub-83" />
+    <itemref idref="epub-82" />
+    <itemref idref="epub-74" />
+    <itemref idref="epub-77" />
+    <itemref idref="epub-79" />
+    <itemref idref="epub-78" />
+    <itemref idref="epub-21" />
+    <itemref idref="epub-23" />
+    <itemref idref="epub-22" />
+    <itemref idref="epub-24" />
+    <itemref idref="epub-27" />
+    <itemref idref="epub-28" />
+    <itemref idref="epub-37" />
+    <itemref idref="epub-31" />
+    <itemref idref="epub-30" />
+    <itemref idref="epub-29" />
+    <itemref idref="epub-38" />
+    <itemref idref="epub-32" />
+    <itemref idref="epub-33" />
+    <itemref idref="epub-34" />
+    <itemref idref="epub-26" />
+    <itemref idref="epub-36" />
+    <itemref idref="epub-25" />
+    <itemref idref="epub-39" />
+    <itemref idref="epub-3" />
+    <itemref idref="epub-0" />
+  </spine>
+  <guide>
+    <reference type="toc" title="Table of Contents" href="index.xhtml" />
+  </guide>
+</package>
