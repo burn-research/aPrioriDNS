@@ -1,3 +1,5 @@
+This is just a memo for me with bash commands to remember.
+
 Main commands to build the docs:
 
 1. Activate virtual env
