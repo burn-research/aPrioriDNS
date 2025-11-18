@@ -98,7 +98,7 @@ can be performed with a few lines of code:
    :figclass: light-only
    :alt: Light mode version
    :align: center
-
+   
 .. figure:: /_static/figures/getting_started/Functionalities_dark.png
    :figclass: dark-only
    :alt: Dark mode version
