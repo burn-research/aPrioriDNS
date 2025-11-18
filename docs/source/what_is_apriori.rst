@@ -78,7 +78,7 @@ main features include:
 
 - **High-level abstractions** (3D fields, meshes, scalar/vector variables)
   that hide low-level storage details.
-- **Lazy-loading and pointer-based access**: data are read from disk *only
+- **Pointer-based data access**: data are read from disk *only
   when needed*, enabling work on large datasets even on modest machines.
 - **Built-in operations** frequently required in turbulence and combustion:
   filtering, gradients, dissipation rates, scalar statistics, and more.
