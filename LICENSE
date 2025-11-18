@@ -27,4 +27,4 @@ This project relies on third-party code from:
     PyCSP (MIT License)
     Copyright (c) 2021 Riccardo Malpica Galassia
     See: third_party/PyCSP/LICENSE
-    The code of PyCSP v1.4.0 is used as a module in src/aPrioriDNS/PyCSP
+    
