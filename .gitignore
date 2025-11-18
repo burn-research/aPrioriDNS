@@ -44,3 +44,5 @@ Temporary Items
 paper_examples/07-ML_turbulent_combustion_closure.py
 paper_examples/07-ML_turbulent_combustion_closure.py
 /.venv_sphinx
+/docs/build/
+/docs/jupyter_execute
