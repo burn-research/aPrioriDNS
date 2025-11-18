@@ -133,3 +133,5 @@ html_context = {
 }
 
 bibtex_bibfiles = ["references.bib"]
+
+html_favicon = "_static/figures/logo/aPriori-logo-flame.png"
