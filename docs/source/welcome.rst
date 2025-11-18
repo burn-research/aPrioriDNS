@@ -70,13 +70,11 @@ The documentation is organised in three main parts:
 Project links
 -------------
 
-Project links
--------------
-
 .. grid:: 1 2 2 2
-   :margin: 2 0 2 0
+   :padding: 2
+   :gutter: 2
 
-   .. card:: 🔗 GitHub Repository
+   .. grid-item-card:: 🔗 GitHub Repository
       :link: https://github.com/LorenzoPiu/aPrioriDNS
       :text-align: center
       :shadow: md
@@ -84,7 +82,7 @@ Project links
 
       Browse the source code, contribute, or follow development.
 
-   .. card:: 🐞 Issue Tracker
+   .. grid-item-card:: 🐞 Issue Tracker
       :link: https://github.com/LorenzoPiu/aPrioriDNS/issues
       :text-align: center
       :shadow: md
@@ -95,8 +93,8 @@ Project links
 If you have questions or run into problems that are not suitable as a GitHub
 issue, you can also reach the author by e-mail.
 
-Documentation guide
--------------------
+Navigation guide
+----------------
 
 If you are new to the project:
 

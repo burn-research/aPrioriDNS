@@ -52,6 +52,7 @@ extensions = [
     "autoapi.extension",
     "sphinx_copybutton",
     "sphinxcontrib.bibtex",
+    "sphinx_design",
 ]
 
 autosummary_generate = True

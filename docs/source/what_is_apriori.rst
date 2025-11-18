@@ -4,40 +4,102 @@ What is aPriori
 Scope of the project
 ~~~~~~~~~~~~~~~~~~~~
 
-**aPriori** is a Python package for working with **Direct Numerical Simulation
-(DNS)** data. Its goal is to make large, high-fidelity datasets easier to use,
-both for people with a background in combustion / fluid dynamics and for those
-coming from other domains such as data science or machine learning. :contentReference[oaicite:5]{index=5}
+**aPriori** is a Python package designed to simplify the analysis of
+**Direct Numerical Simulation (DNS)** datasets in turbulence and combustion.
+Its goal is to make large, high-fidelity datasets easier to explore,
+post-process, and use in physics-based or data-driven workflows. The package
+offers a consistent interface to heterogeneous DNS formats, efficient memory
+management, and a growing collection of tools for data extraction,
+visualisation, filtering, and modelling support.
 
-What are Direct numerical simulations?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Scientific motivation
+~~~~~~~~~~~~~~~~~~~~~
 
-With the rise of Data Science, large datasets have become increasingly valuable for researchers. The vast amount of information they contain offers various opportunities in many fields of science and engineering. 
-In the field of Fluid Dynamics, Direct Numerical Simulation (DNS) is a computational method that resolves all the scales of the turbulence spectrum :cite:`baritaud1996direct`. This makes the resulting datasets extremely valuable for:
+Direct Numerical Simulation (DNS) has become a central tool in fluid
+mechanics, turbulence, and reacting-flow research. By resolving the full
+Navier–Stokes equations and all relevant spatio-temporal scales
+:footcite:`moin1998direct`, DNS provides highly detailed information on:
 
-- carrying out detailed physical analyses of flow and chemical structures. :contentReference[oaicite:6]{index=6}
-- training data-driven models (e.g. neural networks),
-- developing and evaluating turbulence or combustion models,
+- the interaction between turbulence and chemical reactions
+  :footcite:`PoinsotVeynante_2005`;
+- small-scale mixing, dissipation, and scalar transport;
+- statistical and structural properties of turbulent flows
+  :footcite:`Pope2012-jn`.
 
-However, these datasets are typically:
+This level of detail comes at a cost: modern DNS runs are computationally
+expensive and increasingly energy-intensive. A recent analysis of DNS studies
+published in the *Journal of Fluid Mechanics* (2004–2024) showed that the
+largest simulations can emit **up to 1000 metric tons of CO₂**
+— comparable to a transcontinental flight — depending on domain size, chemistry
+complexity and resolution :footcite:`Yang2024`. Community efforts to **share DNS
+data** (e.g. JHTDB) were estimated to have avoided *millions of tons* of CO₂
+emissions by preventing redundant computations.
 
-- **huge** (easily many gigabytes),
-- stored in formats that vary between research groups,
-- produced on large HPC systems, while analysis is often done on more modest
-  machines.
+These results underline two key needs:
 
-A frequent practical problem is simply **running out of memory** when trying to
-load everything into RAM. :contentReference[oaicite:7]{index=7}
+1. **public availability of DNS datasets**, and  
+2. **tools that make these datasets easy to access and reuse**.
+
+The role of shared DNS datasets
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A notable recent effort in this direction is the **BlastNet** database
+:footcite:`chung_wai_tong_2023_8034232, chung2022the, CHUNG2022100087`, an
+open repository containing **744 DNS samples across 34 cases** and totalling
+more than **2.2 TB**. BlastNet aggregates data contributed by multiple
+institutions and includes:
+
+- isotropic turbulence cases :footcite:`Chung2022, Donzis2010`,
+- channel flows :footcite:`Samuel2024`,
+- flame configurations of varying complexity
+  :footcite:`Brouzet_Talei_Brear_Cuenot_2021, Coulon2023, Jung2021`.
+
+This diversity is especially valuable for turbulence modelling and
+data-driven approaches. Modern machine-learning studies—such as model discovery,
+subfilter-scale closure learning, or physics-informed regression
+:footcite:`swaminathan_parente_2023, Ihme2022-ac, Bode2019-ue, Bode2021-ur,
+Nista2023-re, deFrahan2019, Piu2025`—benefit greatly from access to clean,
+well-structured DNS data.
+
+However, unlike common ML benchmark datasets (e.g. MNIST, CIFAR, ImageNet),
+DNS data often require *significant post-processing* before becoming usable:
+computing subfilter quantities, evaluating gradients, extracting slices,
+computing chemistry-related quantities, or reformatting variables for neural
+network pipelines. These steps can be computationally demanding and error-prone
+when performed manually.
 
 Why use aPriori?
 ~~~~~~~~~~~~~~~~
 
-aPriori is designed to make this kind of data more manageable and intuitive:
+The **aPriori** package is designed to streamline this entire workflow. Its
+main features include:
 
-- it provides **high-level objects** (such as 3D fields and meshes) so that you
-  can focus on the analysis rather than the file layout;
-- it operates mainly on **pointers / lazy access** to the data, only reading
-  arrays from disk when needed, which helps avoid exhausting RAM;
-- it includes utilities for **filtering**, **computing reaction rates**, and
-  **preparing data** for turbulence / combustion modelling and machine learning
-  workflows. :contentReference[oaicite:8]{index=8}
+- **High-level abstractions** (3D fields, meshes, scalar/vector variables)
+  that hide low-level storage details.
+- **Lazy-loading and pointer-based access**: data are read from disk *only
+  when needed*, enabling work on large datasets even on modest machines.
+- **Built-in operations** frequently required in turbulence and combustion:
+  filtering, gradients, dissipation rates, scalar statistics, and more.
+- **Interoperability** with scientific Python tools (NumPy, PyVista,
+  PyTorch/TensorFlow, Cantera, PyCSP).
+- **Visualisation utilities** to quickly inspect fields and slices.
+- **Extensive documentation and tutorials**, guiding both newcomers and
+  experienced users through typical analysis patterns.
+
+The package aims to provide a uniform, intuitive, and efficient interface to
+heterogeneous DNS datasets—reducing friction, avoiding unnecessary memory
+usage, and accelerating research workflows in turbulence, combustion, and
+machine learning.
+
+The following figure displays the typical set of operations that using aPriori 
+can be performed with a few lines of code:
+
+.. figure:: /_static/figures/getting_started/Functionalities_light.png
+   :figclass: light-only
+   :alt: Light mode version
+   :align: center
+
+.. figure:: /_static/figures/getting_started/Functionalities_dark.png
+   :figclass: dark-only
+   :alt: Dark mode version
+   :align: center
