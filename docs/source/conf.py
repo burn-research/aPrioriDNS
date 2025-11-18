@@ -32,9 +32,10 @@ autoapi_own_page_level = "function"
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'aPriori'
-copyright = '2025, Lorenzo Piu, Heinz Pitsch, Alessandro Parente'
+copyright = 'Copyright © 2024, Lorenzo Piu, Heinz Pitsch, Alessandro Parente'
 author = 'Lorenzo Piu'
 release = '1.1.10'
+html_title = "aPriori Documentation"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -49,6 +50,8 @@ extensions = [
     "myst_nb",                    # Jupyter notebook tutorials
     "sphinx_autodoc_typehints",
     "autoapi.extension",
+    "sphinx_copybutton",
+    "sphinxcontrib.bibtex",
 ]
 
 autosummary_generate = True
@@ -75,5 +78,57 @@ nb_execution_mode = "auto"  # "off" I don't know what it does, or "auto" if you 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'furo'
+# Theme settings
+# html_theme = 'furo' 
+html_theme = "shibuya"
 html_static_path = ['_static']
+html_css_files = [
+    "custom.css",
+]
+
+html_theme_options = {
+    # already included probably:
+    "accent_color": "auto",
+    "light_logo": "_static/figures/logo/aPriori-logo-flame.png",
+    "dark_logo": "_static/figures/logo/aPriori-logo-flame.png",
+    "accent_color": "orange",
+    # These are the additional links in the navigation bar
+    "nav_links": [
+        {
+            "title": "aPriori Documentation       ",
+            "url": "index"
+        },
+        {
+            "title": "Related Projects",
+            "url": "none",
+            "children": [
+                {
+                    "title": "BLASTNet",
+                    "url": "https://blastnet.github.io",
+                    "summary": "Bearable Large Accessible Scientific Training Network-of-Datasets",
+                    "external": True
+                },
+                {
+                    "title": "PyCSP",
+                    "url": "https://github.com/rmalpica/PyCSP",
+                    "summary": "A collection of tools based on Computational Singular Perturbation for the analysis of chemically reacting systems.",
+                    "external": True
+                },
+            ]
+        },
+        {
+            "title": "Publications",
+            "url": "publications"
+        },
+    ],
+    "github_url": "https://github.com/LorenzoPiu/aPrioriDNS",
+    "linkedin_url": "https://www.linkedin.com/in/lorenzopiu/",
+}
+
+html_context = {
+    "source_type": "github",
+    "source_user": "LorenzoPiu",
+    "source_repo": "aPrioriDNS",
+}
+
+bibtex_bibfiles = ["references.bib"]

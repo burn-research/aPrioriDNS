@@ -1,0 +1,10 @@
+/* DARK MODE ONLY */
+html.dark {
+    --sy-c-background: rgb(0, 0, 0) !important;   
+    --sy-c-foot-background: #1A1C20 !important;
+}
+
+/* LIGHT MODE ONLY */
+html.light {
+  --sy-c-background-dropback: #edededa9 !important;          /* slightly grey background */
+}

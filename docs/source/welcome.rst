@@ -1,0 +1,88 @@
+.. figure:: /_static/figures/getting_started/Graphical_abstract_light.png
+   :figclass: light-only
+   :alt: Light mode version
+   :align: center
+
+.. figure:: /_static/figures/getting_started/Graphical_abstract_dark.png
+   :figclass: dark-only
+   :alt: Dark mode version
+   :align: center
+
+|mit| |source| |docs| |issues| |pypi| |zenodo|
+
+.. |mit| image:: https://img.shields.io/badge/License-MIT-yellow.svg
+   :target: https://opensource.org/licenses/MIT
+   :alt: MIT License
+   :height: 20px
+
+.. |source| image:: https://img.shields.io/badge/Source-Github-02bfa6?&logo=Github&logoColor=white
+   :target: https://github.com/LorenzoPiu/aPrioriDNS/
+   :alt: GitHub Source Code
+   :height: 20px
+
+.. |docs| image:: https://img.shields.io/badge/Documentation-Gitbook-green?logo=Gitbook&logoColor=white
+   :target: https://apriori.gitbook.io/apriori-documentation-1
+   :alt: Documentation
+   :height: 20px
+
+.. |issues| image:: https://img.shields.io/badge/Issues-Github-02bfa6?&logo=Github&logoColor=white
+   :target: https://github.com/LorenzoPiu/aPrioriDNS/issues
+   :alt: GitHub Issues
+   :height: 20px
+
+.. |pypi| image:: https://img.shields.io/pypi/dm/aprioridns?color=03b1fc&logo=pypi&logoColor=white
+   :target: https://pypistats.org/packages/aprioridns
+   :alt: PyPI Downloads
+   :height: 20px
+
+.. |zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.13793622.svg
+   :target: https://zenodo.org/records/13793623
+   :alt: Zenodo DOI
+   :height: 20px
+
+
+👋 Welcome to aPriori
+=====================
+
+A Python package to process Direct Numerical Simulations (DNS) of reacting
+and non-reacting flows.
+
+Overview
+--------
+
+This documentation is meant to help you:
+
+* understand the purpose and scope of **aPrioriDNS**,
+* get the library installed and run your first example,
+* learn the core concepts and usage patterns,
+* explore the full API reference when you need more detail.
+
+The documentation is organised in three main parts:
+
+* **Getting Started** – introduction to the project, installation instructions,
+  and a quickstart example that you can run immediately.
+* **Fundamentals & Usage** – more in-depth material on the main classes and
+  workflows, with examples of how to build analyses step by step.
+* **API Guide** – automatically generated reference for modules, classes and
+  functions. This is mostly useful when you already know the basics and need
+  precise details.
+
+Project links
+-------------
+
+* Source code: https://github.com/LorenzoPiu/aPrioriDNS
+* Issue tracker: https://github.com/LorenzoPiu/aPrioriDNS/issues
+
+If you have questions or run into problems that are not suitable as a GitHub
+issue, you can also reach the author by e-mail.
+
+Documentation guide
+-------------------
+
+If you are new to the project:
+
+1. Start with :doc:`getting_started` to understand what aPrioriDNS is and how
+   to install it.
+2. Try one of the tutorials under :doc:`tutorials/index` to see concrete usage
+   examples.
+3. When you need deeper details, visit the :doc:`API Guide <autoapi/aPrioriDNS/index>`.
