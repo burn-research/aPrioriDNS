@@ -46,3 +46,5 @@ paper_examples/07-ML_turbulent_combustion_closure.py
 /.venv_sphinx
 /docs/build/
 /docs/jupyter_execute
+/Lifted_H2_subdomain
+/Filter16FavreGauss
