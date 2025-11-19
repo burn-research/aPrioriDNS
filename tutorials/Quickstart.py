@@ -110,23 +110,25 @@ field_filtered.compute_reaction_rates()
 
 # Compare visually the results 
 field_filtered.plot_z_midplane('RH2_DNS',
-                          title=r'$\overline{\dot{\omega}}_{H2,DNS}$ $[kg/(m^3\cdot s)]$', 
+                          title=r'$\overline{\dot{\omega}}_{H2}^{DNS}$ $[kg/(m^3\cdot s)]$', 
                           vmax=-20,
                           vmin=field_filtered.RH2_LFR.z_midplane.min(),
                           levels=[-300, -50, -20],
                           labels=True,
                           colormap='inferno',
-                          transpose=True, x_name='z [mm]', y_name='x [mm]')
+                          transpose=True, x_name='z [mm]', y_name='x [mm]',
+                          remove_cbar=True)
 
 # Compare visually the results in the z midplane
 field_filtered.plot_z_midplane('RH2_LFR',
-                          title=r'$\overline{\dot{\omega}}_{H2,LFR}$ $[kg/(m^3\cdot s)]$', 
+                          title=r'$\overline{\dot{\omega}}_{H2}^{LFR}$ $[kg/(m^3\cdot s)]$', 
                           vmax=-20,
                           vmin=field_filtered.RH2_LFR.z_midplane.min(),
                           levels=[-300, -50, -20],
                           labels=True,
                           colormap='inferno',
-                          transpose=True, x_name='z [mm]', y_name='x [mm]')
+                          transpose=True, x_name='z [mm]', y_name='x [mm]',
+                          remove_y=True)
 
 # Compare the heat release rate results with a parity plot
 f = ap.parity_plot(field_filtered.HRR_DNS.value,  # x
@@ -137,7 +139,7 @@ f = ap.parity_plot(field_filtered.HRR_DNS.value,  # x
                    cmin=0,
                    RMSE=False,
                    NRMSE=True,
-                   ticks=[0, 1e10, 2e10]
+                   ticks=[0, 0.8e10, 1.6e10]
                    )
 
 #------------------------Compute reaction rates (PaSR)-------------------------
