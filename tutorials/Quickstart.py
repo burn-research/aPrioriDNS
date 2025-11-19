@@ -37,23 +37,24 @@ field_DNS.plot_y_midplane('T',
 # Plot Temperature on the yz midplane
 field_DNS.plot_x_midplane('T', levels=[1400, 2000], vmin=1400, 
                           title='T [K]', linewidth=2)
-# Plot OH mass fraction on the transposed xy midplane
-field_DNS.plot_z_midplane('YOH', title=r'$Y_{OH}$', colormap='inferno',
-                          transpose=True, x_name='z [mm]', y_name='x [mm]')
 
 #--------------------------Compute DNS reaction rates--------------------------
 field_DNS.compute_reaction_rates()
 
-# Plot reaction rates
-field_DNS.plot_z_midplane('RH2O_DNS', 
-                          title=r'$\dot{\omega}_{H2O}$ $[kg/m^3/s]$', 
-                          colormap='inferno',
+# Plot OH mass fraction on the transposed xy midplane
+field_DNS.plot_z_midplane('YOH', title=r'$Y_{OH}$ $[-]$', colormap='inferno',
                           transpose=True, x_name='z [mm]', y_name='x [mm]')
+# Plot reaction rates
 field_DNS.plot_z_midplane('ROH_DNS', 
                           title=r'$\dot{\omega}_{OH}$ $[kg/m^3/s]$', 
                           colormap='inferno',
                           transpose=True, x_name='z [mm]', y_name='x [mm]')
+field_DNS.plot_z_midplane('RH2O_DNS', 
+                          title=r'$\dot{\omega}_{H2O}$ $[kg/m^3/s]$', 
+                          colormap='inferno',
+                          transpose=True, x_name='z [mm]', y_name='x [mm]')
 
+#--------------------------Compute derived variables---------------------------
 # compute kinetic energy
 field_DNS.compute_kinetic_energy()
 
@@ -90,16 +91,18 @@ field_filtered = ap.Field3D(f_string)
 
 # Visualize the effect of filtering on the Heat Release Rate
 field_DNS.plot_z_midplane('HRR_DNS',
-                          title=r'$\dot{Q}_{DNS}$', 
+                          title=r'$\dot{Q}_{DNS}$ $[W/m^3]$', 
                           colormap='inferno',
                           vmax=8*1e9,
-                          transpose=True, x_name='z [mm]', y_name='x [mm]')
+                          transpose=True, x_name='z [mm]', y_name='x [mm]',
+                          remove_cbar=True)
 
 field_filtered.plot_z_midplane('HRR_DNS',
-                          title=r'$\overline{\dot{Q}_{DNS}}$', 
+                          title=r'$\overline{\dot{Q}_{DNS}}$ $[W/m^3]$', 
                           colormap='inferno',
                           vmax=8*1e9,
-                          transpose=True, x_name='z [mm]', y_name='x [mm]')
+                          transpose=True, x_name='z [mm]', y_name='x [mm]',
+                          remove_y=True)
 
 #-------------------------Compute reaction rates (LFR)-------------------------
 # Computing reaction rates directly from the filtered field (LFR approximation)
@@ -107,7 +110,7 @@ field_filtered.compute_reaction_rates()
 
 # Compare visually the results 
 field_filtered.plot_z_midplane('RH2_DNS',
-                          title=r'$\overline{\dot{\omega}}_{H2,DNS}$', 
+                          title=r'$\overline{\dot{\omega}}_{H2,DNS}$ $[kg/(m^3\cdot s)]$', 
                           vmax=-20,
                           vmin=field_filtered.RH2_LFR.z_midplane.min(),
                           levels=[-300, -50, -20],
@@ -117,7 +120,7 @@ field_filtered.plot_z_midplane('RH2_DNS',
 
 # Compare visually the results in the z midplane
 field_filtered.plot_z_midplane('RH2_LFR',
-                          title=r'$\overline{\dot{\omega}}_{H2,LFR}$', 
+                          title=r'$\overline{\dot{\omega}}_{H2,LFR}$ $[kg/(m^3\cdot s)]$', 
                           vmax=-20,
                           vmin=field_filtered.RH2_LFR.z_midplane.min(),
                           levels=[-300, -50, -20],
@@ -129,8 +132,12 @@ field_filtered.plot_z_midplane('RH2_LFR',
 f = ap.parity_plot(field_filtered.HRR_DNS.value,  # x
                    field_filtered.HRR_LFR.value,  # y
                    density=True,                  # KDE coloured
-                   x_name=r'$\overline{\dot{\omega}}_{H2,DNS}$',
-                   y_name=r'$\overline{\dot{\omega}}_{H2,LFR}$'
+                   x_name=r'$\overline{\dot{\omega}}_{H2}^{DNS}$',
+                   y_name=r'$\overline{\dot{\omega}}_{H2}^{LFR}$',
+                   cmin=0,
+                   RMSE=False,
+                   NRMSE=True,
+                   ticks=[0, 1e10, 2e10]
                    )
 
 #------------------------Compute reaction rates (PaSR)-------------------------
