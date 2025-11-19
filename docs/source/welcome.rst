@@ -10,7 +10,7 @@
 
 |mit| |source| |docs| |issues| |pypi| |zenodo|
 
-.. |mit| image:: https://img.shields.io/badge/License-MIT-yellow.svg
+.. |mit| image:: https://img.shields.io/badge/License-MIT-yellow
    :target: https://opensource.org/licenses/MIT
    :alt: MIT License
    :height: 20px
@@ -35,7 +35,7 @@
    :alt: PyPI Downloads
    :height: 20px
 
-.. |zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.13793622.svg
+.. |zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.13793622.png
    :target: https://zenodo.org/records/13793623
    :alt: Zenodo DOI
    :height: 20px
@@ -52,7 +52,7 @@ Overview
 
 This documentation is meant to help you:
 
-* understand the purpose and scope of **aPrioriDNS**,
+* understand the purpose and scope of the project,
 * get the library installed and run your first example,
 * learn the core concepts and usage patterns,
 * explore the full API reference when you need more detail.

@@ -86,35 +86,45 @@ Visualization
 After downloading the dataset, the following lines of code initialize a Field3D object. 
 Once instantiated the object, we can display the field leveraging the plotting utilities:
 
-.. code-block:: python
+.. container:: demo
+   .. code-block:: python
 
-   # Initialize 3D DNS field
-   field_DNS = ap.Field3D('Lifted_H2_subdomain')
 
-   #----------------------------Visualize the dataset-----------------------------#
-  
-   # Plot Temperature on the xy midplane (transposed as yx plane)
-   field_DNS.plot_z_midplane('T',                 # plots the Temperature
-                             levels=[1400, 2000], # isocontours at 1400 and 2000
-                             vmin=1400,           # minimum temperature to plot
-                             title='T [K]',       # figure title
-                             linewidth=2,         # isocontour lines thickness
-                             transpose=True,      # inverts x and y axes
-                             x_name='y [mm]',     # x axis label
-                             y_name='x [mm]')     # y axis label
-   # Plot Temperature on the xz midplane (transposed as zx plane)
-   field_DNS.plot_y_midplane('T', 
-                             levels=[1400, 2000], 
-                             vmin=1400, 
-                             title='T [K]', 
-                             linewidth=2,
-                             transpose=True, 
-                             x_name='z [mm]', 
-                             y_name='x [mm]')
-   # Plot Temperature on the yz midplane
-   field_DNS.plot_x_midplane('T', levels=[1400, 2000], vmin=1400, 
-                             title='T [K]', linewidth=2)
-   # Plot OH mass fraction on the transposed xy midplane
-   field_DNS.plot_z_midplane('YOH', title=r'$Y_{OH}$', colormap='inferno',
-                             transpose=True, x_name='z [mm]', y_name='x [mm]')
+      # Initialize 3D DNS field
+      field_DNS = ap.Field3D('Lifted_H2_subdomain')
+
+      #----------------------------Visualize the dataset-----------------------------#
+   
+      # Plot Temperature on the xy midplane (transposed as yx plane)
+      field_DNS.plot_z_midplane('T',                 # plots the Temperature
+                              levels=[1400, 2000], # isocontours at 1400 and 2000
+                              vmin=1400,           # minimum temperature to plot
+                              title='T [K]',       # figure title
+                              linewidth=2,         # isocontour lines thickness
+                              transpose=True,      # inverts x and y axes
+                              x_name='y [mm]',     # x axis label
+                              y_name='x [mm]')     # y axis label
+      # Plot Temperature on the xz midplane (transposed as zx plane)
+      field_DNS.plot_y_midplane('T', 
+                              levels=[1400, 2000], 
+                              vmin=1400, 
+                              title='T [K]', 
+                              linewidth=2,
+                              transpose=True, 
+                              x_name='z [mm]', 
+                              y_name='x [mm]')
+      # Plot Temperature on the yz midplane
+      field_DNS.plot_x_midplane('T', levels=[1400, 2000], vmin=1400, 
+                              title='T [K]', linewidth=2)
+      # Plot OH mass fraction on the transposed xy midplane
+      field_DNS.plot_z_midplane('YOH', title=r'$Y_{OH}$', colormap='inferno',
+                              transpose=True, x_name='z [mm]', y_name='x [mm]')
+
+      .. container:: demo-result
+
+         .. figure:: /_static/figures/getting_started/quickstart_T_zmid.png
+            :width: 600
+            :align: center
+
+            This is the ``caption``, *it can* contain **other markups**.
 

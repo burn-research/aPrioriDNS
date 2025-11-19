@@ -13,3 +13,9 @@ rm -rf docs/source/autoapi
 
 4. Build html
 python -m sphinx -b html docs/source docs/build/html
+
+5. Build pdf
+python -m sphinx -b latex docs/source docs/build/latex
+cd docs/build/latex
+make
+cd ../../../

@@ -53,6 +53,7 @@ extensions = [
     "sphinx_copybutton",
     "sphinxcontrib.bibtex",
     "sphinx_design",
+    "sphinx.ext.imgconverter",
 ]
 
 autosummary_generate = True
