@@ -23,8 +23,9 @@
    :caption: Fundamentals and usage
    :maxdepth: 1
 
-   tutorials/01_basic_field_operations
-   tutorials/02_simple_plotting
+   tutorials/01_cut_scalar
+   tutorials/02_filter_scalar
+   tutorials/03_read_dataset
 
 .. toctree::
    :caption: API Guide

@@ -13,5 +13,5 @@ as you convert your existing Python scripts.
 .. toctree::
    :maxdepth: 1
 
-   01_basic_field_operations
-   02_simple_plotting
+   01_cut_scalar
+   02_filter_scalar

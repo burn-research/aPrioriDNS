@@ -249,7 +249,30 @@ All the files contained in the data folder when the command is launched will be 
 Compute laminar rates on the filtered field
 -------------------------------------------
 
-All the files contained in the data folder when the command is launched will be automatically filtered by the filtering function.
+The filtered field is what in *a priori* validation is considered to resemble 
+a Large Eddy Simulation (LES) snapshot. 
+From those values, it is possible to model the unclosed quantities, and then
+compare them with the DNS benchmark values.
+
+The simplest way to model the reaction rates is based on the so-called **Laminar Finite
+Rate (LFR)** approximation. This approach directly computes the reaction rates from the
+filtered LES field:
+
+.. math::
+
+    \bar{\dot{\omega}}_{\mathrm{LFR}} = \dot{\omega}(\tilde{T}, \tilde{Y}_k)
+
+Where:
+
+* :math:`\bar{\dot{\omega}}_{\mathrm{LFR}}` represents the reaction rates.
+* :math:`\dot{\omega}(\tilde{T}, \tilde{Y}_k)` is the computation of the instantaneous
+  Arrhenius rates from the filtered temperature :math:`\tilde{T}` and the filtered species
+  concentrations :math:`\tilde{Y}_k`.
+
+This code snippet computes :math:`\bar{\dot{\omega}}_{\mathrm{LFR}}` and compares it with
+the filtered DNS values :math:`\bar{\dot{\omega}}_{\mathrm{DNS}}`. For more complex
+modeling approaches, see the section *Machine Learning Tutorials* at the paragraph
+*Data-Driven Closure for Turbulence–Chemistry Interaction*.
 
 .. container:: demo
 
