@@ -3086,7 +3086,146 @@ class Field3D():
                     )
         
         return fig, ax
+
+    def plot_midplane(self, attribute,
+                        plane='z',
+                        log=False,
+                        colormap='viridis', 
+                        cbar_title=None,
+                        cbar_shrink=0.7,
+                        levels=None,
+                        color='black',
+                        labels=False,
+                        linestyle='-',
+                        linecolor='black',
+                        linewidth=1,
+                        x_ticks=None,
+                        y_ticks=None,
+                        x_lim=None,
+                        y_lim=None,
+                        vmin=None,
+                        vmax=None,
+                        transparent=True,
+                        title=None,
+                        x_name=None,
+                        y_name=None,
+                        remove_cbar=False,
+                        remove_x=False,
+                        remove_y=False,
+                        remove_title=False,
+                        transpose=False,
+                        dpi=None,
+                        scale='mm',
+                        save=False,
+                        save_path=None,
+                        show=True,
+                        ):
+        """
+        Plots the specified midplane of a scalar attribute of the Field3D class.
     
+        Description:
+        ------------
+        This method plots a midplane of a specified attribute in the Field3D class. It verifies 
+        if the attribute is valid, and then uses the built in function contour_plot to generate 
+        the plot.
+    
+        Parameters:
+        -----------
+        attribute : str
+            The name of the attribute to plot.
+        vmin : float, optional
+            The minimum value for the color scale. Default is None.
+        vmax : float, optional
+            The maximum value for the color scale. Default is None.
+    
+        Returns:
+        --------
+        None
+    
+        """
+        self.check_valid_attribute(attribute)
+        #getattr(self, attribute).plot_z_midplane(self.mesh, title=attribute, vmin=vmin, vmax=vmax)
+        if scale.lower() == 'mm':
+            s = 1000
+        elif scale.lower() == 'm':
+            s = 1
+        else:
+            s = 1000
+            scale = 'mm'
+            warnings.warn("\nAvailable options for the 'scale' parameter are 'm' or 'mm'.\n"
+                          "Value defaulted to 'mm'.")
+        
+        # Select the plane to plot
+        if plane.lower() == 'x':
+            X = self.mesh.Y_midX * s
+            Y = self.mesh.Z_midX * s
+            Z = getattr(self, attribute).x_midplane
+            x_axis_name = 'y'
+            y_axis_name = 'z'
+        elif plane.lower() == 'y':
+            X = self.mesh.X_midY * s
+            Y = self.mesh.Z_midY * s
+            Z = getattr(self, attribute).y_midplane
+            x_axis_name = 'x'
+            y_axis_name = 'z'
+        elif plane.lower() == 'z':
+            X = self.mesh.X_midZ * s
+            Y = self.mesh.Y_midZ * s
+            Z = getattr(self, attribute).z_midplane
+            x_axis_name = 'x'
+            y_axis_name = 'y'
+        else:
+            raise ValueError("\nValid options for the 'plane' parameter are 'x', 'y', or 'z'.")
+
+        # Assign names to the x and y axes
+        if x_name is None:
+            x_name = f'{x_axis_name} [{scale}]'
+            if transpose:
+                x_name = f'{y_axis_name} [{scale}]'
+        if y_name is None:
+            y_name = f'{y_axis_name} [{scale}]'
+            if transpose:
+                y_name = f'{x_axis_name} [{scale}]'
+        
+        # Assign title
+        if title is None:
+            title = attribute
+        
+        # Call contour plot function from the plotting utilities
+        fig, ax = contour_plot(X, Y, Z, 
+                    log=log,
+                    colormap=colormap, 
+                    cbar_title=cbar_title,
+                    cbar_shrink=cbar_shrink,
+                    levels=levels,
+                    color=color,
+                    labels=labels,
+                    linestyle=linestyle,
+                    linecolor=linecolor,
+                    linewidth=linewidth,
+                    x_ticks=x_ticks,
+                    y_ticks=y_ticks,
+                    x_lim=x_lim,
+                    y_lim=y_lim,
+                    vmin=vmin,
+                    vmax=vmax,
+                    transparent=transparent,
+                    title=title,
+                    x_name=x_name,
+                    y_name=y_name,
+                    remove_cbar=remove_cbar,
+                    remove_x=remove_x,
+                    remove_y=remove_y,
+                    remove_title=remove_title,
+                    transpose=transpose,
+                    dpi=dpi,
+                    save=save,
+                    save_path=save_path,
+                    show=show
+                    )
+        
+        return fig, ax
+
     def plot_api(self, api_type="TSR", n=4, plane='z_midplane', 
              vmin=None, vmax=None, cmap='viridis', n_cols=None, 
              figsize=None, include_reactions=True, save_path=None, 
