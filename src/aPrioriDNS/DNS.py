@@ -1,25 +1,37 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Feb 26 17:17:23 2024
+"""DNS.py: the core module of the aPrioriDNS package.
 
-@author: Lorenzo Piu
 """
+
+__authors__ = "Lorenzo Piu"
+__copyright__ = "Copyright (c) 2024-2025, Lorenzo Piu, Heinz Pitsch, and Alessandro Parente"
+__credits__ = ["Aero-Thermo-Mechanics laboratories - Universite Libre de Bruxelles, Brussels, Belgium"
+               "Institut für Technische Verbrennung (ITV) - RWTH Aachen University, Aachen, Germany"]
+__license__ = "MIT"
+__version__ = "1.11.0"
+__maintainer__ = ["Lorenzo Piu"]
+__email__ = ["lorenzo.piu@ulb.be"]
+__status__ = "Production"
+
 
 import json
 import os
 from os import cpu_count
 import sys
-from tabulate import tabulate
+from tabulate import tabulate # type: ignore - comment to suppress warning
 import shutil
 from scipy.ndimage import convolve
 from scipy.ndimage import gaussian_filter
 import matplotlib.pyplot as plt
 import numpy as np
-import cantera as ct
+import cantera as ct # type: ignore - comment to suppress warning
 import gc
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import requests
+import re
+from itertools import zip_longest
+import warnings
 
 from ._variables import variables_list
 from ._variables import mesh_list
@@ -27,6 +39,7 @@ from ._utils import (
     check_data_files,
     check_folder_structure,
     extract_species,
+    extract_reactions,
     find_kinetic_mechanism,
     extract_filter,
     change_folder_name,
@@ -34,8 +47,9 @@ from ._utils import (
     check_reaction_rates
 )
 from ._data_struct import folder_structure
-from .plot_utilities import contour_plot
+from .plot_utilities import contour_plot, plot_multifield
 from .plot_utilities import scatter
+from PyCSP import Functions as csp   # type: ignore - comment to suppress warning
 
 
 ###########################################################
@@ -187,11 +201,11 @@ class Field3D():
     __field_dimension = 3
     
     
-    def __init__(self, folder_path):
+    def __init__(self, folder_path, reactive=True):
         print("\n---------------------------------------------------------------")
         print("Initializing 3D Field\n")
         # check the folder structure and files
-        check_folder_structure(folder_path)
+        check_folder_structure(folder_path, reactive=reactive)
         _, ids = check_data_files(folder_path)
         print("Folder structure OK")
         
@@ -199,6 +213,8 @@ class Field3D():
         self.data_path = os.path.join(folder_path, folder_structure["data_path"])
         self.chem_path = os.path.join(folder_path, folder_structure["chem_path"])
         self.grid_path = os.path.join(folder_path, folder_structure["grid_path"])
+        
+        self.reactive = reactive
         
         self.filter_size = extract_filter(folder_path)
         self.downsampled = False
@@ -221,14 +237,16 @@ class Field3D():
         self.mesh = Mesh3D(X, Y, Z)
         print ("Mesh fields read correctly")
         
-        
-        print("\n---------------------------------------------------------------")
-        print("Reading kinetic mechanism...")
-        self.kinetic_mechanism = find_kinetic_mechanism(self.chem_path)
-        print(f"Kinetic mechanism file found: {self.kinetic_mechanism}")
-        self.species = extract_species(self.kinetic_mechanism)
-        print("Species:")
-        print(self.species)
+        if reactive:
+            print("\n---------------------------------------------------------------")
+            print("Reading kinetic mechanism...")
+            self.kinetic_mechanism = find_kinetic_mechanism(self.chem_path)
+            print(f"Kinetic mechanism file found: {self.kinetic_mechanism}")
+            self.species = extract_species(self.kinetic_mechanism)
+            self.reactions, self.reaction_equations = extract_reactions(self.kinetic_mechanism)
+            self.reaction_names = [re.search(r'\(([^)]+)\)', r).group(1) for r in self.reactions]
+            print("Species:")
+            print(self.species)
         
         
         print("\n---------------------------------------------------------------")
@@ -242,7 +260,7 @@ class Field3D():
         if not isinstance(attr_name, str):
             raise TypeError("attr_name must be a string.")
         if not isinstance(file_name, str):
-            raise TypeError("path must be a string.")
+            raise TypeError("file_name must be a string.")
         # check that the name format is correct
         else:
             if not file_name.endswith(".dat"):
@@ -255,19 +273,17 @@ class Field3D():
         # check that an attribute with the same name does not exist yet
         if attr_name in self.attr_list:
             raise ValueError(f"The object already has an attribute named {attr_name}.")
-        elif file_name in self.paths_list:
+        if file_name in self.paths_list:
             raise ValueError(f"The path {os.path.join(self.data_path, file_name)} is already in the list.\n"
                              "Please choose a different file name")
         
-        else:
-            self.attr_list.append(attr_name)
-            self.paths_list.append(os.path.join(self.data_path, file_name))
-            setattr(self, attr_name, Scalar3D(self.shape, path=os.path.join(self.data_path, file_name)))
-            
+        self.attr_list.append(attr_name)
+        self.paths_list.append(os.path.join(self.data_path, file_name))
+        setattr(self, attr_name, Scalar3D(self.shape, path=os.path.join(self.data_path, file_name)))
+        
         self.update()
-            
                         
-    def build_attributes_list(self):
+    def build_attributes_list(self, variable=None):
         """
         Build lists of attribute names and corresponding file paths 
         based on the configuration specified in variables_list.
@@ -286,38 +302,65 @@ class Field3D():
         attr_list = []
         paths_list = []
         # bool_list = []
-        for attribute_name in variables_list:
-            if variables_list[attribute_name][1] == False: # non-species-dependent names
-                if variables_list[attribute_name][2] == None:
-                    file_name = variables_list[attribute_name][0].format(self.id_string)
-                    path = os.path.join(self.data_path, file_name)
-                    paths_list.append(path)
-                    attr_list.append(attribute_name)
-                else: # Handling multiple models variables
-                    if variables_list[attribute_name][3] == False:
-                        for model in variables_list[attribute_name][2]:
-                            file_name = variables_list[attribute_name][0].format(model, self.id_string)
+        if variable is None:
+            variables_list_ = Field3D.variables.copy()
+        else:
+            variables_list_ = {variable : variables_list[variable]}
+
+        for attribute_name in variables_list_:
+            f_name       = variables_list[attribute_name][0]   # Unformatted file name
+            species_attr = variables_list[attribute_name][1]   # True if there is one attribute for every species (e.g. mass fractions and reaction rates) 
+            models       = variables_list[attribute_name][2]   # Contains the different models available
+            tensor       = variables_list[attribute_name][3]   # True if the attribute is related to a tensor, 'Symmetric' if it's a symmetric tensor
+            reactions    = variables_list[attribute_name][4]   # True if there is one attribute for every reaction (e.g. Participation Indexes)
+            if species_attr == False: # non species-dependent names
+                if reactions == False: # non reactions-dependent names
+                    if models == None:  
+                        file_name = variables_list[attribute_name][0].format(self.id_string)
+                        path = os.path.join(self.data_path, file_name)
+                        paths_list.append(path)
+                        attr_list.append(attribute_name)
+                    else: # Handling multiple models variables
+                        if tensor == False:
+                            for model in models:
+                                file_name = f_name.format(model, self.id_string)
+                                path = os.path.join(self.data_path, file_name)
+                                paths_list.append(path)
+                                attr_list.append(attribute_name.format(model))
+                        else: # handling tensors that have multiple models. NOTE: 
+                              # for the moment I'm not handling species tensors or 
+                              # tensors without models
+                            for model in models:
+                                for j in range(1,4):
+                                    for i in range(1,4):
+                                        if (not tensor == 'Symmetric') or i<=j:
+                                            file_name = variables_list[attribute_name][0].format(i,j,model, self.id_string)
+                                            path = os.path.join(self.data_path, file_name)
+                                            paths_list.append(path)
+                                            attr_list.append(attribute_name.format(i,j,model))
+                else: # Handling reaction dependent attributes (so far only the Participation Indexes)
+                    if self.reactive:
+                        for reaction_name in self.reaction_names:
+                            file_name = f_name.format(reaction_name, self.id_string)
                             path = os.path.join(self.data_path, file_name)
                             paths_list.append(path)
-                            attr_list.append(attribute_name.format(model))
-                    else: # handling tensors that have multiple models. NOTE: 
-                          # for the moment I'm not handling species tensors or 
-                          # tensors without models
-                        for model in variables_list[attribute_name][2]:
-                            for j in range(1,4):
-                                for i in range(1,4):
-                                    if (not variables_list[attribute_name][3] == 'Symmetric') or i<=j:
-                                        file_name = variables_list[attribute_name][0].format(i,j,model, self.id_string)
-                                        path = os.path.join(self.data_path, file_name)
-                                        paths_list.append(path)
-                                        attr_list.append(attribute_name.format(i,j,model))
+                            attr_list.append(attribute_name.format(reaction_name))
             else: #handling the species attributes
-                for specie in self.species:
-                    file_name = variables_list[attribute_name][0].format(specie, self.id_string)
-                    path = os.path.join(self.data_path, file_name)
-                    paths_list.append(path)
-                    attr_list.append(attribute_name.format(specie))
-                    
+                if self.reactive:
+                    if not reactions:
+                        for specie in self.species:
+                            file_name = f_name.format(specie, self.id_string)
+                            path = os.path.join(self.data_path, file_name)
+                            paths_list.append(path)
+                            attr_list.append(attribute_name.format(specie))
+                    else:
+                        for specie in self.species:
+                            for reaction in self.reaction_names:
+                                file_name = f_name.format(specie, reaction, self.id_string)
+                                path = os.path.join(self.data_path, file_name)
+                                paths_list.append(path)
+                                attr_list.append(attribute_name.format(specie, reaction))
+
         return attr_list, paths_list
     
     def check_valid_attribute(self, input_attribute):
@@ -335,7 +378,7 @@ class Field3D():
             valid_attributes_str = '\n'.join(valid_attributes)
             raise ValueError(f"The attribute '{input_attribute}' is not valid. \nValid attributes are: \n{valid_attributes_str}")
 
-    def compute_chemical_timescale(self, mode='SFR', verbose=False):
+    def compute_chemical_timescale(self, mode='SFR', verbose=False, threshold=1e-15, replace_nonreacting=False):
         '''
         Computes the chemical timescale for the field, useful in Partially Stirred Reactor (PaSR) modeling.
         
@@ -349,6 +392,8 @@ class Field3D():
             The mode of timescale computation. Valid options are 'SFR', 'FFR', and 'Ch'. Default is 'SFR'.
         verbose : bool, optional
             If True, prints detailed information during the computation. Default is False.
+        threshold: float, optional
+            Minimum value of the species formation rates to consider the cell reactive
         
         Raises:
         -------
@@ -407,7 +452,7 @@ class Field3D():
                 # information
             species_paths = []
             for attr, path in zip(self.attr_list, self.paths_list):
-                if attr.startswith('Y'):
+                if attr.startswith('Y') and (attr != 'Y'):
                     species_paths.append(path)
             
             if (len(species_paths)!=len(self.species)) or(len(reaction_rates_paths)!=len(self.species)):
@@ -430,11 +475,24 @@ class Field3D():
                 Y          = Scalar3D(self.shape, path=Y_path)
                 R          = Scalar3D(self.shape, path=R_path)
                 tau_2      = np.abs(Y.value/R.value)
-                idx        = np.abs(R.value)<1e-10 # indexes of the dormant species
+                idx        = np.abs(R.value)<threshold # indexes of the dormant species
                 tau_2[idx] = -inf_time     # in this way the dormant species should not be considered
                 tau_c_SFR  = np.maximum(tau_c_SFR, tau_2)
                 tau_2[idx] = inf_time
                 tau_c_FFR  = np.minimum(tau_c_FFR, tau_2)
+            
+            if replace_nonreacting is not False:
+                non_reactive_indices = tau_c_FFR == inf_time
+                if isinstance(replace_nonreacting, (int,float)): # if it's a number
+                    replacement_SFR = replace_nonreacting
+                    replacement_FFR = replace_nonreacting
+                if replace_nonreacting.lower() == 'max':
+                    replacement_SFR = np.max(tau_c_SFR)
+                    tau_c_FFR[non_reactive_indices] = -inf_time # otherwise the max will always be inf_time
+                    replacement_FFR = np.max(tau_c_FFR)
+                # Replace values
+                tau_c_SFR[non_reactive_indices] = replacement_SFR
+                tau_c_FFR[non_reactive_indices] = replacement_FFR
             
             tau_c_SFR = self.RHO.value * tau_c_SFR
             tau_c_FFR = self.RHO.value * tau_c_FFR
@@ -460,7 +518,7 @@ class Field3D():
             R_fuel = Scalar3D(shape=self.shape, path=self.find_path(f"R{self.fuel}_LFR"))
             RHO    = Scalar3D(shape=self.shape, path=self.find_path('RHO'))
             
-            tau_chomiak = RHO.value*np.minimum( Y_ox.value/np.maximum(np.abs(R_ox.value),1e-10), Y_fuel.value/np.maximum(np.abs(R_fuel.value),1e-10) )
+            tau_chomiak = RHO.value*np.minimum( Y_ox.value/np.maximum(np.abs(R_ox.value),threshold), Y_fuel.value/np.maximum(np.abs(R_fuel.value),threshold) )
             save_file(tau_chomiak, self.find_path('Tau_c_Ch'))
             
         self.update()
@@ -475,6 +533,7 @@ class Field3D():
         the gradient of Z. The result is saved to a file.
     
         Prerequisites:
+        --------------
         - The mixture fraction Z must be computed and available as an attribute.
         - The thermal conductivity Lambda and specific heat Cp must be computed.
         - The gradient of Z (Z_grad) should be available or will be computed if missing.
@@ -532,6 +591,170 @@ class Field3D():
         
         return
     
+    
+    def compute_csp(self, 
+                    n_chunks=1000, 
+                    TSR=True,
+                    API_TSR=True, 
+                    API_species=False,
+                    n_proc=None, 
+                    parallel=False, 
+                    debug=False, 
+                    overwrite=True,
+                    verbose=True,
+                    ):
+
+        if n_proc is None:
+            n_proc = max(1, cpu_count() // 2)  # Ensure at least one process
+        
+        # Step 1: Check that all the mass fractions are in the folder
+        check_mass_fractions(self.attr_list, self.bool_list, self.folder_path)
+        # Step 2: Understand if the field is filtered or not
+        if self.filter_size == 1:
+            mode = 'DNS'
+        else:
+            mode = 'LES'
+        
+        # Step 3: build a list with species paths and one with the species' Mass fractions paths
+        _, species_paths = self.build_attributes_list("Y{}")
+        
+        # if debug:
+        #   print( [len(species_paths), len(self.species),  len(reaction_rates_paths), ])
+                
+        if (len(species_paths)!=len(self.species)):
+            raise ValueError("Lenght of the lists must be equal to the number of species. "
+                             "Check that all the species molar concentrations and Reaction Rates are in the data folder."
+                             "\nYou can compute the reaction rates with the command:"
+                             "\n>>> your_filt_field.compute_reaction_rates()"
+                             "\n\nOperation aborted.")
+        
+        # Initialize list for API TSR
+        if API_TSR:
+            # build paths for API_TSR files
+            _, api_tsr_paths = self.build_attributes_list("API_TSR_{}")
+            if (len(api_tsr_paths)!=len(self.reactions)):
+                raise ValueError("Lenght of the lists must be equal to the number of reactions. ")
+            # Check that the files of the APIs do not exist yet
+            overwrite = delete_existing_files(api_tsr_paths, context="API_TSR indexes", delete=overwrite)
+
+        # Initialize list for species APIs 
+        if API_species is not False:
+            # Check that API_species is a list of strings
+            if not isinstance(API_species, list):
+                raise TypeError("API_species must be a list of strings")
+            for s in API_species:
+                if not isinstance(s, str):
+                    raise TypeError("API_species must be a list of strings")
+            # Build the list of API_species attributes and paths
+            api_species_attr, api_species_paths = self.build_attributes_list("API_{}_{}")
+            api_species = [s.split('_')[1] for s in api_species_attr]
+            api_species_paths_dict = {}
+            for species in API_species:
+                if species not in self.species:
+                    raise ValueError("Species {} was not found in the kinetic mechanism".format(species))
+                api_species_paths_dict[species] = []
+                for i, name in enumerate(api_species):
+                    if name == species:
+                        api_species_paths_dict[species].append(api_species_paths[i])
+                overwrite = delete_existing_files(api_species_paths_dict[species], context="API_{} indexes".format(species), delete=overwrite)
+        
+        # Initialise chunk size and CSP class (Inherited from ct.Solution)
+        chunk_size = self.shape[0]*self.shape [1]*self.shape[2]//n_chunks + 1
+        gas = csp.CanteraCSP(self.kinetic_mechanism)
+        gas.jacobiantype = 'full'
+        
+        # Open output files in writing mode
+        if mode == 'DNS':
+            TSR_path = self.find_path('TSR_DNS')
+        if mode =='LES':
+            TSR_path = self.find_path('TSR_LES')
+
+        if TSR:
+            overwrite = delete_existing_files(TSR_path, delete=overwrite, context='the Tangential stretching rate (TSR)')
+            output_file_TSR = open(TSR_path, 'ab')
+
+        if API_TSR:
+            output_files_api_tsr = [open(a, 'ab') for a in api_tsr_paths]
+
+        if API_species:
+            # Generate a dictionary with the species as entries, each entry then opens a file
+            # for each reaction (for a total of n_reactions*n_species opened files)
+            output_files_api_species = {}
+            for key in API_species:
+                output_files_api_species[key] = [open(a, 'ab') for a in api_species_paths_dict[key]]
+
+        # create generators to read files in chunks
+        T_chunk_generator = read_variable_in_chunks(self.T.path, chunk_size)
+        P_chunk_generator = read_variable_in_chunks(self.P.path, chunk_size)
+        species_chunk_generator = [read_variable_in_chunks(specie_path, chunk_size) for specie_path in species_paths]
+        print('Reading file in chunks: read 0/{}'.format(n_chunks))
+        for i in range(n_chunks):
+            T_chunk = next(T_chunk_generator)  # Read one step of this function
+            P_chunk = next(P_chunk_generator)
+            # Read a chunk for every specie
+            Y_chunk = [next(generator) for generator in species_chunk_generator]
+            Y_chunk = np.array(Y_chunk)  # Make the list an array
+            # Initialise the TSR variable
+            TSR_chunk = np.zeros_like(T_chunk)
+            # Initialise API chunks
+            if API_TSR:
+                api_tsr_chunk = dict()
+                for r in self.reaction_names:
+                    api_tsr_chunk[r] = np.zeros_like(T_chunk)
+            if API_species:
+                api_species_chunk = dict()
+                for s in API_species:
+                    api_species_chunk[s] = dict()
+                    for r in self.reaction_names:
+                        api_species_chunk[s][r] = np.zeros_like(T_chunk)
+            
+            # iterate through the chunks and compute the CSP-TSR parameters cellwise
+            for j in range(len(T_chunk)):
+                gas.TPY = T_chunk[j], P_chunk[j], Y_chunk[:, j]
+                gas.constP = True
+                lam,R,L,f = gas.get_kernel()
+                if TSR:
+                    TSR_chunk[j] = gas.calc_TSR()
+                if API_TSR:
+                    tsrapi = gas.calc_TSRindices(type='amplitude')
+                if API_species:
+                    api, tpi, ifast, islow, species_type = gas.calc_CSPindices(API=True,Impo=False,species_type=False,TPI=False)
+                # Save results in the chunk
+                for k in range(len(self.reaction_names)):
+                    # k is the number that tracks a certain reaction during the cycle
+                    # r is the k-th reaction name
+                    # j is the index during the chunk cycle
+                    # s is the index of the species
+                    r = self.reaction_names[k]
+                    if API_TSR:
+                        api_tsr_chunk[r][j] = tsrapi[k]
+                    if API_species:
+                        for key in API_species:
+                            s = self.species.index(key)
+                            api_species_chunk[key][r][j] = api[s][k]
+            
+            # Save files
+            if TSR:
+                save_file(TSR_chunk, output_file_TSR)
+            if API_TSR:
+                for r, f in zip(self.reaction_names, output_files_api_tsr):
+                    save_file(api_tsr_chunk[r], f)
+            if API_species:
+                for s in API_species:
+                    for r, f in zip(self.reaction_names, output_files_api_species[s]):
+                        save_file(api_species_chunk[s][r], f)
+            
+            # Print advancement state
+            print('Reading file in chunks: read {}/{}'.format(i + 1, n_chunks))
+
+        # Close all output files
+        output_file_TSR.close()
+        
+        self.update()
+        
+        return
+    
+    
     def compute_gradient_C(self):
         # Check that the mixture fraction is available
         self.update(verbose=False)
@@ -572,6 +795,34 @@ class Field3D():
         save_file(grad_C, self.find_path('C_grad'))
         self.update()
         del grad_C # release memory
+        
+        return
+
+    def compute_laplacian_C(self):
+        # Check that the mixture fraction is available
+        self.update(verbose=False)
+        if (not hasattr(self, 'C_grad_X')) or (not hasattr(self, 'C_grad_Y') or (not hasattr(self, 'C_grad_Z'))):
+            raise ValueError("To compute the progress variable gradient, the progress variable C is needed.\n"
+                             "You can compute C using the function compute_progress_variable.\n"
+                             "Example usage:\n"
+                             ">>> import aPrioriDNS as ap"
+                             ">>> my_field = ap.Field3D('path_to_your_folder')\n"
+                             ">>> my_field.compute_progress_variable(species='H2O')"
+                             )
+        
+        if self.downsampled is True:
+            filter_size = 1
+        else:
+            filter_size = self.filter_size
+
+        # Computing the laplacian incrementally to avoid memory overload
+        laplacian =  gradient_x(self.C_grad_X, self.mesh, filter_size)
+        laplacian += gradient_y(self.C_grad_Y, self.mesh, filter_size)
+        laplacian += gradient_y(self.C_grad_Y, self.mesh, filter_size)
+
+        save_file(laplacian, self.find_path('C_laplacian'))
+
+        self.update()
         
         return
     
@@ -771,7 +1022,7 @@ class Field3D():
         elif mode.lower() == 'int':
             # Check that the C_mix constant is defined
             if not hasattr(self, 'C_mix'):
-                Warning("The field does not have an attribute C_mix.\n The integral lengthscale model constant C_mix will be initialized by default to 0.1")
+                warnings.warn("The field does not have an attribute C_mix.\n The integral lengthscale model constant C_mix will be initialized by default to 0.1")
                 self.C_mix = 0.1
             
             C_mix = self.C_mix
@@ -877,7 +1128,7 @@ class Field3D():
         
         return Z_st
     
-    def compute_progress_variable(self, species=None, Y_b=None, Y_u=None):
+    def compute_progress_variable(self, species=None, Y_b=None, Y_u=None, reactant=False):
         """
         Computes the progress variable based on the mass fraction of a specified species 
         (default is 'O2') and saves the result.
@@ -910,7 +1161,7 @@ class Field3D():
         """
         # Default specie is oxygen
         if species is None:
-            species = 'O2'
+            species = 'H2O'
             
         Y_ox_str = 'Y' + species
         Y = getattr(self, Y_ox_str)
@@ -919,11 +1170,19 @@ class Field3D():
         # maximum specie mass fraction value. The unburnt gas mass fraction
         # is set by default to the minimum value.
         if Y_b is None:
-            Y_b = np.max(Y.value)
+            if reactant:
+                Y_b = np.min(Y.value)
+            else:
+                Y_b = np.max(Y.value)
         if Y_u is None:
-            Y_u = np.min(Y.value)
+            if reactant:
+                Y_u = np.max(Y.value)
+            else:
+                Y_u = np.min(Y.value)
 
-        C = 1 - (Y.value - Y_u) / (Y_b - Y_u)
+        C = (Y.value - Y_u) / (Y_b - Y_u)
+        # if reactant == True:
+        #     C = 1 - C
         save_file(C, self.find_path("C"))
         self.update()
         
@@ -1024,7 +1283,7 @@ class Field3D():
         if mode=='Yosh':
             # Check that the Yoshizawa constant C_i is defined
             if not hasattr(self, 'Ci'):
-                Warning("The field does not have an attribute Ci.\n The Yoshizawa model constant Ci will be initialized by default to 0.1")
+                warnings.warn("The field does not have an attribute Ci.\n The Yoshizawa model constant Ci will be initialized by default to 0.1")
                 self.Ci = 0.1
             Ci = self.Ci
             K_r_Yosh = 2*Ci*self.RHO._3d*(self.filter_size*self.mesh.l)**2*self.S_LES._3d**2
@@ -1114,10 +1373,11 @@ class Field3D():
                 raise AttributeError("The filtered field does not have a value to identify the associated unfiltered data.\n"
                                  "The path of the unfiltered data folder must be assigned with the following command:\n"
                                  ">>> your_filtered_field.DNS_folder_path = 'your_unfiltered_DNS_folder_path'")
-            DNS_field = Field3D(self.DNS_folder_path)
+            DNS_field = Field3D(self.DNS_folder_path, reactive=self.reactive)
             
             #--------- Compute Anisotropic Residual Stress Tensor ------------#
             # Check what filter was used for the folder and keep consistency
+            favre=False
             if 'favre' in self.folder_path.lower():
                 favre = True
             if 'box' in self.folder_path.lower():
@@ -1149,6 +1409,10 @@ class Field3D():
                         Tau_r_ij = Ui_Uj_DNS - (getattr(self, f'U_{direction[i]}')._3d * getattr(self, f'U_{direction[j]}')._3d)
                         # TODO: check that this formulation is consistent for compressible flows
                         # with Favre averaging. Source: Poinsot pag 173 footnote
+                        # TODO: I should subtract the trace to the tensor, as the current code
+                        # considers the full residual stress tensor, while it should
+                        # only consider the deviatoric part. See Pope pag 585, eq. 13.123, where Tau_r 
+                        # (lowercase r) represents the deviatoric part of the stress tensor
                         del Ui_Uj_DNS
                         epsilon_r       += -Tau_r_ij*getattr(self, f"S{i+1}{j+1}_LES")._3d
                         if i!=j:  # take into account the sub-diagonal element in the computation of the module
@@ -1157,11 +1421,10 @@ class Field3D():
             file_name=  self.find_path(f"Epsilon_r_{mode}")
             save_file(epsilon_r, file_name)
             
-            
         if mode=='Smag':
             # Check that the smagorinsky constant is defined
             if not hasattr(self, 'Cs'):
-                Warning("The field does not have an attribute Cs.\n The Smagorinsky constant Cs will be initialized by default to 0.1")
+                warnings.warn("The field does not have an attribute Cs.\n The Smagorinsky constant Cs will be initialized by default to 0.1")
                 self.Cs = 0.1
             Cs = self.Cs
             if not hasattr(self, 'S_LES'):
@@ -1177,7 +1440,7 @@ class Field3D():
         
         self.update()
             
-    def compute_reaction_rates(self, n_chunks = 1000, parallel=False, n_proc=None):
+    def compute_reaction_rates(self, n_chunks = 1000, parallel=False, n_proc=None, exist_ok=False, overwrite=False):
         """
         Computes the source terms for a given chemical reaction system.
         
@@ -1205,7 +1468,6 @@ class Field3D():
         if n_proc is None:
             n_proc = max(1, cpu_count() // 2)  # Ensure at least one process
         
-        
         # Step 1: Check that all the mass fractions are in the folder
         check_mass_fractions(self.attr_list, self.bool_list, self.folder_path)
         # Step 2: Understand if the reaction rates to be computed are in DNS or LFR mode
@@ -1223,7 +1485,7 @@ class Field3D():
                         reaction_rates_paths.append(path)
         species_paths = []
         for attr, path in zip(self.attr_list, self.paths_list):
-            if attr.startswith('Y'):
+            if attr.startswith('Y') and (attr != 'Y'):
                 species_paths.append(path)
                 
         print( [len(species_paths), len(self.species),  len(reaction_rates_paths), ])
@@ -1240,11 +1502,16 @@ class Field3D():
         for path in reaction_rates_paths:
             if os.path.exists(path):
                 if count == 0: # only asks one time if they want to remove the files
-                    user_input = input(
-                            f"The folder '{self.data_path}' already contains the reaction rates. "
-                            f"\nThis operation will overwrite the content of the folder. "
-                            f"\nDo you want to continue? ([yes]/no): "
-                                        )
+                    if exist_ok:
+                        return
+                    if overwrite: # if overwrite is true then automatically recompute the reaction rates
+                        user_input = 'yes'
+                    else:
+                        user_input = input(
+                                f"The folder '{self.data_path}' already contains the reaction rates. "
+                                f"\nThis operation will overwrite the content of the folder. "
+                                f"\nDo you want to continue? ([yes]/no): "
+                                            )
                     if user_input.lower() != "yes":
                         print("Operation aborted.")
                         sys.exit()
@@ -1255,7 +1522,6 @@ class Field3D():
                     delete_file(path)
         delete_file(self.find_path('Mu'))
         delete_file(self.find_path(f'HRR_{mode}'))
-        
                     
         # Step 5: Compute reaction rates
         chunk_size = self.shape[0] * self.shape [1] * self.shape[2] // n_chunks + 1
@@ -1307,7 +1573,6 @@ class Field3D():
                     HRR_chunk[j] = gas.heat_release_rate 
                     Mu_chunk[j] = gas.viscosity # dynamic viscosity, Pa*s
                 
-            
             # Save files
             save_file(HRR_chunk, output_file_HRR)
             save_file(Mu_chunk, output_file_Mu)
@@ -1326,139 +1591,9 @@ class Field3D():
         
         self.update()
         
-        return
-
-    def compute_reaction_rates_serial(self, n_chunks = 5000):
-        """
-        Computes the source terms for a given chemical reaction system.
-        
-        This function performs several steps:
-        1. Checks that all the mass fractions are in the folder.
-        2. Determines if the reaction rates to be computed are in DNS or LFR mode based on the filter size.
-        3. Builds a list with reaction rates paths and one with the species' Mass fractions paths.
-        4. Checks that the files of the reaction rates do not exist yet. If they do, asks the user if they want to overwrite them.
-        5. Computes the reaction rates in chunks to handle large data sets efficiently.
-        6. Saves the computed reaction rates, heat release rate, and dynamic viscosity to files.
-        7. Updates the object's state.
-        
-        Parameters:
-        n_chunks (int, optional): The number of chunks to divide the data into for efficient computation. Default is 5000.
-        
-        Returns:
-        None
-        
-        Raises:
-        SystemExit: If the user chooses not to overwrite existing reaction rate files, or if there is a mismatch in the number of species and the length of the species paths list.
-        
-        Note:
-        This function uses the Cantera library to compute the reaction rates, heat release rate, and dynamic viscosity. It assumes that the object has the following attributes: attr_list, bool_list, folder_path, filter_size, species, shape, kinetic_mechanism, T, P, and paths_list. It also assumes that the object has the following methods: find_path and update.
-        """
-        # Step 1: Check that all the mass fractions are in the folder
-        check_mass_fractions(self.attr_list, self.bool_list, self.folder_path)
-        # Step 2: Understand if the reaction rates to be computed are in DNS or LFR mode
-        if self.filter_size == 1:
-            mode = 'DNS'
-        else:
-            mode = 'LFR'
-            
-        # Step 4: build a list with reaction rates paths and one with the species' Mass fractions paths
-        reaction_rates_paths = []
-        for attr, path in zip(self.attr_list, self.paths_list):
-            if attr.startswith('R'):
-                if mode in attr:
-                    reaction_rates_paths.append(path)
-        species_paths = []
-        for attr, path in zip(self.attr_list, self.paths_list):
-            if attr.startswith('Y'):
-                species_paths.append(path)
-                
-        if (len(species_paths)!=len(self.species)) or(len(reaction_rates_paths)!=len(self.species)):
-            raise ValueError("Lenght of the lists must be equal to the number of species. "
-                             "Check that all the species molar concentrations and Reaction Rates are in the data folder."
-                             "\nYou can compute the reaction rates with the command:"
-                             "\n>>> your_filt_field.compute_reaction_rates()"
-                             "\n\nOperation aborted.")
-        
-        # Step 3: Check that the files of the reaction rates do not exist yet
-        count = 0
-        for path in reaction_rates_paths:
-            if os.path.exists(path):
-                if count == 0: # only asks one time if they want to remove the files
-                    user_input = input(
-                            f"The folder '{self.data_path}' already contains the reaction rates. "
-                            f"\nThis operation will overwrite the content of the folder. "
-                            f"\nDo you want to continue? ([yes]/no): "
-                                        )
-                    if user_input.lower() != "yes":
-                        print("Operation aborted.")
-                        sys.exit()
-                    else:
-                        count += 1
-                        delete_file(path)
-                else:
-                    delete_file(path)
-        delete_file(self.find_path('Mu'))
-        delete_file(self.find_path(f'HRR_{mode}'))
-        
-                    
-        # Step 5: Compute reaction rates
-        chunk_size = self.shape[0] * self.shape [1] * self.shape[2] // n_chunks + 1
-        gas = ct.Solution(self.kinetic_mechanism)
-        
-        # Open output files in writing mode
-        output_files_R = [open(reaction_rate_path, 'ab') for reaction_rate_path in reaction_rates_paths]
-        if mode == 'DNS':
-            HRR_path = self.find_path('HRR_DNS')
-        if mode =='LFR':
-            HRR_path = self.find_path('HRR_LFR')
-        output_file_HRR = open(HRR_path, 'ab')
-        Mu_path = self.find_path('Mu')
-        output_file_Mu = open(Mu_path, 'ab')
-        
-        # create generators to read files in chunks
-        T_chunk_generator = read_variable_in_chunks(self.T.path, chunk_size)
-        P_chunk_generator = read_variable_in_chunks(self.P.path, chunk_size)
-        species_chunk_generator = [read_variable_in_chunks(specie_path, chunk_size) for specie_path in species_paths]
-        print('Reading file in chunks: read 0/{}'.format(n_chunks))
-        for i in range(n_chunks):
-            T_chunk = next(T_chunk_generator)  # Read one step of this function
-            P_chunk = next(P_chunk_generator)
-            # Read a chunk for every specie
-            Y_chunk = [next(generator) for generator in species_chunk_generator]
-            Y_chunk = np.array(Y_chunk)  # Make the list an array
-            # Initialize R for the source Terms, HRR and Mu
-            R_chunk = np.zeros_like(Y_chunk)
-            HRR_chunk = np.zeros_like(T_chunk)
-            Mu_chunk = np.zeros_like(T_chunk) #if it's a scalar I use T_chunk as a reference size
-            
-            # iterate through the chunks and compute the Reaction Rates
-            for j in range(len(T_chunk)):
-                gas.TPY = T_chunk[j], P_chunk[j], Y_chunk[:, j]
-                R_chunk[:, j] = gas.net_production_rates * gas.molecular_weights
-                HRR_chunk[j] = gas.heat_release_rate 
-                Mu_chunk[j] = gas.viscosity # dynamic viscosity, Pa*s
-            
-            # Save files
-            save_file(HRR_chunk, output_file_HRR)
-            save_file(Mu_chunk, output_file_Mu)
-            R_chunk = R_chunk.tolist()
-            for k in range(len(self.species)):
-                save_file(np.array(R_chunk[k]), output_files_R[k])
-            
-            # Print advancement state
-            print('Reading file in chunks: read {}/{}'.format(i + 1, n_chunks))
-
-        # Close all output files
-        for output_file in output_files_R:
-            output_file.close()
-        output_file_HRR.close()
-        output_file_Mu.close()
-        
-        self.update()
-        
-        return    
+        return 
     
-    def compute_reaction_rates_batch(self, n_chunks=1000, tau_c='SFR', tau_m='Kolmo', parallel=True, n_proc=None):
+    def compute_reaction_rates_batch(self, n_chunks=1000, tau_c='SFR', tau_m='Kolmo', parallel=False, n_proc=None, exist_ok=False, overwrite=False):
         '''
         Computes the reaction rates in batches for a filtered field.
     
@@ -1504,7 +1639,7 @@ class Field3D():
         elif n_chunks < 1:
             raise ValueError("n_chunks must be at least 1. Value set to 1")
         elif n_chunks > 10000:
-            raise Warning("maximum allowed number of chunks is 10000. Value is set to the maximum limit.")
+            warnings.warn("maximum allowed number of chunks is 10000. Value is set to the maximum limit.")
             n_chunks = 10000
         
         # Step 1: Check that all the mass fractions are in the folder
@@ -1518,7 +1653,7 @@ class Field3D():
         
         # Step 4: build a list with reaction rates paths and one with the species' Mass fractions paths
         reaction_rates_paths = [path for attr, path in zip(self.attr_list, self.paths_list) if attr.startswith('R') and mode in attr]
-        species_paths = [path for attr, path in zip(self.attr_list, self.paths_list) if attr.startswith('Y')]
+        species_paths = [path for attr, path in zip(self.attr_list, self.paths_list) if (attr.startswith('Y') and (attr != 'Y'))]
         
         if (len(species_paths) != len(self.species)) or (len(reaction_rates_paths) != len(self.species)):
             raise ValueError("Length of the lists must be equal to the number of species. "
@@ -1532,7 +1667,12 @@ class Field3D():
         for path in reaction_rates_paths:
             if os.path.exists(path):
                 if not already_asked:
-                    user_input = input(f"The folder '{self.data_path}' already contains the reaction rates. \nThis operation will overwrite the content of the folder. \nDo you want to continue? ([yes]/no): ")
+                    if exist_ok:
+                        return
+                    if overwrite:
+                        user_input = 'yes'
+                    else:
+                        user_input = input(f"The folder '{self.data_path}' already contains the reaction rates. \nThis operation will overwrite the content of the folder. \nDo you want to continue? ([yes]/no): ")
                     already_asked = True
                 else:
                     user_input = "yes"
@@ -1859,7 +1999,7 @@ class Field3D():
             #----------------- Compute Turbulent Viscosity -------------------#
             # Check that the smagorinsky constant is defined
             if not hasattr(self, 'Cs'):
-                Warning("The field does not have an attribute Cs.\n The Smagorinsky constant Cs will be initialized by default to 0.1")
+                warnings.warn("The field does not have an attribute Cs.\n The Smagorinsky constant Cs will be initialized by default to 0.1")
                 self.Cs = 0.1
             Cs = self.Cs
             if not hasattr(self, 'S_LES'):
@@ -1903,12 +2043,14 @@ class Field3D():
                 raise AttributeError("The filtered field does not have a value to identify the associated unfiltered data.\n"
                                  "The path of the unfiltered data folder must be assigned with the following command:\n"
                                  ">>> your_filtered_field.DNS_folder_path = 'your_unfiltered_DNS_folder_path'")
-            DNS_field = Field3D(self.DNS_folder_path)
+            DNS_field = Field3D(self.DNS_folder_path, reactive=self.reactive)
             
             #--------- Compute Anisotropic Residual Stress Tensor ------------#
             # Check what filter was used for the folder and keep consistency
             if 'favre' in self.folder_path.lower():
                 favre = True
+            else:
+                favre = False
             if 'box' in self.folder_path.lower():
                 filter_type = 'box'
             elif 'gauss' in self.folder_path.lower():
@@ -1993,7 +2135,7 @@ class Field3D():
         del T_flux_Z # Release memory
         
         self.update()
-        
+    
     
     def compute_transport_properties(self, n_chunks = 5000, Cp=True, Lambda=True, verbose=False):
         # check if the paths already exist, and delete the files in case
@@ -2010,7 +2152,7 @@ class Field3D():
         
         species_paths = []
         for attr, path in zip(self.attr_list, self.paths_list):
-            if attr.startswith('Y'):
+            if attr.startswith('Y') and (attr != 'Y'):
                 species_paths.append(path)
                 
         if (len(species_paths)!=len(self.species)):
@@ -2066,6 +2208,7 @@ class Field3D():
         output_file_Cp.close()
         
         self.update()
+        
         
     def compute_unresolved_pv_fluxes(self, mode='DNS'):
         valid_modes = ['DNS']
@@ -2228,7 +2371,7 @@ class Field3D():
         return
         
     
-    def cut(self, cut_size, mode='xyz'):
+    def cut(self, cut_size, mode='xyz', exist_ok=False, overwrite=False):
         """
         Cut a field into smaller sections based on a specified cut size.
     
@@ -2268,7 +2411,12 @@ class Field3D():
         if not os.path.exists(cut_folder_path):
             os.makedirs(cut_folder_path)
         else:
-            user_input = input("The folder already exists. This operation will overwrite the content of the folder. Do you want to continue? (yes/no): ")
+            if exist_ok:
+                return cut_folder_path
+            if overwrite:
+                user_input = 'yes'
+            else:
+                user_input = input("The folder already exists. This operation will overwrite the content of the folder. Do you want to continue? (yes/no): ")
             if user_input.lower() != "yes":
                 print("Operation aborted.")
                 sys.exit()
@@ -2278,9 +2426,10 @@ class Field3D():
             os.makedirs(cut_data_path)
         if not os.path.exists(cut_grid_path):
             os.makedirs(cut_grid_path)
-        if not os.path.exists(cut_chem_path):
-            shutil.copytree(self.chem_path, cut_chem_path)
-            
+        if self.reactive:
+            if not os.path.exists(cut_chem_path):
+                shutil.copytree(self.chem_path, cut_chem_path)
+                
         for attribute, file_path, is_present in zip(self.attr_list, self.paths_list, self.bool_list):
             if is_present:
                 file_name = os.path.basename(file_path)
@@ -2351,9 +2500,10 @@ class Field3D():
             os.makedirs(ds_data_path)
         if not os.path.exists(ds_grid_path):
             os.makedirs(ds_grid_path)
-        if not os.path.exists(ds_chem_path):
-            shutil.copytree(self.chem_path, ds_chem_path)
-            
+        if self.reactive:
+            if not os.path.exists(ds_chem_path):
+                shutil.copytree(self.chem_path, ds_chem_path)
+                
         for attribute, file_path, is_present in zip(self.attr_list, self.paths_list, self.bool_list):
             if is_present:
                 file_name = os.path.basename(file_path)
@@ -2384,7 +2534,7 @@ class Field3D():
         
         return ds_folder_path    
         
-    def filter_favre(self, filter_size, filter_type='Gauss'):
+    def filter_favre(self, filter_size, filter_type='Gauss', exist_ok=False, overwrite=False):
         """
         Filter every scalar in the field object using Favre-averaging.
         
@@ -2449,7 +2599,12 @@ class Field3D():
         if not os.path.exists(filt_folder_path):
             os.makedirs(filt_folder_path)
         else:
-            user_input = input(f"The folder '{filt_folder_path}' already exists. This operation will overwrite the content of the folder. Do you want to continue? (yes/no): ")
+            if exist_ok:
+                return filt_folder_path
+            if overwrite:
+                user_input = 'yes'
+            else:
+                user_input = input(f"The folder '{filt_folder_path}' already exists. This operation will overwrite the content of the folder. Do you want to continue? (yes/no): ")
             if user_input.lower() != "yes":
                 print("Operation aborted.")
                 sys.exit()
@@ -2459,8 +2614,9 @@ class Field3D():
             os.makedirs(filt_data_path)
         if not os.path.exists(filt_grid_path):
             shutil.copytree(self.grid_path, filt_grid_path)
-        if not os.path.exists(filt_chem_path):
-            shutil.copytree(self.chem_path, filt_chem_path)
+        if self.reactive:
+            if not os.path.exists(filt_chem_path):
+                shutil.copytree(self.chem_path, filt_chem_path)
         if not os.path.exists(os.path.join(filt_folder_path, 'info.json')):
             # TODO: it's wrong handling this like that, because if the folder already existed with a different
             # size of the field, the file info.json is not updated. In summary, you have to delete the 
@@ -2494,7 +2650,7 @@ class Field3D():
         
         return filt_folder_path
     
-    def filter(self, filter_size, filter_type='Gauss'):
+    def filter(self, filter_size, filter_type='Gauss', exist_ok=False, overwrite=False):
         """
         Filter every scalar in the field object.
         
@@ -2554,7 +2710,12 @@ class Field3D():
         if not os.path.exists(filt_folder_path):
             os.makedirs(filt_folder_path)
         else:
-            user_input = input(f"The folder '{filt_folder_path}' already exists. This operation will overwrite the content of the folder. Do you want to continue? (yes/no): ")
+            if exist_ok:
+                return filt_folder_path
+            if overwrite:
+                user_input = 'yes'
+            else:
+                user_input = input(f"The folder '{filt_folder_path}' already exists. This operation will overwrite the content of the folder. Do you want to continue? (yes/no): ")
             if user_input.lower() != "yes":
                 print("Operation aborted.")
                 sys.exit()
@@ -2564,8 +2725,9 @@ class Field3D():
             os.makedirs(filt_data_path)
         if not os.path.exists(filt_grid_path):
             shutil.copytree(self.grid_path, filt_grid_path)
-        if not os.path.exists(filt_chem_path):
-            shutil.copytree(self.chem_path, filt_chem_path)
+        if self.reactive:
+            if not os.path.exists(filt_chem_path):
+                shutil.copytree(self.chem_path, filt_chem_path)
         if not os.path.exists(os.path.join(filt_folder_path, 'info.json')):
             shutil.copy(os.path.join(self.folder_path, 'info.json'), os.path.join(filt_folder_path, 'info.json'))
         
@@ -2685,7 +2847,7 @@ class Field3D():
         if title is None:
             title = attribute
         
-        contour_plot(X, Y, Z, 
+        fig, ax = contour_plot(X, Y, Z, 
                     log=log,
                     colormap=colormap, 
                     cbar_title=cbar_title,
@@ -2714,7 +2876,7 @@ class Field3D():
                     show=show
                     )
         
-        return
+        return fig, ax
         
     def plot_y_midplane(self, attribute, 
                         log=False,
@@ -2776,7 +2938,7 @@ class Field3D():
         if title is None:
             title = attribute
         
-        contour_plot(X, Y, Z, 
+        fig, ax = contour_plot(X, Y, Z, 
                     log=log,
                     colormap=colormap, 
                     cbar_title=cbar_title,
@@ -2805,7 +2967,7 @@ class Field3D():
                     show=show
                     )
         
-        return
+        return fig, ax
         
     def plot_z_midplane(self, attribute, 
                         log=False,
@@ -2826,15 +2988,18 @@ class Field3D():
                         vmax=None,
                         transparent=True,
                         title=None,
-                        x_name='x [mm]',
-                        y_name='y [mm]',
+                        x_name=None,
+                        y_name=None,
                         remove_cbar=False,
                         remove_x=False,
                         remove_y=False,
                         remove_title=False,
                         transpose=False,
+                        dpi=None,
+                        scale='mm',
                         save=False,
-                        show=True
+                        save_path=None,
+                        show=True,
                         ):
         """
         Plots the z midplane of a specified attribute in the Field3D class.
@@ -2861,14 +3026,34 @@ class Field3D():
         """
         self.check_valid_attribute(attribute)
         #getattr(self, attribute).plot_z_midplane(self.mesh, title=attribute, vmin=vmin, vmax=vmax)
-        X = self.mesh.X_midZ * 1000
-        Y = self.mesh.Y_midZ * 1000
+        if scale.lower() == 'mm':
+            s = 1000
+        elif scale.lower() == 'm':
+            s = 1
+        else:
+            s = 1000
+            scale = 'mm'
+            warnings.warn("\nAvailable options for the 'scale' parameter are 'm' or 'mm'.\n"
+                          "Value defaulted to 'mm'.")
+        
+        if x_name is None:
+            x_name = f'x [{scale}]'
+            if transpose:
+                x_name = f'y [{scale}]'
+        if y_name is None:
+            y_name = f'y [{scale}]'
+            if transpose:
+                y_name = f'x [{scale}]'
+            
+        
+        X = self.mesh.X_midZ * s
+        Y = self.mesh.Y_midZ * s
         Z = getattr(self, attribute).z_midplane
         
         if title is None:
             title = attribute
         
-        contour_plot(X, Y, Z, 
+        fig, ax = contour_plot(X, Y, Z, 
                     log=log,
                     colormap=colormap, 
                     cbar_title=cbar_title,
@@ -2894,11 +3079,267 @@ class Field3D():
                     remove_y=remove_y,
                     remove_title=remove_title,
                     transpose=transpose,
+                    dpi=dpi,
                     save=save,
+                    save_path=save_path,
                     show=show
                     )
         
-        return
+        return fig, ax
+
+    def plot_midplane(self, attribute,
+                        plane='z',
+                        log=False,
+                        colormap='viridis', 
+                        cbar_title=None,
+                        cbar_shrink=0.7,
+                        levels=None,
+                        color='black',
+                        labels=False,
+                        linestyle='-',
+                        linecolor='black',
+                        linewidth=1,
+                        x_ticks=None,
+                        y_ticks=None,
+                        x_lim=None,
+                        y_lim=None,
+                        vmin=None,
+                        vmax=None,
+                        transparent=True,
+                        title=None,
+                        x_name=None,
+                        y_name=None,
+                        remove_cbar=False,
+                        remove_x=False,
+                        remove_y=False,
+                        remove_title=False,
+                        transpose=False,
+                        dpi=None,
+                        scale='mm',
+                        save=False,
+                        save_path=None,
+                        show=True,
+                        ):
+        """
+        Plots the specified midplane of a scalar attribute of the Field3D class.
+    
+        Description:
+        ------------
+        This method plots a midplane of a specified attribute in the Field3D class. It verifies 
+        if the attribute is valid, and then uses the built in function contour_plot to generate 
+        the plot.
+    
+        Parameters:
+        -----------
+        attribute : str
+            The name of the attribute to plot.
+        vmin : float, optional
+            The minimum value for the color scale. Default is None.
+        vmax : float, optional
+            The maximum value for the color scale. Default is None.
+    
+        Returns:
+        --------
+        None
+    
+        """
+        self.check_valid_attribute(attribute)
+        #getattr(self, attribute).plot_z_midplane(self.mesh, title=attribute, vmin=vmin, vmax=vmax)
+        if scale.lower() == 'mm':
+            s = 1000
+        elif scale.lower() == 'm':
+            s = 1
+        else:
+            s = 1000
+            scale = 'mm'
+            warnings.warn("\nAvailable options for the 'scale' parameter are 'm' or 'mm'.\n"
+                          "Value defaulted to 'mm'.")
+        
+        # Select the plane to plot
+        if plane.lower() == 'x':
+            X = self.mesh.Y_midX * s
+            Y = self.mesh.Z_midX * s
+            Z = getattr(self, attribute).x_midplane
+            x_axis_name = 'y'
+            y_axis_name = 'z'
+        elif plane.lower() == 'y':
+            X = self.mesh.X_midY * s
+            Y = self.mesh.Z_midY * s
+            Z = getattr(self, attribute).y_midplane
+            x_axis_name = 'x'
+            y_axis_name = 'z'
+        elif plane.lower() == 'z':
+            X = self.mesh.X_midZ * s
+            Y = self.mesh.Y_midZ * s
+            Z = getattr(self, attribute).z_midplane
+            x_axis_name = 'x'
+            y_axis_name = 'y'
+        else:
+            raise ValueError("\nValid options for the 'plane' parameter are 'x', 'y', or 'z'.")
+
+        # Assign names to the x and y axes
+        if x_name is None:
+            x_name = f'{x_axis_name} [{scale}]'
+            if transpose:
+                x_name = f'{y_axis_name} [{scale}]'
+        if y_name is None:
+            y_name = f'{y_axis_name} [{scale}]'
+            if transpose:
+                y_name = f'{x_axis_name} [{scale}]'
+        
+        # Assign title
+        if title is None:
+            title = attribute
+        
+        # Call contour plot function from the plotting utilities
+        fig, ax = contour_plot(X, Y, Z, 
+                    log=log,
+                    colormap=colormap, 
+                    cbar_title=cbar_title,
+                    cbar_shrink=cbar_shrink,
+                    levels=levels,
+                    color=color,
+                    labels=labels,
+                    linestyle=linestyle,
+                    linecolor=linecolor,
+                    linewidth=linewidth,
+                    x_ticks=x_ticks,
+                    y_ticks=y_ticks,
+                    x_lim=x_lim,
+                    y_lim=y_lim,
+                    vmin=vmin,
+                    vmax=vmax,
+                    transparent=transparent,
+                    title=title,
+                    x_name=x_name,
+                    y_name=y_name,
+                    remove_cbar=remove_cbar,
+                    remove_x=remove_x,
+                    remove_y=remove_y,
+                    remove_title=remove_title,
+                    transpose=transpose,
+                    dpi=dpi,
+                    save=save,
+                    save_path=save_path,
+                    show=show
+                    )
+        
+        return fig, ax
+
+    def plot_api(self, api_type="TSR", n=4, plane='z_midplane', 
+             vmin=None, vmax=None, cmap='viridis', n_cols=None, 
+             figsize=None, include_reactions=True, save_path=None, 
+             dpi=400, **kwargs):
+        """
+        Plot the top N reactions by API (Analytical Projected Integral) norm.
+        
+        This method identifies the reactions with the highest L1 norm of their API
+        values, extracts the specified 2D plane for each, and plots them as subplots
+        with a shared colorbar.
+        
+        Parameters:
+        -----------
+        api_type : str, optional
+            Type of API to plot (e.g., "TSR"). Default is "TSR"
+        n : int, optional
+            Number of top reactions to plot. Default is 4
+        plane : str, optional
+            Plane attribute to extract from API fields. Default is 'z_midplane'
+            Other options depend on your Field3D implementation (e.g., 'x_midplane', 'y_midplane')
+        vmin : float, optional
+            Minimum value for colorbar. If None, uses global minimum of fields
+        vmax : float, optional
+            Maximum value for colorbar. If None, uses global maximum of fields
+        cmap : str, optional
+            Colormap name. Default is 'viridis'
+        n_cols : int, optional
+            Number of columns in the subplot grid. If None, automatically determined
+        figsize : tuple, optional
+            Figure size (width, height). If None, automatically computed
+        include_reactions : bool, optional
+            If True, includes reaction equations as side text. Default is True
+        save_path : str, optional
+            If provided, saves the figure to this path. Default is None (no save)
+        dpi : int, optional
+            DPI for saved figure. Default is 400
+        **kwargs : dict
+            Additional keyword arguments passed to plot_multifield()
+        
+        Returns:
+        --------
+        fig : matplotlib.figure.Figure
+            The figure object
+        axes : numpy.ndarray
+            Array of subplot axes
+        top_reactions : list of tuple
+            List of (name, norm, reaction_string) for the top N reactions
+        
+        Example:
+        --------
+        >>> field = ap.Field3D('DNS_DATA_2d_cut_cut')
+        >>> fig, axes, top_rxns = field.plot_api(api_type="TSR", n=4, 
+        ...                                       vmin=-1, vmax=1, 
+        ...                                       save_path="APIs_TSR.png")
+        """
+        
+        # Calculate L1 norms for all reactions
+        norm_list = []
+        for r in self.reaction_names:
+            api_attr = f"API_{api_type}_{r}"
+            api = getattr(self, api_attr).value
+            api_norm = np.linalg.norm(api, ord=1)
+            norm_list.append(api_norm)
+        
+        # Create (reaction_name, norm_value, reaction_string) tuples
+        paired_list = list(zip(self.reaction_names, norm_list, self.reactions))
+        
+        # Sort by norm descending
+        sorted_list = sorted(paired_list, key=lambda x: x[1], reverse=True)
+        
+        # Get top n reactions
+        top_n = sorted_list[:n]
+        
+        # Extract components
+        top_n_names = [name for name, val, _ in top_n]
+        top_n_reactions = [r for _, _, r in top_n]
+        
+        # Extract 2D fields for plotting
+        api_2d_list = []
+        for r, _, _ in top_n:
+            api_attr = f"API_{api_type}_{r}"
+            api_field = getattr(self, api_attr)
+            
+            # Get the specified plane and transpose
+            plane_data = getattr(api_field, plane).T
+            api_2d_list.append(plane_data)
+        
+        # Get mesh coordinates (in mm)
+        X = self.mesh.Y_midZ.T * 1000
+        Y = self.mesh.X_midZ.T * 1000
+        
+        # Prepare side text if requested
+        side_text = "\n\n".join(top_n_reactions) if include_reactions else None
+        
+        # Create the plot
+        fig, axes = plot_multifield(
+            X, Y, 
+            api_2d_list, 
+            titles=top_n_names,
+            n_cols=n_cols,
+            figsize=figsize,
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax,
+            side_text=side_text,
+            **kwargs
+        )
+        
+        # Save figure if path provided
+        if save_path is not None:
+            fig.savefig(save_path, dpi=dpi, bbox_inches='tight', transparent=True)
+            print(f"Figure saved to: {save_path}")
+        
+        return fig, axes, top_n
     
     def print_attributes(self):
         """
@@ -3006,18 +3447,22 @@ class Field3D():
         - verbose (bool, optional): If True, prints information about the initialization of new attributes.
                                    Default is False.
         """
+        # Rebuild attributes and paths lists in case new variables were added
+        self.attr_list, self.paths_list = self.build_attributes_list()
+        
         files_in_folder = os.listdir(self.data_path)
-        bool_list = []
+        bool_list = [] # 
         for attribute_name, path in zip(self.attr_list, self.paths_list):
             file_name = os.path.basename(path)
-            if file_name in files_in_folder:
+            if (file_name in files_in_folder) :
                 bool_list.append(True)
             else:
                 bool_list.append(False)
         if not hasattr(self, 'bool_list'): # means that the field is being initialized
-            new_list = bool_list
+            new_list = bool_list # in this case all the files in the folder will be used to create an attribute
         else:
-            new_list = [a and (not b) for a, b in zip(bool_list, self.bool_list)]
+            # new_list = [a and (not b) for a, b in zip(bool_list, self.bool_list)]
+            new_list = [a and (not b) for a, b in zip_longest(bool_list, self.bool_list, fillvalue=False)]
         self.bool_list = bool_list
         
         remove_list = []
@@ -3950,12 +4395,12 @@ class Mesh3D:
 #                               Functions
 ###############################################################################
 
-def add_variable(attribute_name, file_name, species=False, models=None, tensor=False, description=''):
+def add_variable(attribute_name, file_name, species=False, models=None, tensor=False, reactions=False, description=''):
     # TODO: add a check that an attribute with the same name does not exist yet
     
     # TODO: Check in general that the files have the correct form
     
-    variables_list[attribute_name] = [file_name, species, models, tensor, description]
+    Field3D.variables[attribute_name] = [file_name, species, models, tensor, reactions, description]
     
     return
 
@@ -4024,6 +4469,36 @@ def compute_cell_volumes(x, y, z):
     
     return cell_volumes
 
+def delete_existing_files(paths, delete=False, context="the API indexes"):
+    """
+    Checks if any of the given paths exist. If so, prompts the user once to confirm deletion.
+    Deletes the files if confirmed.
+
+    :param paths: List of file paths to check and possibly delete
+    :param context: Optional string to clarify what the files represent (for user message)
+    """
+
+    for path in paths:
+        if os.path.exists(path):
+            if delete:
+                user_input = 'yes'
+            else:
+                user_input = input(
+                    f"The folder already contains {context}. "
+                    f"\nThis operation will overwrite the existing files. "
+                    f"\nDo you want to continue? ([yes]/no): "
+                )
+            if (user_input.lower() != "yes") and (user_input.lower() != "y"):
+                print("Operation aborted.")
+                sys.exit()
+            
+            delete = True
+
+            delete_file(path)
+    
+    # returns True if the user asked to delete the files or if the function was called with delete=True
+    return delete
+
 def delete_file(file_path):
     """
     Deletes the specified file from the file system.
@@ -4053,9 +4528,9 @@ def delete_file(file_path):
     if os.path.isfile(file_path):
         os.remove(file_path)
     else:
-        print(f"No such file: '{file_path}'")
+        warnings.warn(f"No such file: '{file_path}'")
 
-def download(repo_url="https://github.com/LorenzoPiu/aPrioriDNS/tree/main/data", dest_folder="./"):
+def download(repo_url="https://github.com/LorenzoPiu/aPrioriDNS/tree/main/data", dest_folder="./", dataset=None):
     """
     Downloads all files from a specified GitHub repository directory and saves them to the destination folder,
     including files in subdirectories.
@@ -4068,6 +4543,19 @@ def download(repo_url="https://github.com/LorenzoPiu/aPrioriDNS/tree/main/data",
     list: A list of paths to the downloaded files.
     """
     
+    if dataset is not None:
+        datasets_list = ['h2_lifted', 'h2_premixed', 'hit']
+        if dataset.lower() == 'h2_lifted':
+            repo_url = "https://github.com/LorenzoPiu/aPrioriDNS/tree/main/data/Lifted_H2_subdomain"
+        elif dataset.lower() == 'h2_premixed':
+            repo_url = "https://github.com/LorenzoPiu/aPrioriDNS/tree/dev/data/Premixed_H2_Phi0.5"
+        elif dataset.lower() == 'hit':
+            repo_url = "https://github.com/LorenzoPiu/aPrioriDNS/tree/main/data/Forced_HIT_ReL184"
+        if dataset.lower() not in datasets_list:
+            raise ValueError(
+            f"Invalid dataset '{dataset}'. Expected one of {datasets_list}."
+        )
+            
     if not os.path.exists(dest_folder):
         os.makedirs(dest_folder)
 

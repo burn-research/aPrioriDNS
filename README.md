@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/LorenzoPiu/Images/refs/heads/main/Logo-0.0.8.png" width="35%">
+  <img src="branding/img/Graphical_abstract_2.png" width="100%">
 </p>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) 
@@ -11,7 +11,7 @@
 A Python package to process Direct Numerical Simulations of reacting and non-reacting flows.
 
 ## Purpose of the project
-The project aims to help make large DNS (Direct Numerical Simulations) datasets more accessible to everyone, both to those who come from the field of Combustion and Fluid Dynamics, and who come from other fields.
+The project seeks to make large DNS (Direct Numerical Simulation) datasets more accessible to a broad audience, including both specialists in Combustion and Fluid Dynamics and researchers from other disciplines.
 Processing DNS data can be challenging in several ways. This package offers:
 - **Field3D**: An object that automatically reads formatted data aligned with [Blastnet](https://blastnet.github.io) [1, 2], an open source scientific repository.
 - **Scalar3D**: An object that efficiently manages pointers to local files, preventing memory overload.
@@ -27,7 +27,7 @@ The following figure displays the typical set of operations that using aPriori c
 code:
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/LorenzoPiu/Images/refs/heads/main/Library_description.png" width="85%">
+  <img src="branding/img/Graphical_abstract.png" width="85%">
 </p>
 
 ## Installation
@@ -46,6 +46,7 @@ This will automatically install or update the following dependencies if necessar
 - cantera>=3.0.0,
 - tabulate>=0.9.0,
 - requests>=2.32.0.
+- PyCSP>=1.4.0
 
 ## Documentation
 
@@ -58,16 +59,14 @@ This open-source software is distributed under the MIT license. If you use it in
 
 Lorenzo Piu. ‘aprioridns: V1.1.8’. Zenodo, 19 September 2024. https://doi.org/10.5281/zenodo.13793623.
 
+## Third party software
+The present library relies on the code [PyCSP](https://github.com/rmalpica/PyCSP) package for Computational Singular Perturbation (CSP) analysis. PyCSP is developed and maintained by Professor Riccardo Malpica Galassi at Sapienza University of Rome. For detailed documentation and further information, please refer to the original repository.
+
 ## Quickstart
 The following code can be used to test the library once installed. A detailed explanation of the workflow presented is available [here](https://apriori.gitbook.io/apriori-documentation-1/getting-started/quickstart).
 
 ```python
 """
-Created on Fri May 24 14:50:44 2024
-
-@author: lorenzo piu
-"""
-
 import aPrioriDNS as ap
 
 # Download the dataset

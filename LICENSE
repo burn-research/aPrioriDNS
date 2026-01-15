@@ -1,6 +1,8 @@
 MIT License
 
-Copyright (c) 2024 Lorenzo Piu
+Copyright (c) 2024 Lorenzo Piu, Heinz Pitsch, and Alessandro Parente
+Aero-Thermo Mechanics (ATM) laboratories - Université Libre de Bruxelles and 
+Institut für Technische Verbrennung (ITV) - RWTH Aachen University.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +21,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+This project relies on third-party code from:
+
+    PyCSP (MIT License)
+    Copyright (c) 2021 Riccardo Malpica Galassia
+    See: third_party/PyCSP/LICENSE
+    

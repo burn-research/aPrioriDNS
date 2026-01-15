@@ -1,10 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+""" A collection of training data building utilities  
 """
-Created on Wed Oct 16 00:31:46 2024
 
-@author: lorenzo piu
-"""
+__authors__ = "Lorenzo Piu"
+__copyright__ = "Copyright (c) 2024-2025, Lorenzo Piu, Heinz Pitsch, and Alessandro Parente"
+__credits__ = ["Aero-Thermo-Mechanics laboratories - Universite Libre de Bruxelles, Brussels, Belgium"
+               "Institut für Technische Verbrennung (ITV) - RWTH Aachen University, Aachen, Germany"]
+__license__ = "MIT"
+__version__ = "1.11.0"
+__maintainer__ = ["Lorenzo Piu"]
+__email__ = ["lorenzo.piu@ulb.be"]
+__status__ = "Production"
+
 
 import json
 import os
@@ -172,16 +180,49 @@ class TrainingBuilder(dict):
             
         return X
     
+    # def fit(self, field):
+    #     """
+    #     Old function, only able to handle one field at a time.
+    #     Delete after testing the new utility.
+    #     Fit each VectorScaler in the TrainingBuilder to the corresponding data in the Field3D.
+
+    #     Parameters:
+    #     -----------
+    #         - field (Field3D): The field with data to fit each scaler.
+    #     """
+    #     for variable_name in self.keys():
+    #         self[variable_name].fit(getattr(field, variable_name).value)
+    
     def fit(self, field):
         """
-        Fit each VectorScaler in the TrainingBuilder to the corresponding data in the Field3D.
+        Fit each VectorScaler in the TrainingBuilder to the corresponding data in the Field3D or list of Field3D objects.
 
         Parameters:
         -----------
-            - field (Field3D): The field with data to fit each scaler.
+            - field (Field3D or list of Field3D): The field(s) with data to fit each scaler.
         """
+        # Handle single field case
+        if isinstance(field, Field3D):
+            fields = [field]
+        # Handle list of fields case
+        elif isinstance(field, list) and all(isinstance(f,Field3D) for f in field):
+            fields = field
+        else:
+            raise TypeError("Input must be a Field3D object or a list of Field3D objects")
+        
+        # Collect data from all fields for each variable
         for variable_name in self.keys():
-            self[variable_name].fit(getattr(field, variable_name).value)
+            # Gather data from all fields for this variable
+            all_data = []
+            for f in fields:
+                variable_data = getattr(f, variable_name).value
+                all_data.append(variable_data.flatten())  # Flatten to 1D array
+            
+            # Concatenate all data for this variable
+            combined_data = np.concatenate(all_data)
+            
+            # Fit the scaler to the combined data
+            self[variable_name].fit(combined_data)
             
     def load(self, file_path):
         """
@@ -417,7 +458,10 @@ class VectorScaler():
         
         x = self._preprocess_input(x)
         
-        if self.mode.lower()=='minmax':
+        if self.mode is None:
+            pass
+    
+        elif self.mode.lower()=='minmax':
             self.max = np.max(x)
             self.min = np.min(x)
             
@@ -428,9 +472,6 @@ class VectorScaler():
         elif self.mode.lower() == 'mean':
             self.mean = np.mean(x)
             self.ptp = np.ptp(x)
-            
-        elif self.mode is None:
-            pass
         
         else:
             raise ValueError(f"Unknown scaling mode {self.mode}")
@@ -457,7 +498,10 @@ class VectorScaler():
         """
         x = self._preprocess_input(x)
         
-        if self.mode.lower()=='minmax':
+        if self.mode is None:
+            pass
+
+        elif self.mode.lower()=='minmax':
             x = (x-self.min)/(self.max-self.min)
             
         elif self.mode.lower() == 'standard':
@@ -466,9 +510,6 @@ class VectorScaler():
         elif self.mode.lower() == 'mean':
             # Scale between -1 and 1 using mean and range
             x = (x - self.mean) / (self.ptp / 2)
-            
-        elif self.mode is None:
-            pass
         
         else:
             raise ValueError(f"Unknown scaling mode {self.mode}")

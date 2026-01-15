@@ -1,16 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""Utilities module
 """
-Created on Fri May 10 20:00:31 2024
 
-@author: lorenzo piu
-"""
+__authors__ = "Lorenzo Piu"
+__copyright__ = "Copyright (c) 2024-2025, Lorenzo Piu, Heinz Pitsch, and Alessandro Parente"
+__credits__ = ["Aero-Thermo-Mechanics laboratories - Universite Libre de Bruxelles, Brussels, Belgium"
+               "Institut für Technische Verbrennung (ITV) - RWTH Aachen University, Aachen, Germany"]
+__license__ = "MIT"
+__version__ = "1.11.0"
+__maintainer__ = ["Lorenzo Piu"]
+__email__ = ["lorenzo.piu@ulb.be"]
+__status__ = "Production"
 
 import os
 import re
 from ._data_struct import folder_structure
 import cantera as ct
 import numpy as np
+from PyCSP.Functions import CanteraCSP
 
 class DataStructureException(Exception):
     pass
@@ -62,7 +70,7 @@ def check_data_files(main_folder):
     return True, id_part
 
 
-def check_folder_structure(folder_path):
+def check_folder_structure(folder_path, reactive=True):
     """
     Check if the folder structure is coherent with the blastnet one.
 
@@ -79,6 +87,9 @@ def check_folder_structure(folder_path):
     
     required_folders = [folder_structure["chem_path"], folder_structure["data_path"], folder_structure["grid_path"]]
     my_folder_structure = os.listdir(folder_path)
+    
+    if not reactive:
+        required_folders = [folder_structure["data_path"], folder_structure["grid_path"]]
 
     for folder in required_folders:
         if folder not in my_folder_structure:
@@ -110,6 +121,14 @@ def extract_species(file_path):
         #     mechanism_data = yaml.safe_load(file)
         #     species_names = mechanism_data.get('phases', ['species'])
         #     return species_names[0]['species']
+    except FileNotFoundError:
+        print(f"File '{file_path}' not found.")
+        return None   
+    
+def extract_reactions(file_path):
+    try:
+        gas = CanteraCSP(file_path)
+        return gas.reaction_names(), gas.reaction_equations()
     except FileNotFoundError:
         print(f"File '{file_path}' not found.")
         return None   

@@ -1,15 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+""" Plotting Utilities
 """
-Created on Mon Jul 26 17:17:23 2024
 
-@author: Lorenzo Piu
-"""
+__authors__ = "Lorenzo Piu"
+__copyright__ = "Copyright (c) 2024-2025, Lorenzo Piu, Heinz Pitsch, and Alessandro Parente"
+__credits__ = ["Aero-Thermo-Mechanics laboratories - Universite Libre de Bruxelles, Brussels, Belgium"
+               "Institut für Technische Verbrennung (ITV) - RWTH Aachen University, Aachen, Germany"]
+__license__ = "MIT"
+__version__ = "1.11.0"
+__maintainer__ = ["Lorenzo Piu"]
+__email__ = ["lorenzo.piu@ulb.be"]
+__status__ = "Production"
 
 import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
 from scipy.stats import gaussian_kde
+from matplotlib import ticker
+from matplotlib.colors import LogNorm
 
 from ._styles import ParityPlot, ContourPlot, CondMeanPlot, ScatterPlot
 from ._utils import extract_random_elements, reorder_arrays, process_arrays
@@ -40,8 +49,11 @@ def parity_plot(x,
                 y_name='y',
                 title=None,
                 density=False, 
+                bins=200,
+                cmin=1,
                 c=None, 
-                linewidth=3,
+                linestyle='--',
+                linewidth=2.5,
                 vmin=None,
                 vmax=None,
                 cbar_title=None,
@@ -49,6 +61,8 @@ def parity_plot(x,
                 s=1, 
                 alpha=1,
                 R2=True,
+                RMSE=True,
+                NRMSE=False,
                 ticks=None,
                 limits=None,
                 save=False,
@@ -68,52 +82,47 @@ def parity_plot(x,
     max_x = np.maximum(np.max(x), np.max(y))
     
     if limits is None:
-        limits=[min_x, max_x]
+        limits = [min_x, max_x]
+    else:
+        min_x = limits[0]
+        max_x = limits[1]
         
-    # Compute the R2 score if required:
+    # Compute the error metrics if required:
     if R2:
         R2 = 1 - np.sum((x-y)**2) / np.sum((x-np.average(x))**2)
+    if RMSE:
+        RMSE = np.sqrt(np.mean((x - y) ** 2))
+    if NRMSE:
+        NRMSE = np.sqrt(np.mean((x - y) ** 2))/np.max(x)
     
     if density:
-        if len(x) > max_dim:
-            print(f"\nParity Plot:\nThe vector size is too large to compute"
-                  f" the Gaussian kde. A random sample of {max_dim} elements "
-                  "will be extracted from the vector for the plot. You can "
-                  "change this limit with the parameter max_dim")
-            x = extract_random_elements(x, max_dim, seed=42)
-            y = extract_random_elements(y, max_dim, seed=42)
-        # Perform KDE
-        x = np.reshape(x, [1, len(x)])
-        y = np.reshape(y, [1, len(y)])
-        
-        xy = np.vstack([x, y])
-        z = gaussian_kde(xy)(xy)
-        z = z/max(z)
-        
-        # Sort the points by density, so densest points are plotted last
-        x = x.flatten()
-        y = y.flatten()
-        idx = z.argsort()
-        x, y, z = x[idx], y[idx], z[idx]
-        
-        c = z
-        cbar_title='Density'
+        cbar_title='PDF'
 
     # PLOT
     fig = plt.figure(figsize=ParityPlot.fig_size, 
                      dpi=ParityPlot.dpi)
-    plt.fill_between(limits, 
-                     [min_x, max_x*(1-rel_error),], 
-                     [min_x, max_x*(1+rel_error)], 
-                     color='grey', alpha=0.5)
     
-    if c is None:
-        c='blue'
+    if not density:
+        if c is None:
+            c='blue'
+        plt.scatter(x, y, marker=marker, c=c, s=s, 
+                    cmap=colormap, alpha=alpha, vmin=vmin, vmax=vmax)
+    else:
+        plt.hist2d(x, y, 
+                   bins=bins, 
+                   cmin=cmin, 
+                   density=True, 
+                   cmap=colormap,
+                   norm=LogNorm()
+                   )
     
-    plt.scatter(x, y, marker=marker, c=c, s=s, 
-                cmap=colormap, alpha=alpha, vmin=vmin, vmax=vmax)
-    
-    if (not isinstance(c, str)) and (c is not None): # if c is a string means it was initialized as a single color, so no need for colormap
+    if rel_error is not None:
+        plt.fill_between(limits, 
+                         [min_x*(1-rel_error), max_x*(1-rel_error)], 
+                         [min_x*(1+rel_error), max_x*(1+rel_error)], 
+                         color='grey', alpha=0.4)
+        
+    if (not isinstance(c, str)) or (c is None): # if c is a string means it was initialized as a single color, so no need for colormap
         cbar = plt.colorbar(shrink=.9, aspect=15, fraction=.1,pad=.05)
         cbar.ax.tick_params(labelsize=ParityPlot.fontsize*3//4)
         if cbar_title is not None:
@@ -121,24 +130,34 @@ def parity_plot(x,
     plt.xlabel(x_name, fontsize=ParityPlot.fontsize)
     plt.ylabel(y_name, fontsize=ParityPlot.fontsize)
     if title is not None:
-        plt.title(title)
+        plt.title(title, fontsize=ParityPlot.fontsize)
     plt.xlim(limits)
     plt.ylim(limits)
-    plt.xticks(fontsize=ParityPlot.fontsize*3//4)
-    plt.yticks(fontsize=ParityPlot.fontsize*3//4)
+    plt.xticks(fontsize=ParityPlot.fontsize*4//5)
+    plt.yticks(fontsize=ParityPlot.fontsize*4//5)
     if ticks is not None:
-        if isinstance(ticks, int):
-            xmin    = plt.gca().get_xlim()[0]
-            xmax    = plt.gca().get_xlim()[1]
-            ticks = np.linspace(xmin, xmax, ticks)
+        # if isinstance(ticks, int):
+        # These lines create n equispaced ticks
+        #     xmin    = plt.gca().get_xlim()[0]
+        #     xmax    = plt.gca().get_xlim()[1]
+        #     ticks = np.linspace(xmin, xmax, ticks)
         plt.xticks(ticks=ticks)
         plt.yticks(ticks=ticks)
-    plt.plot(limits, limits, 'k--', linewidth=linewidth)
-    if R2:
-        plt.text(0.02, 0.92, rf'$R^2 = {R2:.4f}$', 
+    plt.plot(limits, limits, 'k', linestyle=linestyle, linewidth=linewidth)
+    
+    # Write the error metrics if required
+    lines = []
+    if NRMSE:  lines.append(rf'$\mathrm{{NRMSE}} = {NRMSE:.2e}$')
+    if R2:   lines.append(rf'$R^2 = {R2:.4f}$')
+    if RMSE:  lines.append(rf'$\mathrm{{RMSE}} = {RMSE:.4f}$')
+    annotation = "\n".join(lines)
+    if annotation:
+        plt.text(0.02, 0.98, annotation, 
                  transform=plt.gca().transAxes, 
-                 fontsize=ParityPlot().fontsize//2)
-        
+                 fontsize=ParityPlot().fontsize*0.65,
+                 va='top',
+                 ha='left'
+                 )
     # Adjust borders tickness
     for spine in plt.gca().spines.values():
         spine.set_linewidth(ParityPlot.border_width )
@@ -146,13 +165,14 @@ def parity_plot(x,
     plt.gca().set_aspect('equal', adjustable='box')
     if remove_cbar:
         cbar.remove()
-    figure = plt.gcf()
     if remove_x:
         plt.xlabel('')
         plt.xticks([])
     if remove_y:
-        plt.xlabel('')
-        plt.xticks([])
+        plt.ylabel('')
+        plt.yticks([])
+    figure = plt.gcf()
+    axes = plt.gca()
     
     if save:
         if title is None:
@@ -162,10 +182,10 @@ def parity_plot(x,
     if show:
         plt.show()
         
-    # Close the figure to prevent it from displaying when returned
-    plt.close(figure)
+    # # Close the figure to prevent it from displaying when returned
+    # plt.close(figure)
     
-    return figure
+    return figure, axes
     
 
 def contour_plot(X, 
@@ -189,16 +209,22 @@ def contour_plot(X,
                  vmax=None,
                  transparent=True,
                  title=None,
+                 title_pad=20,
                  x_name='x',
                  y_name='y',
                  remove_cbar=False,
                  remove_x=False,
                  remove_y=False,
                  remove_title=False,
+                 dpi=None,
                  transpose=False,
                  save=False,
+                 save_path=None,
                  show=True
                  ):
+    
+    if dpi is None:
+        dpi = ContourPlot.dpi
     
     Z = Z.copy() # so it won't be modified inside the funciton
     X = X.copy()
@@ -246,14 +272,33 @@ def contour_plot(X,
     cbar = plt.colorbar(contourf, shrink=cbar_shrink, aspect=15, fraction=.1,pad=.05)
     cbar.ax.tick_params(labelsize=ContourPlot.fontsize*3//4)
     cbar.ax.tick_params(labelsize=ContourPlot.fontsize*3//4)
+    if log:
+        # Get colorbar limits
+        vmin, vmax = cbar.mappable.get_clim()
+        # Get existing ticks, and keep only those within the colorbar range
+        ticks = [tick for tick in cbar.get_ticks() if vmin <= tick <= vmax]
+        # Format ticks as 10^n (using integer or float depending on tick)
+        tick_labels = [f'$10^{{{int(t)}}}$' if t == int(t) else f'$10^{{{t:.1f}}}$' for t in ticks]
+        # Set ticks and labels manually
+        cbar.set_ticks(ticks)
+        cbar.set_ticklabels(tick_labels)
     if cbar_title is not None:
-        cbar.set_label(cbar_title, rotation=270, fontsize=ContourPlot.fontsize )
+        # cbar.set_label(cbar_title, rotation=270, fontsize=ContourPlot.fontsize )
+        
+        # bbox = cbar.ax.get_position()  # [x0, y0, width, height] in figure coords
+        # x = bbox.x0 #+ 0.5*bbox.width
+        # y = bbox.y1 + 0.10              # 0.01 pushes it a little above the bar
+        # plt.gca().text(x, y, cbar_title, ha='center', va='bottom', fontsize=fontsize)
+        cbar.ax.text(-0.05, 1.08, cbar_title,
+             ha='left', va='bottom',
+             transform=cbar.ax.transAxes,
+             fontsize=fontsize*1.1)
     
     # Add labels and title
     plt.xlabel(x_name, fontsize=fontsize)
     plt.ylabel(y_name, fontsize=fontsize)
     if title is not None:
-        plt.title(title, fontsize=fontsize)
+        plt.title(title, fontsize=fontsize, pad=title_pad)
     
     # x and y limits
     if x_lim is not None:
@@ -283,26 +328,29 @@ def contour_plot(X,
     plt.gca().set_aspect('equal', adjustable='box')
     if remove_cbar:
         cbar.remove()
-    figure = plt.gcf()
     if remove_x:
         plt.xlabel('')
         plt.xticks([])
     if remove_y:
-        plt.xlabel('')
-        plt.xticks([])
+        plt.ylabel('')
+        plt.yticks([])
     if remove_title:
         plt.title('')
     
     figure = plt.gcf()
+    axes = plt.gca()
     
-    if save:
-        if title is None:
-            title=f'Contour_plot'
-            if cbar_title is not None:
-                title = title+'_'+cbar_title
+    if save or (save_path is not None):
+        if save_path is None:
+            if title is None:
+                title=f'Contour_plot'
+                if cbar_title is not None:
+                    title = title+'_'+cbar_title
+            else:
+                title = 'contour_plot' + title
         else:
-            title = 'Scatter_plot' + title
-        plt.savefig(title, dpi=ContourPlot.dpi, bbox_inches = "tight")
+            title = save_path
+        plt.savefig(title, dpi=dpi, bbox_inches = "tight")
     
     if show:
         plt.show()
@@ -310,7 +358,7 @@ def contour_plot(X,
     # Close the figure to prevent it from displaying when returned
     plt.close(figure)
     
-    return figure
+    return figure, axes
 
 def cond_mean_plot(x, y, num_bins=30, 
                    log=False, 
@@ -526,7 +574,6 @@ def scatter(x, y,  logx=False,
     for spine in plt.gca().spines.values():
         spine.set_linewidth(ParityPlot.border_width )
 
-    figure = plt.gcf()
     if remove_x:
         plt.xlabel('')
         plt.xticks([])
@@ -550,6 +597,157 @@ def scatter(x, y,  logx=False,
     plt.close(figure)
     
     return figure
+
+def plot_multifield(X, Y, 
+                    fields, 
+                    titles=None, 
+                    n_cols=None, 
+                    figsize=None, 
+                    cmap='viridis',
+                    vmin=None,
+                    vmax=None,
+                    side_text=None):
+    """
+    Plot multiple 2D fields as subplots with shared colorbar and scaling.
+    
+    Parameters:
+    -----------
+    X : array-like
+        2D mesh for X coordinates
+    Y : array-like  
+        2D mesh for Y coordinates
+    fields : array-like
+        3D array of shape (n_fields, ny, nx) or list of 2D arrays
+        Each field represents the same variable at different conditions
+    titles : list of str, optional
+        Titles for each subplot. If None, uses "Field 1", "Field 2", etc.
+    n_cols : int, optional
+        Number of columns in the subplot grid. If None, automatically determined
+    figsize : tuple, optional
+        Figure size (width, height). If None, automatically computed based on data aspect ratio
+    cmap : str, optional
+        Colormap name (default: 'viridis')
+    vmin : float, optional
+        Minimum value for colorbar. If None, uses global minimum of fields
+    vmax : float, optional
+        Maximum value for colorbar. If None, uses global maximum of fields
+    side_text : str, optional
+        Text to display on the right side of the figure
+    
+    Returns:
+    --------
+    fig : matplotlib.figure.Figure
+        The figure object
+    axes : numpy.ndarray
+        Array of subplot axes
+    """
+    
+    # Convert fields to numpy array if it's a list
+    fields = np.array(fields)
+    
+    # Get dimensions
+    if fields.ndim == 3:
+        n_fields, ny, nx = fields.shape
+    else:
+        raise ValueError("fields must be 3D array (n_fields, ny, nx) or list of 2D arrays")
+    
+    # Calculate grid layout
+    if n_cols is None:
+        # Try to make it as square as possible
+        n_cols = int(np.ceil(np.sqrt(n_fields)))
+    n_rows = int(np.ceil(n_fields / n_cols))
+    
+    # Calculate data aspect ratio and extent
+    x_extent = np.max(X) - np.min(X)
+    y_extent = np.max(Y) - np.min(Y)
+    data_aspect_ratio = y_extent / x_extent
+    
+    # Set figure size if not provided
+    if figsize is None:
+        # Base subplot size considering data aspect ratio
+        base_width = 1.5  # Base width for each subplot
+        subplot_height = base_width * data_aspect_ratio
+        
+        # Calculate total figure size
+        total_width = base_width * (n_cols*1.1 + 1)  # Extra space for colorbar
+        total_height = subplot_height * (n_rows + 0.2)  # Extra space for titles
+        
+        figsize = (total_width, total_height)
+    
+    # Create figure and subplots
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=figsize)
+    
+    # Handle single subplot case
+    if n_fields == 1:
+        axes = np.array([axes])
+    elif axes.ndim == 1:
+        axes = axes.reshape(n_rows, n_cols)
+    
+    # Calculate global vmin and vmax for consistent scaling
+    if vmin is None:
+        vmin = np.min(fields)
+    if vmax is None:
+        vmax = np.max(fields)
+    
+    # Create default titles if not provided
+    if titles is None:
+        titles = [f"Field {i+1}" for i in range(n_fields)]
+    
+    # Plot each field
+    images = []
+    for i in range(n_fields):
+        row = i // n_cols
+        col = i % n_cols
+        ax = axes[row, col] if n_rows > 1 else axes[col]
+        
+        # Create the plot
+        im = ax.pcolormesh(X, Y, fields[i], vmin=vmin, vmax=vmax, cmap=cmap, shading='auto')
+        images.append(im)
+        
+        # Set equal aspect ratio
+        ax.set_aspect('equal', adjustable='box')
+        
+        # Set title
+        ax.set_title(titles[i])
+        
+        # Handle axis labels based on position
+        # Y-axis labels only for leftmost column
+        if col == 0:
+            ax.set_ylabel('Y [mm]')
+        else:
+            ax.set_yticklabels([])
+        
+        # X-axis labels only for bottom row
+        if row == n_rows - 1:
+            ax.set_xlabel('X [mm]')
+        else:
+            ax.set_xticklabels([])
+    
+    # Hide unused subplots
+    for i in range(n_fields, n_rows * n_cols):
+        row = i // n_cols
+        col = i % n_cols
+        ax = axes[row, col] if n_rows > 1 else axes[col]
+        ax.set_visible(False)
+    
+    # Add single colorbar on the right
+    plt.tight_layout()
+    
+    # Adjust layout to make room for colorbar
+    plt.subplots_adjust(right=0.9)
+    
+    # Create colorbar axes
+    cbar_ax = fig.add_axes([0.94, 0.15, 0.02, 0.7])
+    cbar = fig.colorbar(images[0], cax=cbar_ax)
+    
+    # Add side text if provided (after everything is laid out)
+    if side_text is not None:
+        # Add text outside the figure area - matplotlib will expand as needed
+        fig.text(1.07, 0.5, side_text, 
+                rotation=0, verticalalignment='center', 
+                fontsize=22, ha='left', transform=fig.transFigure)
+    
+    return fig, axes
 
 def bins(x, y, n=40, log=False):
     """

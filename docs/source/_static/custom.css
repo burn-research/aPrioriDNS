@@ -1,0 +1,21 @@
+/* DARK MODE ONLY */
+html.dark {
+    --sy-c-background: rgb(23, 23, 23) !important;   
+    --sy-c-foot-background: #1A1C20 !important;
+    /* Dark mode: shadow around code blocks*/
+    div.highlight {
+      border-radius: 6px;   
+      box-shadow: 0 0.5px 6px rgba(255, 255, 255, 0.2);
+    }
+}
+
+/* LIGHT MODE ONLY */
+html.light {
+  --sy-c-background-dropback: #edededa9 !important;          /* slightly grey background */
+  /* Light mode: shadow around code blocks*/
+  div.highlight {
+    border-radius: 6px;   
+    box-shadow: 0 0.5px 6px rgba(0, 0, 0, 0); /* At the moment opacity is set to zero so shadow is deactivated */
+    /* border: 0.2px solid rgba(0, 0, 0, 0.08); */
+  }
+}
