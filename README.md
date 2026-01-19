@@ -2,7 +2,7 @@
   <img src="branding/img/Graphical_abstract_2.png" width="100%">
 </p>
 
-[![Static Badge](https://img.shields.io/badge/CC%20BY%204.0%20-%20yellow?label=License&color=F5CF27)](https://creativecommons.org/licenses/by/4.0/deed.en) 
+[![Static Badge](https://img.shields.io/badge/CC%20BY%204.0%20-%20%23F5CF27?label=License)](https://creativecommons.org/licenses/by/4.0/deed.en) 
 [![Static Badge](https://img.shields.io/badge/Documentation-Gitbook-green?logo=Gitbook&logoColor=white)](https://apriori.gitbook.io/apriori-documentation-1)
 [![Static Badge](https://img.shields.io/badge/Issues-Github-02bfa6?&logo=Github&logoColor=white)](https://github.com/LorenzoPiu/aPrioriDNS/issues)
 [![Static Badge](https://img.shields.io/pypi/dm/aprioridns?color=03b1fc&logo=pypi&logoColor=white)](https://pypistats.org/packages/aprioridns)
