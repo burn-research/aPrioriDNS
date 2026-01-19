@@ -62,6 +62,13 @@ Lorenzo Piu. ‘aprioridns: V1.1.8’. Zenodo, 19 September 2024. https://doi.or
 ## Third party software
 The present library relies on the code [PyCSP](https://github.com/rmalpica/PyCSP) package for Computational Singular Perturbation (CSP) analysis. PyCSP is developed and maintained by Professor Riccardo Malpica Galassi at Sapienza University of Rome. For detailed documentation and further information, please refer to the original repository.
 
+## License
+This project is licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0).
+
+© 2026 Lorenzo Piu, Heinz Pitsch and Alessandro Parente.
+
+You are free to share and adapt this work, provided appropriate credit is given.
+
 ## Quickstart
 The following code can be used to test the library once installed. A detailed explanation of the workflow presented is available [here](https://apriori.gitbook.io/apriori-documentation-1/getting-started/quickstart).
 
