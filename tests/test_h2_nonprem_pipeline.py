@@ -65,11 +65,11 @@ def test_h2_premixed_end_to_end(apriori_test_cache_dir: str):
     assert hasattr(filtered_field, "RH2_DNS")
     assert hasattr(filtered_field, "RH2_LFR"), "LFR rates should be computed by compute_reaction_rates"
 
-    yh2_f = filtered_field.YH2.value
-    rh2_dns_f = filtered_field.RH2_DNS.value
-    rh2_lfr_f = filtered_field.RH2_LFR.value
+    yh2_f = filtered_field.YH2._3d
+    rh2_dns_f = filtered_field.RH2_DNS._3d
+    rh2_lfr_f = filtered_field.RH2_LFR._3d
 
-    assert yh2_f.shape == filtered_field.shape
+    assert list(yh2_f.shape) == filtered_field.shape
     assert np.isfinite(yh2_f).all()
     assert np.isfinite(rh2_dns_f).all()
     assert np.isfinite(rh2_lfr_f).all()
@@ -84,14 +84,12 @@ def test_h2_premixed_end_to_end(apriori_test_cache_dir: str):
 
     filtered_field.compute_residual_dissipation_rate(mode="Smag")
     assert hasattr(filtered_field, "Epsilon_r_Smag"), "Smag model output should exist"
-    eps = filtered_field.Epsilon_r_Smag.value
-    assert eps.shape == filtered_field.shape
+    eps = filtered_field.Epsilon_r_Smag._3d
+    assert list(eps.shape) == filtered_field.shape
     assert np.isfinite(eps).all()
 
     filtered_field.compute_residual_kinetic_energy()
-    assert hasattr(filtered_field, "K_r")  (
-        "Residual kinetic energy output attribute 'K_r' should exist "
-    )
+    assert hasattr(filtered_field, "K_r_Yosh"), "Residual kinetic energy output attribute 'K_r' should exist "
 
     # Timescales
     filtered_field.compute_chemical_timescale(mode="SFR", replace_nonreacting="max")
@@ -120,5 +118,4 @@ def test_h2_premixed_end_to_end(apriori_test_cache_dir: str):
     # --- Optional: midplane cut smoke test (fast check it doesn't crash)
     cut_field = ap.Field3D(filtered_field.cut([0, 0, 100], exist_ok=True))
     assert cut_field.shape[2] == 1 or cut_field.shape[2] < filtered_field.shape[2], "Cut should reduce domain"
-
 
