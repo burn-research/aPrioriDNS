@@ -40,11 +40,11 @@ def test_h2_premixed_end_to_end(apriori_test_cache_dir: str):
     assert hasattr(dns_field, "YH2"), "Dataset should expose YH2"
     assert hasattr(dns_field, "RH2_DNS"), "Reaction-rate computation should expose RH2_DNS"
 
-    yh2_dns = dns_field.YH2.value
-    rh2_dns = dns_field.RH2_DNS.value
+    yh2_dns = dns_field.YH2._3d
+    rh2_dns = dns_field.RH2_DNS._3d
 
-    assert yh2_dns.shape == dns_field.shape
-    assert rh2_dns.shape == dns_field.shape
+    assert list(yh2_dns.shape) == dns_field.shape
+    assert list(rh2_dns.shape) == dns_field.shape
     assert np.isfinite(yh2_dns).all()
     assert np.isfinite(rh2_dns).all()
 
