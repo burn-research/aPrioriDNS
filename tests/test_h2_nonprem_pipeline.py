@@ -36,7 +36,6 @@ def test_h2_premixed_end_to_end(apriori_test_cache_dir: str):
     dns_data_folder   = os.path.join(tests_data_folder, case_name)
 
     os.makedirs(dns_data_folder_orig, exist_ok=True)
-    os.makedirs(dns_data_folder, exist_ok=True)
 
     # Download only if needed
     if not os.path.exists(os.path.join(dns_data_folder, "data")):
