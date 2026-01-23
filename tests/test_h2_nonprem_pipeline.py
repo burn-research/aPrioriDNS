@@ -10,6 +10,9 @@ import aPriori as ap
 @pytest.mark.integration
 def test_h2_premixed_end_to_end(apriori_test_cache_dir: str):
     """
+    Please run the test with the following command:
+    pytest --html=pytest_report.html --self-contained-html
+
     End-to-end smoke/integration test:
       - download dataset if needed
       - load Field3D
@@ -39,6 +42,9 @@ def test_h2_premixed_end_to_end(apriori_test_cache_dir: str):
     if not os.path.exists(os.path.join(dns_data_folder, "data")):
         ap.download(dataset="h2_premixed", dest_folder=dns_data_folder_orig)
 
+    # Delete the data folder if it already exists (as it could contain previously processed data), and copy the original one to ensure a clean start
+    if os.path.exists(dns_data_folder):
+        shutil.rmtree(dns_data_folder)
     shutil.copytree(dns_data_folder_orig, dns_data_folder)
 
     dns_field = ap.Field3D(dns_data_folder)
