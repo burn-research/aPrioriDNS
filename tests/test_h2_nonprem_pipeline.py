@@ -11,7 +11,7 @@ import aPriori as ap
 def test_h2_premixed_end_to_end(apriori_test_cache_dir: str):
     """
     Please run the test with the following command:
-    pytest --html=pytest_report.html --self-contained-html
+      pytest --html=pytest_report.html --self-contained-html
 
     End-to-end smoke/integration test:
       - download dataset if needed
@@ -28,14 +28,16 @@ def test_h2_premixed_end_to_end(apriori_test_cache_dir: str):
     """
     # Setup the folders names
     case_name = "h2_lifted_dns"             # case name
+    test_name = "test_pipeline_h2"          # test name
 
     case_name_orig = case_name + '_orig'    # original dataset name. This one will not be touched by the operations
     dns_data_folder_orig = os.path.join(apriori_test_cache_dir, case_name_orig)
 
     tests_data_folder = os.path.join(apriori_test_cache_dir, "tmp_tests_results") # The folder where
-    dns_data_folder   = os.path.join(tests_data_folder, case_name)
+    dns_data_folder   = os.path.join(tests_data_folder, test_name, case_name)
 
     os.makedirs(dns_data_folder_orig, exist_ok=True)
+    os.makedirs(os.path.join(tests_data_folder, test_name))
 
     # Download only if needed
     if not os.path.exists(os.path.join(dns_data_folder, "data")):
@@ -133,4 +135,52 @@ def test_h2_premixed_end_to_end(apriori_test_cache_dir: str):
     # --- Optional: midplane cut smoke test (fast check it doesn't crash)
     cut_field = ap.Field3D(filtered_field.cut([0, 0, 100], exist_ok=True))
     assert cut_field.shape[2] == 1 or cut_field.shape[2] < filtered_field.shape[2], "Cut should reduce domain"
+
+    # --- Optional: plot figures for qualitative check
+    def _save_and_check_fig(fig, outpath: str, dpi: int = 150):
+        """
+        Save a Matplotlib figure and assert it exists and is non-empty.
+        """
+        # Ensure folder exists
+        os.makedirs(os.path.dirname(outpath), exist_ok=True)
+
+        fig.savefig(outpath, bbox_inches="tight", dpi=dpi)
+        # Close to avoid memory build-up during test runs
+        try:
+            import matplotlib.pyplot as plt
+            plt.close(fig)
+        except Exception:
+            pass
+
+        assert os.path.exists(outpath), f"Expected figure file not found: {outpath}"
+        # 10 KB threshold: avoids passing with a zero-byte file
+        assert os.path.getsize(outpath) > 10_000, f"Figure seems too small/corrupt: {outpath}"
+
+    figures_dir = os.path.join(tests_data_folder, test_name, "figures")
+    dpi = 200
+
+    # --- Plot: YH2 DNS midplane
+    fig1, ax1 = dns_field.plot_z_midplane(
+        "YH2",
+        transpose=True,
+        colormap="hot_r",
+        vmin=0.0,
+        vmax=0.015,
+        title=r"$Y_{H_2}$",
+        remove_cbar=True,
+    )
+    _save_and_check_fig(fig1, os.path.join(figures_dir, "YH2_dns.png"), dpi=dpi)
+
+    # --- Plot: YH2 filtered midplane
+    fig2, ax2 = filtered_field.plot_z_midplane(
+        "YH2",
+        transpose=True,
+        colormap="hot_r",
+        vmin=0.0,
+        vmax=0.015,
+        title=r"$\widetilde{Y}_{H_2}$",
+        cbar_title=r"$Y_{H_2}$ [-]",
+        remove_y=True,
+    )
+    _save_and_check_fig(fig2, os.path.join(figures_dir, "YH2_filtered.png"), dpi=dpi)
 
