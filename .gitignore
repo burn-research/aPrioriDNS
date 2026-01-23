@@ -54,3 +54,4 @@ paper_examples/07-ML_turbulent_combustion_closure.py
 /src/aPriori/__pycache__
 /src/aPriori/__pycache__
 pytest_output.txt
+pytest_report.html
