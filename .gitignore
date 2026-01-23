@@ -48,3 +48,10 @@ paper_examples/07-ML_turbulent_combustion_closure.py
 /docs/jupyter_execute
 /Lifted_H2_subdomain
 /Filter16FavreGauss
+/src/aPriori/__pycache__
+/.pytest_apriori_cache
+/tests/__pycache__
+/src/aPriori/__pycache__
+/src/aPriori/__pycache__
+pytest_output.txt
+pytest_report.html

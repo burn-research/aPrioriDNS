@@ -7,7 +7,7 @@ __authors__ = "Lorenzo Piu"
 __copyright__ = "Copyright (c) 2024-2025, Lorenzo Piu, Heinz Pitsch, and Alessandro Parente"
 __credits__ = ["Aero-Thermo-Mechanics laboratories - Universite Libre de Bruxelles, Brussels, Belgium"
                "Institut für Technische Verbrennung (ITV) - RWTH Aachen University, Aachen, Germany"]
-__license__ = "MIT"
+__license__ = "CC-BY 4.0"
 __version__ = "1.11.0"
 __maintainer__ = ["Lorenzo Piu"]
 __email__ = ["lorenzo.piu@ulb.be"]
