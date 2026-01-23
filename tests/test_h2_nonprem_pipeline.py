@@ -1,10 +1,10 @@
 # tests/test_h2_premixed_pipeline.py
 import os
 import numpy as np
+import shutil
 import pytest
 
 import aPriori as ap
-
 
 @pytest.mark.slow
 @pytest.mark.integration
@@ -23,13 +23,23 @@ def test_h2_premixed_end_to_end(apriori_test_cache_dir: str):
       - values are finite
       - a couple of basic physical / numerical sanity checks
     """
-    dns_data_folder = os.path.join(apriori_test_cache_dir, "h2_premixed_dns")
+    # Setup the folders names
+    case_name = "h2_lifted_dns"             # case name
 
+    case_name_orig = case_name + '_orig'    # original dataset name. This one will not be touched by the operations
+    dns_data_folder_orig = os.path.join(apriori_test_cache_dir, case_name_orig)
+
+    tests_data_folder = os.path.join(apriori_test_cache_dir, "tmp_tests_results") # The folder where
+    dns_data_folder   = os.path.join(tests_data_folder, case_name)
+
+    os.makedirs(dns_data_folder_orig, exist_ok=True)
     os.makedirs(dns_data_folder, exist_ok=True)
 
     # Download only if needed
     if not os.path.exists(os.path.join(dns_data_folder, "data")):
-        ap.download(dataset="h2_premixed", dest_folder=dns_data_folder)
+        ap.download(dataset="h2_premixed", dest_folder=dns_data_folder_orig)
+
+    shutil.copytree(dns_data_folder_orig, dns_data_folder)
 
     dns_field = ap.Field3D(dns_data_folder)
 
