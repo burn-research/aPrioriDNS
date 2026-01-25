@@ -37,15 +37,16 @@ def test_h2_premixed_end_to_end(apriori_test_cache_dir: str):
     dns_data_folder   = os.path.join(tests_data_folder, test_name, case_name)
 
     os.makedirs(dns_data_folder_orig, exist_ok=True)
-    os.makedirs(os.path.join(tests_data_folder, test_name))
 
     # Download only if needed
-    if not os.path.exists(os.path.join(dns_data_folder, "data")):
+    if not os.path.exists(os.path.join(dns_data_folder_orig, "data")):
         ap.download(dataset="h2_premixed", dest_folder=dns_data_folder_orig)
 
-    # Delete the data folder if it already exists (as it could contain previously processed data), and copy the original one to ensure a clean start
-    if os.path.exists(dns_data_folder):
-        shutil.rmtree(dns_data_folder)
+    # Delete the current test folder if it already exists (as it could contain previously processed data), and copy the original one to ensure a clean start
+    if os.path.exists(os.path.join(tests_data_folder, test_name)):
+        shutil.rmtree(os.path.join(tests_data_folder, test_name))
+    else:
+        os.makedirs(os.path.join(tests_data_folder, test_name), exist_ok=True)
     shutil.copytree(dns_data_folder_orig, dns_data_folder)
 
     dns_field = ap.Field3D(dns_data_folder)
@@ -70,7 +71,7 @@ def test_h2_premixed_end_to_end(apriori_test_cache_dir: str):
     assert yh2_dns.max() <= 1.0 + 1e-8
 
     # --- Favre filter
-    filter_size = 6
+    filter_size = 10
     filtered_path = dns_field.filter_favre(filter_size, exist_ok=True)
     filtered_field = ap.Field3D(filtered_path)
 
@@ -167,7 +168,7 @@ def test_h2_premixed_end_to_end(apriori_test_cache_dir: str):
         vmin=0.0,
         vmax=0.015,
         title=r"$Y_{H_2}$",
-        remove_cbar=True,
+        remove_cbar=False,
     )
     _save_and_check_fig(fig1, os.path.join(figures_dir, "YH2_dns.png"), dpi=dpi)
 
@@ -180,7 +181,70 @@ def test_h2_premixed_end_to_end(apriori_test_cache_dir: str):
         vmax=0.015,
         title=r"$\widetilde{Y}_{H_2}$",
         cbar_title=r"$Y_{H_2}$ [-]",
-        remove_y=True,
+        remove_y=False,
     )
     _save_and_check_fig(fig2, os.path.join(figures_dir, "YH2_filtered.png"), dpi=dpi)
+    
+    # --- Plot: Progress variable
+    fig3, ax3 = dns_field.plot_z_midplane(
+        "C",
+        transpose=True,
+        colormap="hot_r",
+        # title=r"$c$",
+        cbar_title=r"$c$ [-]",
+        remove_y=True,
+    )
+    _save_and_check_fig(fig3, os.path.join(figures_dir, "C.png"), dpi=dpi)
 
+    # --- Plot: Filtered progress variable 
+    fig4, ax4 = filtered_field.plot_z_midplane(
+        "C",
+        transpose=True,
+        colormap="hot_r",
+        # title="$\widetilde{c}$",
+        cbar_title=r"$\widetilde{c}$",
+    )
+    _save_and_check_fig(fig4, os.path.join(figures_dir, "C_filtered.png"), dpi=dpi)
+
+    # --- Plot: Progress variable gradient
+    fig5, ax5 = dns_field.plot_z_midplane(
+        "C_grad",
+        transpose=True,
+        colormap="hot_r",
+        # title=r"$c$",
+        cbar_title=r"$c$ [-]",
+        remove_y=True,
+    )
+    _save_and_check_fig(fig5, os.path.join(figures_dir, "C.png"), dpi=dpi)
+
+    # --- Plot: Filtered progress variable 
+    fig6, ax6 = filtered_field.plot_z_midplane(
+        "C_grad",
+        transpose=True,
+        colormap="hot_r",
+        # title="$\widetilde{c}$",
+        cbar_title=r"$\widetilde{c}$",
+    )
+    _save_and_check_fig(fig6, os.path.join(figures_dir, "C_filtered.png"), dpi=dpi)
+    
+    # --- Plot: Progress variable
+    fig7, ax7 = dns_field.plot_z_midplane(
+        "C_laplacian",
+        transpose=True,
+        colormap="hot_r",
+        # title=r"$c$",
+        cbar_title=r"$c$ [-]",
+        remove_y=True,
+    )
+    _save_and_check_fig(fig7, os.path.join(figures_dir, "C.png"), dpi=dpi)
+
+    # --- Plot: Filtered progress variable 
+    fig8, ax8 = filtered_field.plot_z_midplane(
+        "C_laplacian",
+        transpose=True,
+        colormap="hot_r",
+        # title="$\widetilde{c}$",
+        cbar_title=r"$\widetilde{c}$",
+    )
+    _save_and_check_fig(fig8, os.path.join(figures_dir, "C_filtered.png"), dpi=dpi)
+    
