@@ -7,10 +7,31 @@ Tutorial 6: Favre filtering for variable density flows
    `here <https://github.com/LorenzoPiu/aPriori/blob/main/tutorials/06-filter_DNS_field.py>`_.
 
 This tutorial introduces the Favre filtering utilities available in the library.
-Favre filtering is commonly used in large-eddy simulation (LES) and combustion
-applications to separate resolved and sub-filter contributions of thermochemical
-quantities. The example below shows how to apply Favre filtering to a DNS dataset
-and how to generate new filtered fields using different filter kernels.
+Favre filtering is a density-weighted spatial filtering operation that is
+widely used in large-eddy simulation (LES) of compressible and reacting flows
+to separate resolved-scale quantities from sub-filter-scale contributions.
+
+For a generic scalar quantity :math:`\phi`, the Favre-filtered field
+:math:`\tilde{\phi}` is defined as
+
+.. math::
+
+   \tilde{\phi} = \frac{\overline{\rho \phi}}{\overline{\rho}},
+
+where :math:`\rho` is the density field and the overbar denotes a spatial
+filtering operation. This definition ensures that the filtering operation
+is consistent with the conservative form of the governing equations in
+variable-density flows.
+
+Favre filtering is typically employed in LES and a priori analyses of DNS data
+to:
+- define resolved thermochemical quantities at a given filter scale,
+- evaluate sub-filter-scale fluxes and reaction rates,
+- study scale interactions and model closures for turbulent combustion.
+
+In the following example, Favre filtering is applied to a DNS dataset using
+different filter kernels and filter sizes, generating new filtered fields
+that can be analyzed or visualized in the same way as the original DNS data.
 
 Import modules and define data path
 -----------------------------------
@@ -19,23 +40,17 @@ Import modules and define data path
    :caption: Imports and paths definition
 
    import os
-   from aPrioriDNS.DNS import Field3D
-   from aPrioriDNS import DNS
+   from aPriori.DNS import Field3D
+   from aPriori import DNS
    import json
 
-   # Change this with your path to the data folder if necessary
-   directory = os.path.join('..','data','Lifted_H2_subdomain')
-
-   # Check the folder with the data exists in your system
+   directory = os.path.join('Lifted_H2_subdomain') # change this with your path to the data folder
    T_path = os.path.join(directory,'data', 'T_K_id000.dat')
    print(f"\nChecking the path \'{T_path}\' is correct...")
    if not os.path.exists(T_path):
-       raise ValueError(
-           "The path '{T_path}' does not exist in your system. "
-           "Check to have the correct path to your data folder in the code"
-       )
-   else:
-       print("Folder path OK\n")
+      print(f"The path '{T_path}' does not exist in your system. Downloading the dataset from Github...")
+      ap.download(dataset='h2_lifted')
+      
 
 Apply Favre filtering
 ---------------------
