@@ -3,8 +3,7 @@ Tutorial 3: Read a DNS dataset
 
 .. note::
 
-   The complete code associated with this tutorial, including the original
-   Jupyter notebook, is available
+   The complete code associated with this tutorial is available
    `here <https://github.com/LorenzoPiu/aPriori/blob/main/tutorials/03-initialize_DNS_field.py>`_.
 
 This exercise introduces the :class:`Field3D` class, which highlights the main
