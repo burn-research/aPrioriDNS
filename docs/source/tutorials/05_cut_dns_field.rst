@@ -6,7 +6,6 @@ Tutorial 5: Cut DNS field
    The complete code associated with this tutorial is available
    `here <https://github.com/LorenzoPiu/aPriori/blob/main/tutorials/05-cut_DNS_field.py>`_.
 
-
 This tutorial shows how to extract a sub-domain from a DNS dataset using the
 :py:meth:`~aPrioriDNS.DNS.Field3D.cut` method. After cutting the field, we load
 the resulting dataset as a new :py:class:`~aPrioriDNS.DNS.Field3D` object and
