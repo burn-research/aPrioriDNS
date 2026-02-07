@@ -28,6 +28,7 @@
    tutorials/03_read_dataset
    tutorials/04_data_visualization
    tutorials/05_cut_dns_field
+   tutorials/06_filter_dns_field
 
 .. toctree::
    :caption: API Guide
