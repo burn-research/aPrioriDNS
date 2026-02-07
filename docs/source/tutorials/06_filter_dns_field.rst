@@ -78,7 +78,7 @@ Apply Favre filtering
    .. container:: demo-result
 
       .. figure:: /_static/figures/fundamentals_and_usage/tutorial_06_fig1.png
-         :width: 100%
+         :width: 90%
          :align: center
 
          Figure 1 - Example of a Favre-filtered field using a box and a Gaussian kernel.
