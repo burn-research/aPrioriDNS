@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "aPrioriDNS"
-version = "1.1.10"
+version = "1.1.11"
 authors = [
   { name="Lorenzo Piu", email="lorenzo.piu@ulb.be" },
 ]
@@ -39,3 +39,6 @@ exclude = ["data"]
 Homepage = "https://github.com/LorenzoPiu/aPrioriDNS"
 Issues = "https://github.com/LorenzoPiu/aPrioriDNS/issues"
 Documentation = "https://apriori.gitbook.io"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/aPriori"]
