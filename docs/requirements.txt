@@ -1,0 +1,8 @@
+sphinx
+shibuya
+sphinx-design
+sphinx-copybutton
+sphinxcontrib-bibtex
+sphinx-autodoc-typehints
+sphinx-autoapi
+myst-parser

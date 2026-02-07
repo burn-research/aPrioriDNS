@@ -1,6 +1,12 @@
 Tutorial 3: Read a DNS dataset
 ===============================
 
+.. note::
+
+   The complete code associated with this tutorial, including the original
+   Jupyter notebook, is available
+   `here <https://github.com/LorenzoPiu/aPriori/blob/main/tutorials/03-initialize_DNS_field.py>`_.
+
 This exercise introduces the :class:`Field3D` class, which highlights the main
 purpose of **aPrioriDNS**: providing a clean, memory-efficient interface for
 working with formatted DNS datasets.
@@ -11,39 +17,28 @@ If you want to run the tutorial locally, download the dataset from the
 aPrioriDNS GitHub repository using the function ``ap.download()``.  
 If you already downloaded the data, simply comment out that line.
 
-Introduction
-------------
-
-.. code-block:: python
-   :caption: Script header
-
-   """
-   Created on Fri May 24 14:10:20 2024
-
-   @author: lorenzo piu
-   """
-
 Import modules and define data path
 -----------------------------------
 
 .. code-block:: python
+   :caption: Script header
 
    import os
    import aPrioriDNS as ap
    import json
 
    # Download data (comment this if already downloaded)
-   ap.download
+   ap.download()
 
    # Adjust this path depending on where the DNS dataset is stored
    directory = os.path.join('.', 'Lifted_H2_subdomain')
 
    # BlastNet stores the global shape in info.json.
    # Field3D will automatically parse everything, so we don't need to load it manually.
-   #
-   # with open(os.path.join(directory, 'info.json'), 'r') as file:
-   #     info = json.load(file)
-   # DNS_shape = info['global']['Nxyz']
+   # The following lines check that the dataset is present in your system
+   with open(os.path.join(directory, 'info.json'), 'r') as file:
+       info = json.load(file)
+   DNS_shape = info['global']['Nxyz']
 
 Initialize the Field3D object
 -----------------------------
@@ -136,7 +131,7 @@ This returns the full NumPy array of the *Y* velocity component.
 Filtering a field
 ~~~~~~~~~~~~~~~~~
 
-You may apply any filtering operation (e.g., Gaussian, box, or Favre filters):
+You may apply any filtering operation (e.g., Gaussian, box, or Favre filtering):
 
 .. code-block:: python
 
