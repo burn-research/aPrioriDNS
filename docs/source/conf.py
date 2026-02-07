@@ -129,7 +129,7 @@ html_theme_options = {
 html_context = {
     "source_type": "github",
     "source_user": "LorenzoPiu",
-    "source_repo": "aPrioriDNS",
+    "source_repo": "aPriori",
 }
 
 bibtex_bibfiles = ["references.bib"]
