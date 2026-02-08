@@ -1,6 +1,6 @@
 This is just a memo for me with bash commands to remember.
 
-Main commands to build the docs:
+Main commands to build the docs locally:
 
 1. Activate virtual env
 source .venv_sphinx/bin/activate

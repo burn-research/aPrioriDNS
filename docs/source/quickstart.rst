@@ -14,18 +14,18 @@ Optional: run tutorial with a different dataset
 
 To follow this hands-on quickstart, you have two options:
 
-1. **Use a dataset from BlastNet_**
+1. **Use a dataset from BlastNet**
 
    You can select any case that provides data for a *single timestep*
    (the current version of the library assumes one time index per dataset).
-   Download the case locally and point :mod:`aPrioriDNS` to the top-level
+   Download the case locally and point :mod:`aPriori` to the top-level
    folder of the dataset.
 
 2. **Use the reduced example dataset on GitHub**
 
    A small example dataset, extracted from a slot-burner hydrogen flame
    simulation, is available in the project repository. This dataset is
-   formatted to be immediately compatible with :mod:`aPrioriDNS` and is
+   formatted to be immediately compatible with :mod:`aPriori` and is
    convenient if you just want to test the library without browsing external
    databases.
 
@@ -42,7 +42,7 @@ Figure 1 shows a representation of the subdomain used in this tutorial.
 .. figure:: /_static/figures/getting_started/Lifted_h2_subdomain.png
    :align: center
 
-   Figure 1: Graphical representation of the DNS subset used in this tutorial
+   Figure 1: Graphical representation of the DNS subset used in the present tutorial
 
 Run the following command to download the dataset:
 
