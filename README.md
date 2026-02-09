@@ -3,7 +3,7 @@
 </p>
 
 [![Static Badge](https://img.shields.io/badge/GPL%20v3.0%20-%20%23F5CF27?label=License)](https://www.gnu.org/licenses/gpl-3.0.en.html) 
-[![Static Badge](https://img.shields.io/badge/Documentation-Gitbook-green?logo=Gitbook&logoColor=white)](https://apriori.gitbook.io/apriori-documentation-1)
+[![Static Badge](https://img.shields.io/badge/Documentation-ReadTheDocs-green?logo=readthedocs&logoColor=white)](https://apriori.readthedocs.io)
 [![Static Badge](https://img.shields.io/badge/Issues-Github-02bfa6?&logo=Github&logoColor=white)](https://github.com/LorenzoPiu/aPrioriDNS/issues)
 [![Static Badge](https://img.shields.io/pypi/dm/aprioridns?color=03b1fc&logo=pypi&logoColor=white)](https://pypistats.org/packages/aprioridns)
 [![Static Badge](https://zenodo.org/badge/DOI/10.5281/zenodo.13793622.svg)](https://zenodo.org/records/13793623)
