@@ -4530,7 +4530,7 @@ def delete_file(file_path):
     else:
         warnings.warn(f"No such file: '{file_path}'")
 
-def download(repo_url="https://github.com/LorenzoPiu/aPrioriDNS/tree/main/data", dest_folder="./", dataset=None):
+def download(repo_url="https://github.com/LorenzoPiu/aPriori-data/tree/main", dest_folder=None, dataset=None):
     """
     Downloads all files from a specified GitHub repository directory and saves them to the destination folder,
     including files in subdirectories.
@@ -4546,21 +4546,34 @@ def download(repo_url="https://github.com/LorenzoPiu/aPrioriDNS/tree/main/data",
     if dataset is not None:
         datasets_list = ['h2_lifted', 'h2_premixed', 'hit']
         if dataset.lower() == 'h2_lifted':
-            repo_url = "https://github.com/LorenzoPiu/aPrioriDNS/tree/main/data/Lifted_H2_subdomain"
+            repo_url = "https://github.com/LorenzoPiu/aPriori-data/tree/main/Lifted_H2_subdomain"
+            if dest_folder is None:
+                dest_folder = 'Lifted_H2_subdomain'
         elif dataset.lower() == 'h2_premixed':
-            repo_url = "https://github.com/LorenzoPiu/aPrioriDNS/tree/dev/data/Premixed_H2_Phi0.5"
+            repo_url = "https://github.com/LorenzoPiu/aPriori-data/tree/main/Premixed_H2_Phi0.5"
+            if dest_folder is None:
+                dest_folder = 'Premixed_H2_Phi0.5'
         elif dataset.lower() == 'hit':
-            repo_url = "https://github.com/LorenzoPiu/aPrioriDNS/tree/main/data/Forced_HIT_ReL184"
+            repo_url = "https://github.com/LorenzoPiu/aPriori-data/tree/main/Forced_HIT_ReL184"
+            if dest_folder is None:
+                dest_folder = 'Forced_HIT_ReL184'
         if dataset.lower() not in datasets_list:
             raise ValueError(
             f"Invalid dataset '{dataset}'. Expected one of {datasets_list}."
         )
+
+    if dest_folder is None:
+        dest_folder = "./DNS_data"
             
     if not os.path.exists(dest_folder):
         os.makedirs(dest_folder)
 
     # Extract owner, repo, and branch from the URL
     parts = repo_url.split('/')
+
+    # for debug
+    print(parts)
+
     owner = parts[3]
     repo = parts[4]
     branch = parts[6]
