@@ -12,16 +12,14 @@ Journal articles
 
 .. rubric:: 2025
 
-- **[J1]** *A Data-Driven Approach to Refine the Partially Stirred Reactor Closure
-   for Turbulent Premixed Flames.*  
-  Lorenzo Piu, Arthur Péquin, Rodolfo S. M. Freitas, Salvatore Iavarone,
-   Heinz Pitsch, and Alessandro Parente, *Flow, Turbulence and Combustion*, (2025).  
+- **[J1]** *A Data-Driven Approach to Refine the Partially Stirred Reactor Closure for Turbulent Premixed Flames.*  
+  Lorenzo Piu, Arthur Péquin, Rodolfo S. M. Freitas, Salvatore Iavarone, Heinz Pitsch, and Alessandro Parente, *Flow, Turbulence and Combustion*, (2025).  
 
 Conference papers
 -----------------
 
 - **[C1]** *Bayesian neural networks for Arrhenius-based turbulent combustion closures in large eddy simulations*  
-  Lorenzo Piu, Arthur Pequin, Salvatore Iavarone, Rodolfo Freitas, Ki Sung Jung, Hongchao Chu, Heinz Pitsch, Alessandro Parente
+  Lorenzo Piu, Arthur Pequin, Salvatore Iavarone, Rodolfo Freitas, Ki Sung Jung, Hongchao Chu, Heinz Pitsch, and Alessandro Parente
   *12th European Combustion Meeting. Edinburgh, Scotland, UK*, (2025)
 
 ..
