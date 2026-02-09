@@ -32,7 +32,7 @@ autoapi_own_page_level = "function"
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'aPriori'
-copyright = 'Copyright © 2024, Lorenzo Piu, Heinz Pitsch, Alessandro Parente'
+copyright = 'Copyright © 2026, Lorenzo Piu, Heinz Pitsch, Alessandro Parente'
 author = 'Lorenzo Piu'
 release = '1.1.10'
 html_title = "aPriori Documentation"
