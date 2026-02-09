@@ -50,3 +50,4 @@ of the lifted flame configuration.
    :width: 95%
 
    Figure 1: Graphical representation of the DNS subset used in the present example
+
