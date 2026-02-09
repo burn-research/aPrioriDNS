@@ -74,7 +74,7 @@ The following code can be used to test the library once installed. A detailed ex
 
 ```python
 """
-import aPrioriDNS as ap
+import aPriori as ap
 
 # Download the dataset
 ap.download()
