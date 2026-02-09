@@ -8,11 +8,11 @@
    :alt: Dark mode version
    :align: center
 
-|mit| |source| |docs| |issues| |pypi| |zenodo|
+|license| |source| |docs| |issues| |pypi| |zenodo|
 
-.. |mit| image:: https://img.shields.io/badge/License-MIT-yellow
-   :target: https://opensource.org/licenses/MIT
-   :alt: MIT License
+.. |license| image:: https://img.shields.io/badge/GPL%20v3.0%20-%20%23F5CF27?label=License
+   :target: https://www.gnu.org/licenses/gpl-3.0.en.html
+   :alt: GPL v3.0 License
    :height: 20px
 
 .. |source| image:: https://img.shields.io/badge/Source-Github-02bfa6?&logo=Github&logoColor=white
