@@ -10,7 +10,7 @@
 
 |license| |source| |docs| |issues| |pypi| |zenodo|
 
-.. |license| image:: https://img.shields.io/badge/GPL%20v3.0%20-%20%23F5CF27?label=License
+.. |license| image:: https://img.shields.io/badge/GPL%20v3.0%20-%20%23F5CF27?label=License&logo=gplv3&logoColor=white
    :target: https://www.gnu.org/licenses/gpl-3.0.en.html
    :alt: GPL v3.0 License
    :height: 20px
@@ -20,8 +20,8 @@
    :alt: GitHub Source Code
    :height: 20px
 
-.. |docs| image:: https://img.shields.io/badge/Documentation-Gitbook-green?logo=Gitbook&logoColor=white
-   :target: https://apriori.gitbook.io/apriori-documentation-1
+.. |docs| image:: https://img.shields.io/badge/Documentation-ReadTheDocs-green?logo=readthedocs&logoColor=white
+   :target: https://apriori.readthedocs.io
    :alt: Documentation
    :height: 20px
 
