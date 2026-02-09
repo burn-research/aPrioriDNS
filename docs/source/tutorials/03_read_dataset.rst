@@ -24,11 +24,11 @@ Import modules and define data path
    :caption: Script header
 
    import os
-   import aPrioriDNS as ap
+   import aPriori as ap
    import json
 
    # Download data (comment this if already downloaded)
-   ap.download()
+   ap.download(dataset='h2_lifted')
 
    # Adjust this path depending on where the DNS dataset is stored
    directory = os.path.join('.', 'Lifted_H2_subdomain')

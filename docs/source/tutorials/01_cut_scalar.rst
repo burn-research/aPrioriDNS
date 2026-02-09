@@ -24,7 +24,7 @@ Then:
 
 .. code-block:: python
 
-   from aPrioriDNS.DNS import Scalar3D
+   from aPriori.DNS import Scalar3D
    import numpy as np
 
 Define a generic 3D array that we will use as a scalar field:

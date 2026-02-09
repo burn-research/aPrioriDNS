@@ -25,8 +25,8 @@ First, import the modules required for this tutorial:
 .. code-block:: python
 
     import numpy as np
-    import aPrioriDNS.DNS as DNS
-    from aPrioriDNS.DNS import Scalar3D
+    import aPriori.DNS as DNS
+    from aPriori.DNS import Scalar3D
 
 Filtering a synthetic array
 ---------------------------
