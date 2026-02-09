@@ -121,6 +121,10 @@ html_theme_options = {
             "title": "Publications",
             "url": "publications"
         },
+        {
+            "title": "Cite",
+            "url": "how_to_cite"
+        },
     ],
     "github_url": "https://github.com/LorenzoPiu/aPrioriDNS",
     "linkedin_url": "https://www.linkedin.com/in/lorenzopiu/",

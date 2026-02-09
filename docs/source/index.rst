@@ -42,4 +42,5 @@
    :maxdepth: 1
 
    aPriori License <license>
+   How to cite <how_to_cite>
    Bibliography <bibliography>
