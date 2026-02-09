@@ -8,7 +8,6 @@ peer-reviewed publication, which introduces the methodology and workflows
 on which the library is based:
 
 .. code-block:: text
-   .. code-block:: text
 
    Piu L, Péquin A, Freitas RSM, Iavarone S, Pitsch H, Parente A.
    A data-driven approach to refine the partially stirred reactor closure
