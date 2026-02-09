@@ -63,7 +63,7 @@ Lorenzo Piu. ‘aprioridns: V1.1.8’. Zenodo, 19 September 2024. https://doi.or
 The present library relies on the code [PyCSP](https://github.com/rmalpica/PyCSP) package for Computational Singular Perturbation (CSP) analysis. PyCSP is developed and maintained by Professor Riccardo Malpica Galassi at Sapienza University of Rome. For detailed documentation and further information, please refer to the original repository.
 
 ## License
-This project is licensed under the [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/deed.en) (CC BY 4.0).
+This project is licensed under the [GNU General Public License](https://creativecommons.org/licenses/by/4.0/deed.en) (GPL v3.0).
 
 © 2026 Lorenzo Piu, Heinz Pitsch and Alessandro Parente.
 
@@ -77,7 +77,7 @@ The following code can be used to test the library once installed. A detailed ex
 import aPriori as ap
 
 # Download the dataset
-ap.download()
+ap.download(dataset='h2_lifted')
 
 # Initialize 3D DNS field
 field_DNS = ap.Field3D('Lifted_H2_subdomain')

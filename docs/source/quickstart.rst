@@ -49,9 +49,9 @@ Run the following command to download the dataset:
 .. code-block:: python
    :caption: Import library and download example dataset
 
-   import aPrioriDNS as ap
+   import aPriori as ap
 
-   ap.download()
+   ap.download(dataset='h2_lifted')
 
 This command should have downloaded from Github a folder with the following structure:
 
