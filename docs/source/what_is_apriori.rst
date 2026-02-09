@@ -89,8 +89,8 @@ main features include:
   experienced users through typical analysis patterns.
 
 The package aims to provide a uniform, intuitive, and efficient interface to
-heterogeneous DNS datasets—reducing friction, avoiding unnecessary memory
-usage, and accelerating research workflows in turbulence, combustion, and
+heterogeneous DNS datasets—avoiding unnecessary memory
+usage and accelerating research workflows in turbulence, combustion, and
 machine learning. As an example, the following figure displays the typical 
 set of operations that using aPriori can be performed with a few lines of code:
 
