@@ -69,21 +69,34 @@ Use short, descriptive branch names, for example:
 
 .. warning::
 
-   Avoid committing directly to ``main``.
-
-.. Avoid committing directly to ``main``.
+   Please avoid committing directly to ``main``.
 
 4. Install the development environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-It is recommended to install aPriori in editable mode:
+First, install aPriori in editable mode:
 
 .. code-block:: bash
 
-   pip install -e .[dev]
+   pip install -e .
+
+Then install the development dependencies:
+
+.. code-block:: bash
+
+   pip install -r dev-requirements.txt
 
 This installs development dependencies (testing, formatting, documentation tools)
 and allows changes to be picked up immediately.
+
+Before moving on, please try to run the tests to check that everything works, with
+the following command:
+
+.. code-block:: bash
+
+   pytests
+
+If some of the tests fail, please open an issue attaching the test results.
 
 5. Make your changes
 ^^^^^^^^^^^^^^^^^^^^
@@ -159,12 +172,25 @@ Documentation is written using **Sphinx** and reStructuredText.
 
 To build the documentation locally:
 
+1. Remove the previously built folder content
+
 .. code-block:: bash
 
-   cd docs
-   make html
+   rm -rf docs/build/html
 
-Documentation contributions are highly appreciated, especially tutorials and examples.
+2. Remove the previously generated autodoc 
+
+.. code-block:: bash
+
+   rm -rf docs/source/autoapi
+
+3. Build html
+
+.. code-block:: bash
+
+   python -m sphinx -b html docs/source docs/build/html
+
+Documentation contributions are **highly appreciated**, especially tutorials and examples.
 
 Reporting issues
 ----------------
