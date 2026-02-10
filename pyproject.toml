@@ -32,6 +32,20 @@ dependencies = [
     # Add more dependencies here
 ]
 
+[project.optional-dependencies]
+dev = [
+  "pytest",
+  "pytest-html",
+  "sphinx",
+  "shibuya",
+  "sphinx-design",
+  "sphinx-copybutton",
+  "sphinxcontrib-bibtex",
+  "sphinx-autodoc-typehints",
+  "sphinx-autoapi",
+  "myst-parser",
+]
+
 [tool.hatch.build]
 exclude = ["data"]
 
