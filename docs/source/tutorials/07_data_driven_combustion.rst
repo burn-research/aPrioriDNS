@@ -51,3 +51,61 @@ of the lifted flame configuration.
 
    Figure 1: Graphical representation of the DNS subset used in the present example
 
+A priori validation methodology
+-------------------------------
+
+Filtered species transport equation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In the context of Large Eddy Simulation (LES), the transport equation for the
+Favre-filtered mass fraction of species :math:`k` reads
+
+.. math::
+
+   \frac{\partial (\bar{\rho}\,\tilde{Y}_k)}{\partial t}
+   + \frac{\partial (\bar{\rho}\,\tilde{Y}_k\,\tilde{u}_i)}{\partial x_i}
+   =
+   - \frac{\partial j^{\mathrm{sgs}}_{k,i}}{\partial x_i}
+   + \overline{\dot{\omega}}_k ,
+
+where:
+
+- :math:`\tilde{Y}_k` is the Favre-filtered mass fraction of species :math:`k`,
+- :math:`j^{\mathrm{sgs}}_{k,i}` is the subgrid-scale diffusive flux of species :math:`k`,
+- :math:`\overline{\dot{\omega}}_k` is the filtered chemical source term.
+
+In this tutorial, we focus on the **closure of the chemical source term**
+:math:`\overline{\dot{\omega}}_k`, which represents one of the main challenges
+in turbulent combustion modeling.
+
+A priori evaluation of chemical source terms
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+From Direct Numerical Simulation (DNS) data, chemical source terms can be
+computed directly using detailed chemistry (e.g. through Cantera).
+Since DNS resolves both transport and chemical processes down to the finest
+relevant scales, the resulting reaction rates naturally account for the full
+interaction between turbulence and chemistry.
+
+In a priori analysis, these DNS-based reaction rates are considered as
+reference values.
+
+In contrast, LES does not have access to this level of detail. Only
+filtered quantities—such as temperature, velocity, pressure, and species
+mass fractions—are available. To mimic the information accessible in LES,
+the DNS fields are therefore **filtered explicitly**.
+
+Starting from these filtered fields, chemical source terms can be recomputed
+using the same detailed chemistry models. However, because the filtering
+operation removes small-scale fluctuations, the resulting reaction rates
+are generally less accurate than those obtained from the original DNS data.
+In particular, transport processes are no longer resolved down to the
+Kolmogorov scale, and the interaction between turbulence and chemistry is
+only partially captured.
+
+The comparison between:
+- reaction rates computed from the original DNS fields, and
+- reaction rates recomputed from the filtered fields,
+
+forms the basis of the a priori validation framework used to assess
+turbulence–chemistry interaction closures.
