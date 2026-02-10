@@ -30,8 +30,8 @@
    :alt: GitHub Issues
    :height: 20px
 
-.. |pypi| image:: https://img.shields.io/pypi/dm/aprioridns?color=03b1fc&logo=pypi&logoColor=white
-   :target: https://pypistats.org/packages/aprioridns
+.. |pypi| image:: https://img.shields.io/pepy/dt/aPrioriDNS?logo=pypi&logoColor=white&color=03b1fc
+   :target: https://pepy.tech/projects/aprioridns
    :alt: PyPI Downloads
    :height: 20px
 
