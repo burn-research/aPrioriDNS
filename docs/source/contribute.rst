@@ -12,12 +12,12 @@ Ways to contribute
 
 You can contribute to aPriori in several ways:
 
-- Reporting bugs or unexpected behavior
-- Suggesting new features or improvements
-- Improving documentation or tutorials
-- Adding new utilities, post-processing methods, or examples
-- Writing or extending tests
-- Reviewing pull requests
+- Reporting **bugs** or unexpected behavior
+- Suggesting new **features** or improvements
+- Improving **documentation** or **tutorials**
+- Adding new utilities, post-processing **methods**, or examples
+- Writing or extending **tests**
+- Reviewing **pull requests**
 
 If you are unsure whether a change fits the scope of the project, feel free to open an
 issue and discuss it first.
@@ -32,7 +32,7 @@ The recommended contribution workflow follows standard GitHub practices.
 
 Go to the main repository:
 
-https://github.com/LorenzoPiu/aPrioriDNS
+https://github.com/LorenzoPiu/aPriori
 
 Click **Fork** (top right) to create a copy of the repository under your own GitHub account.
 
@@ -43,14 +43,14 @@ Clone your fork to your local machine:
 
 .. code-block:: bash
 
-   git clone https://github.com/<your-username>/aPrioriDNS.git
+   git clone https://github.com/<your-username>/aPriori.git
    cd aPrioriDNS
 
 Add the upstream repository (optional but recommended):
 
 .. code-block:: bash
 
-   git remote add upstream https://github.com/LorenzoPiu/aPrioriDNS.git
+   git remote add upstream https://github.com/LorenzoPiu/aPriori.git
 
 3. Create a dedicated branch
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -67,7 +67,11 @@ Use short, descriptive branch names, for example:
 - ``add-favre-filtering``
 - ``improve-docs-installation``
 
-Avoid committing directly to ``main``.
+.. warning::
+
+   Avoid committing directly to ``main``.
+
+.. Avoid committing directly to ``main``.
 
 4. Install the development environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
