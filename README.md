@@ -5,8 +5,10 @@
 [![Static Badge](https://img.shields.io/badge/GPL%20v3.0%20-%20%23F5CF27?label=License&logo=gplv3&logoColor=white)](https://www.gnu.org/licenses/gpl-3.0.en.html) 
 [![Static Badge](https://img.shields.io/badge/Documentation-ReadTheDocs-green?logo=readthedocs&logoColor=white)](https://apriori.readthedocs.io)
 [![Static Badge](https://img.shields.io/badge/Issues-Github-02bfa6?&logo=Github&logoColor=white)](https://github.com/LorenzoPiu/aPrioriDNS/issues)
-[![Static Badge](https://img.shields.io/pypi/dm/aprioridns?color=03b1fc&logo=pypi&logoColor=white)](https://pypistats.org/packages/aprioridns)
-[![PyPI Downloads](https://static.pepy.tech/personalized-badge/aprioridns?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=BLUE&left_text=Downloads)](https://pepy.tech/projects/aprioridns)
+[//]: # (The following two badges are commented out: )
+[//]: # ( [![Static Badge](https://img.shields.io/pypi/dm/aprioridns?color=03b1fc&logo=pypi&logoColor=white)](https://pypistats.org/packages/aprioridns) )
+[//]: # ([![PyPI Downloads](https://static.pepy.tech/personalized-badge/aprioridns?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=BLUE&left_text=Downloads)](https://pepy.tech/projects/aprioridns) )
+[![Static Badge](https://img.shields.io/pepy/dt/aPrioriDNS?logo=pypi&logoColor=white&color=03b1fc)](https://pepy.tech/projects/aprioridns?timeRange=threeMonths&category=version&includeCIDownloads=true&granularity=daily&viewType=line&versions=1.1.10%2C1.1.9%2C1.1.8)
 [![Static Badge](https://zenodo.org/badge/DOI/10.5281/zenodo.13793622.svg)](https://zenodo.org/records/13793623)
 
 A Python package to process Direct Numerical Simulations of reacting and non-reacting flows.
