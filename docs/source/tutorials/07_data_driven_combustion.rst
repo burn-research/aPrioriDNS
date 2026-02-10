@@ -54,8 +54,8 @@ of the lifted flame configuration.
 A priori validation methodology
 -------------------------------
 
-Filtered species transport equation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Favre Filtered species transport equation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In the context of Large Eddy Simulation (LES), the transport equation for the
 Favre-filtered mass fraction of species :math:`k` reads
@@ -104,8 +104,229 @@ Kolmogorov scale, and the interaction between turbulence and chemistry is
 only partially captured.
 
 The comparison between:
+
 - reaction rates computed from the original DNS fields, and
+
 - reaction rates recomputed from the filtered fields,
 
 forms the basis of the a priori validation framework used to assess
 turbulence–chemistry interaction closures.
+
+Step 1: DNS data processing
+---------------------------
+
+In this first step, we extract from the DNS dataset all the quantities required
+to perform an a priori analysis and to build a data-driven closure model.
+The goal is to construct, from the DNS data, both reference quantities and
+LES-like quantities obtained by explicit filtering.
+
+Dataset loading and initialization
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+We begin by specifying the path to the DNS sub-domain and initializing a
+:class:`Field3D` object. If the dataset is not found locally,
+it is automatically downloaded.
+
+.. code-block:: python
+
+   import os
+   import aPriori as ap
+   from aPriori.DNS import Field3D
+
+   directory = os.path.join('.', 'Lifted_H2_subdomain')
+
+   T_path = os.path.join(directory, 'data', 'T_K_id000.dat')
+   if not os.path.exists(T_path):
+       ap.download(dataset='h2_lifted')
+
+   DNS_field = Field3D(directory)
+
+At this stage, the DNS field contains all primitive variables (velocity,
+temperature, species mass fractions) resolved down to the smallest scales.
+
+Compute reaction rates on the DNS grid
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Using the detailed chemical mechanism associated with the dataset, we compute
+the chemical source terms directly on the DNS grid. These reaction rates
+naturally account for the full interaction between turbulence and chemistry
+and are therefore used as reference values in the a priori analysis.
+
+.. code-block:: python
+
+   DNS_field.compute_reaction_rates()
+
+The heat release rate (HRR) is computed automatically as part
+of this operation.
+
+Filtering the DNS field
+^^^^^^^^^^^^^^^^^^^^^^
+
+To mimic the information available in Large Eddy Simulation (LES), the DNS
+field is explicitly Favre-filtered. In this example, a filter width of
+:math:`\Delta = 16` grid points is used.
+
+It is important to note that the filtering operation applies to **all**
+variables present in the data folder. Since the DNS reaction rates have already
+been computed, they are filtered as well, yielding the filtered reference
+source terms :math:`\overline{\dot{\omega}}^{DNS}`.
+
+.. code-block:: python
+
+   filter_size = 16
+   filtered_field = Field3D(DNS_field.filter_favre(filter_size))
+
+Compute reaction rates on the filtered field
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Starting from the LES-like filtered quantities (filtered temperature and
+species mass fractions), reaction rates are recomputed using the same
+detailed chemistry. These rates correspond to a **Laminar Finite Rate (LFR)**
+approximation evaluated on filtered fields.
+
+.. code-block:: python
+
+   filtered_field.compute_reaction_rates()
+
+The discrepancy between DNS-filtered and LFR reaction rates highlights the
+impact of unresolved turbulence–chemistry interactions.
+
+Compute additional variables of interest
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To train a data-driven closure model, additional LES-scale quantities are
+required. In this tutorial, we compute:
+
+- the strain-rate magnitude,
+- the residual dissipation rate (Smagorinsky model),
+- the residual kinetic energy,
+- chemical and mixing time scales.
+
+These quantities characterize the local interaction between turbulence
+and chemistry and are commonly used in subgrid-scale modeling.
+
+.. code-block:: python
+
+   filtered_field.compute_strain_rate(save_tensor=True)
+   filtered_field.compute_residual_dissipation_rate(mode='Smag')
+   filtered_field.compute_residual_kinetic_energy()
+
+   filtered_field.compute_chemical_timescale(mode='SFR')
+   filtered_field.fuel = 'H2'
+   filtered_field.ox = 'O2'
+   filtered_field.compute_chemical_timescale(mode='Ch')
+   filtered_field.compute_mixing_timescale(mode='Kolmo')
+
+At the end of this step, the filtered field contains both LES-resolved variables
+and reference subgrid-scale quantities, enabling the construction of
+data-driven closure models.
+
+Step 2: Neural network training
+-------------------------------
+
+In this second step, a neural network is trained to model the correction factor
+:math:`\gamma` that accounts for unresolved turbulence–chemistry interactions.
+The approach follows the same conceptual framework used in models such as
+EDC and PaSR, where the filtered chemical source term is written as
+
+.. math::
+
+   \overline{\dot{\omega}}_k = \gamma \, \dot{\omega}^{LFR}_k .
+
+Here, :math:`\dot{\omega}^{LFR}_k` is the reaction rate computed from filtered
+quantities, and :math:`\gamma` is a data-driven correction predicted by the
+neural network.
+
+Data preprocessing for PyTorch
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+We construct the input feature matrix using quantities available at LES scale:
+temperature, strain-rate magnitude, and the slowest chemical time scale.
+The target output is the DNS heat release rate.
+
+.. code-block:: python
+
+   shape  = filtered_field.shape
+   length = shape[0] * shape[1] * shape[2]
+
+   T     = filtered_field.T.value.reshape(length, 1)
+   S     = filtered_field.S_LES.value.reshape(length, 1)
+   Tau_c = filtered_field.Tau_c_SFR.value.reshape(length, 1)
+
+   HRR_LFR = filtered_field.HRR_LFR.value.reshape(length, 1)
+   HRR_DNS = filtered_field.HRR_DNS.value.reshape(length, 1)
+
+The input variables are normalized and transformed before building the
+training matrix.
+
+.. code-block:: python
+
+   T = (T - np.min(T)) / (np.max(T) - np.min(T))
+   S = np.log10(S)
+   S = (S - np.min(S)) / (np.max(S) - np.min(S))
+   Tau_c = np.log10(Tau_c)
+   Tau_c = (Tau_c - np.min(Tau_c)) / (np.max(Tau_c) - np.min(Tau_c))
+
+   X = np.hstack([T, S, Tau_c])
+
+The dataset is then split into training and testing subsets and converted
+to PyTorch tensors.
+
+Neural network architecture
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The neural network is implemented as a fully connected feed-forward model
+using PyTorch. The architecture consists of multiple hidden layers with
+ReLU activation functions.
+
+.. code-block:: python
+
+   class NeuralNetwork(nn.Module):
+       def __init__(self, input_size, hidden_size, output_size, num_layers):
+           super().__init__()
+           self.layers = nn.ModuleList()
+           self.layers.append(nn.Linear(input_size, hidden_size))
+           for _ in range(num_layers - 1):
+               self.layers.append(nn.Linear(hidden_size, hidden_size))
+           self.layers.append(nn.Linear(hidden_size, output_size))
+
+       def forward(self, x):
+           for layer in self.layers[:-1]:
+               x = torch.relu(layer(x))
+           return self.layers[-1](x)
+
+Training loop
+^^^^^^^^^^^^^
+
+The model is trained by minimizing the mean squared error between the
+DNS heat release rate and the corrected LFR prediction
+:math:`\gamma \dot{Q}_{LFR}`.
+
+.. code-block:: python
+
+   loss = criterion(output * HRR_LFR_train, HRR_DNS_train)
+
+Training and testing losses are monitored to assess convergence and
+generalization.
+
+Step 3: Results visualization
+^^^^^^^^^^^^^^^^^^^^^
+
+Once trained, the neural network is evaluated on the full dataset.
+Parity plots are used to compare the DNS heat release rate with both
+the LFR model and the machine-learning-corrected prediction.
+
+.. code-block:: python
+
+   gamma = model(torch.tensor(X, dtype=torch.float32).to(device)).cpu().numpy()
+
+   ap.parity_plot(HRR_DNS, HRR_LFR, density=True,
+                  x_name=r'$\dot{Q}_{DNS}$',
+                  y_name=r'$\dot{Q}_{LFR}$')
+
+   ap.parity_plot(HRR_DNS, gamma * HRR_LFR, density=True,
+                  x_name=r'$\dot{Q}_{DNS}$',
+                  y_name=r'$\dot{Q}_{ML}$')
+
+Spatial distributions of the error and of the predicted correction factor
+are finally visualized using mid-plane contour plots.
