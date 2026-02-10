@@ -208,9 +208,16 @@ Code of conduct
 All contributors are expected to interact respectfully and professionally.
 Constructive discussion and scientific rigor are valued.
 
-Thank you
+Thank you 🫶
 ---------
 
-Thank you for contributing to **aPriori**.
-Community involvement is essential for the project to grow into a robust and
-widely useful tool for DNS post-processing and a priori analysis.
+Thank you for contributing to the project.  
+We sincerely appreciate the time and effort you have invested in improving the
+library.
+
+Community contributions are essential to the development of ``aPriori``, helping it
+remain reliable, extensible, and useful for DNS post-processing and *a priori*
+analysis. Whether through code, documentation, testing, or feedback, each
+contribution plays an important role.
+
+Your involvement is highly valued, and we are grateful for your support!
