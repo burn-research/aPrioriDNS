@@ -32,26 +32,12 @@ dependencies = [
     # Add more dependencies here
 ]
 
-[project.optional-dependencies]
-dev = [
-  "pytest",
-  "pytest-html",
-  "sphinx",
-  "shibuya",
-  "sphinx-design",
-  "sphinx-copybutton",
-  "sphinxcontrib-bibtex",
-  "sphinx-autodoc-typehints",
-  "sphinx-autoapi",
-  "myst-parser",
-]
-
 [tool.hatch.build]
 exclude = ["data"]
 
 [project.urls]
-Homepage = "https://github.com/LorenzoPiu/aPrioriDNS"
-Issues = "https://github.com/LorenzoPiu/aPrioriDNS/issues"
+Homepage = "https://github.com/LorenzoPiu/aPriori"
+Issues = "https://github.com/LorenzoPiu/aPriori/issues"
 Documentation = "https://apriori.gitbook.io"
 
 [tool.hatch.build.targets.wheel]
