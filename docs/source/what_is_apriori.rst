@@ -20,11 +20,11 @@ mechanics, turbulence, and reacting-flow research. By resolving the full
 Navier–Stokes equations and all relevant spatio-temporal scales
 :cite:p:`moin1998direct`, DNS provides highly detailed information on:
 
-- the interaction between turbulence and chemical reactions
-  :cite:p:`PoinsotVeynante_2005`;
-- small-scale mixing, dissipation, and scalar transport;
 - statistical and structural properties of turbulent flows
   :cite:p:`Pope2012-jn`.
+- the interaction between turbulence and chemical reactions
+  :cite:p:`PoinsotVeynante_2005`;
+- small-scale mixing, dissipation, and scalar transport :cite:p:`Attili2012`;
 
 This level of detail comes at a cost: modern DNS runs are computationally
 expensive and increasingly energy-intensive. A recent analysis of DNS studies
