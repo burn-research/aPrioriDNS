@@ -128,6 +128,7 @@ We begin by specifying the path to the DNS sub-domain and initializing a
 it is automatically downloaded.
 
 .. code-block:: python
+   :caption: Imports and DNS data reading
 
    import os
    import aPriori as ap
@@ -153,6 +154,7 @@ naturally account for the full interaction between turbulence and chemistry
 and are therefore used as reference values in the a priori analysis.
 
 .. code-block:: python
+   :caption: DNS reaction rates
 
    DNS_field.compute_reaction_rates()
 
@@ -172,6 +174,7 @@ been computed, they are filtered as well, yielding the filtered reference
 source terms :math:`\overline{\dot{\omega}}^{DNS}`.
 
 .. code-block:: python
+   :caption: Filtering
 
    filter_size = 16
    filtered_field = Field3D(DNS_field.filter_favre(filter_size))
@@ -185,6 +188,7 @@ detailed chemistry. These rates correspond to a **Laminar Finite Rate (LFR)**
 approximation evaluated on filtered fields.
 
 .. code-block:: python
+   :caption: LES reaction rates
 
    filtered_field.compute_reaction_rates()
 
@@ -195,7 +199,9 @@ Compute additional variables of interest
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To train a data-driven closure model, additional LES-scale quantities are
-required. In this tutorial, we compute:
+required. These are quantities that are often needed for modeling sub-filter
+interactions.
+In this tutorial, we compute:
 
 - the strain-rate magnitude,
 - the residual dissipation rate (Smagorinsky model),
@@ -206,8 +212,9 @@ These quantities characterize the local interaction between turbulence
 and chemistry and are commonly used in subgrid-scale modeling.
 
 .. code-block:: python
+   :caption: LES modeled quantities
 
-   filtered_field.compute_strain_rate(save_tensor=True)
+   filtered_field.compute_strain_rate(save_tensor=False)
    filtered_field.compute_residual_dissipation_rate(mode='Smag')
    filtered_field.compute_residual_kinetic_energy()
 
@@ -224,6 +231,23 @@ data-driven closure models.
 Step 2: Neural network training
 -------------------------------
 
+Prerequisites
+^^^^^^^^^^^^^
+
+This chapter supposes that the reader is already familiar with Neural Networks (NNs) 
+and knows how to code using Pytorch. In case you're not familiar with these concepts, 
+I strongly suggest you the following sources:
+
+- Steve Brunton's `book <https://www.amazon.com.be/-/en/Steven-L-Brunton/dp/1108422098>`__ 'Data Driven Engineering'.
+- `This <https://www.3blue1brown.com/topics/neural-networks>`__ video series from 3blue1brown is an insightful and clear explanation.
+- Pytorch `documentation <https://pytorch.org/docs/stable/index.html>`__ and `tutorials <https://pytorch.org/tutorials/beginner/basics/intro.html>`__ are a complete source for learning this library.
+- The `exercise <https://github.com/burn-research/data-driven-engineering-course2024/blob/main/04_NeuralNetworks/neural_networks_2024_solution.ipynb>`__ of the class of Data-Driven Engineering for the 1st year master's students 
+at Université Libre de Bruxelles. This source is less detailed but can provide quick, 
+straightforward source of information if you already have a basic understanding of the topic.
+
+Overview
+^^^^^^^^
+
 In this second step, a neural network is trained to model the correction factor
 :math:`\gamma` that accounts for unresolved turbulence–chemistry interactions.
 The approach follows the same conceptual framework used in models such as
@@ -231,11 +255,23 @@ EDC and PaSR, where the filtered chemical source term is written as
 
 .. math::
 
+   \overline{\dot{\omega}}_k = \gamma \, \dot{\omega}^{QLFR}_k .
+
+The term :math:`\dot{\omega}^{QLFR}_k` represents the quasi-laminar finite rates (QLFR)
+and typically involves the integration of a reactor in time.
+Our approach will be based on the laminar finite rates (LFR)
+
+.. math::
+
    \overline{\dot{\omega}}_k = \gamma \, \dot{\omega}^{LFR}_k .
 
-Here, :math:`\dot{\omega}^{LFR}_k` is the reaction rate computed from filtered
-quantities, and :math:`\gamma` is a data-driven correction predicted by the
-neural network.
+Here, :math:`\dot{\omega}^{LFR}_k` is the reaction rate of the :math:`k^th` species 
+directly computed from filtered quantities, and :math:`\gamma` is a data-driven 
+term which represents the cell reacting fracion predicted by the neural network.
+Our optimization problem can hence be reduced to the computation of the factor
+:math:`\gamma` such that some quantities of interest related to the reaction rates are
+optimized with respect to the reference DNS data. In the next steps we will further
+highlight this point.
 
 Data preprocessing for PyTorch
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -245,32 +281,55 @@ temperature, strain-rate magnitude, and the slowest chemical time scale.
 The target output is the DNS heat release rate.
 
 .. code-block:: python
+   :caption: Reshape the data
 
-   shape  = filtered_field.shape
-   length = shape[0] * shape[1] * shape[2]
+   import torch
+   import torch.nn as nn
+   import torch.optim as optim
+   import numpy as np
+   import matplotlib.pyplot as plt
+   from sklearn.model_selection import train_test_split
 
-   T     = filtered_field.T.value.reshape(length, 1)
-   S     = filtered_field.S_LES.value.reshape(length, 1)
-   Tau_c = filtered_field.Tau_c_SFR.value.reshape(length, 1)
+   # DATA PROCESSING
+   T      = filtered_field.T.reshape_column() # extract the valeue of Temperature from the filtered field and rehape it as a column vector
+   S      = filtered_field.S_LES.reshape_column()
+   Tau_c  = filtered_field.Tau_c_SFR.reshape_column()
 
-   HRR_LFR = filtered_field.HRR_LFR.value.reshape(length, 1)
-   HRR_DNS = filtered_field.HRR_DNS.value.reshape(length, 1)
+   HRR_LFR = filtered_field.HRR_LFR.reshape_column()
+   HRR_DNS = filtered_field.HRR_DNS.reshape_column()
 
 The input variables are normalized and transformed before building the
 training matrix.
 
 .. code-block:: python
+   :caption: Data scaling
 
-   T = (T - np.min(T)) / (np.max(T) - np.min(T))
-   S = np.log10(S)
-   S = (S - np.min(S)) / (np.max(S) - np.min(S))
-   Tau_c = np.log10(Tau_c)
-   Tau_c = (Tau_c - np.min(Tau_c)) / (np.max(Tau_c) - np.min(Tau_c))
+   T      = (T-np.min(T))/(np.max(T)-np.min(T))
+   S      = np.log10(S)
+   S      = (S-np.min(S))/(np.max(S) - np.min(S))
+   Tau_c  = np.log10(Tau_c)
+   Tau_c  = (Tau_c-np.min(Tau_c)) / (np.max(Tau_c)-np.min(Tau_c))
 
+   # Build the training data matrix
    X = np.hstack([T, S, Tau_c])
 
 The dataset is then split into training and testing subsets and converted
 to PyTorch tensors.
+
+.. code-block:: python
+   :caption: Train/test split
+
+   # Divide between train and test data
+   X_train, X_test, HRR_LFR_train, HRR_LFR_test, HRR_DNS_train, HRR_DNS_test = train_test_split(
+      X, HRR_LFR, HRR_DNS, test_size=0.9, random_state=42)
+
+   X_train = torch.tensor(X_train, dtype=torch.float32)
+   X_test  = torch.tensor(X_test,  dtype=torch.float32)
+   HRR_LFR_train = torch.tensor(HRR_LFR_train, dtype=torch.float32)
+   HRR_LFR_test  = torch.tensor(HRR_LFR_test,  dtype=torch.float32)
+   HRR_DNS_train = torch.tensor(HRR_DNS_train, dtype=torch.float32)
+   HRR_DNS_test  = torch.tensor(HRR_DNS_test,  dtype=torch.float32)
+
 
 Neural network architecture
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -280,53 +339,236 @@ using PyTorch. The architecture consists of multiple hidden layers with
 ReLU activation functions.
 
 .. code-block:: python
+   :caption: Neural network definition and instantiation
 
+   # NN class definition
    class NeuralNetwork(nn.Module):
-       def __init__(self, input_size, hidden_size, output_size, num_layers):
-           super().__init__()
-           self.layers = nn.ModuleList()
-           self.layers.append(nn.Linear(input_size, hidden_size))
-           for _ in range(num_layers - 1):
-               self.layers.append(nn.Linear(hidden_size, hidden_size))
-           self.layers.append(nn.Linear(hidden_size, output_size))
+      def __init__(self, input_size, hidden_size, output_size, num_layers):
+         super(NeuralNetwork, self).__init__()
+         self.layers = nn.ModuleList() # initialize the layers list as an empty list using nn.ModuleList()
+         self.layers.append(nn.Linear(input_size, hidden_size)) # Add the first input layer. The layer takes as input <input_size> neurons and gets as output <hidden_size> neurons
+         for _ in range(num_layers - 1):
+               self.layers.append(nn.Linear(hidden_size, hidden_size)) # Add hidden layers
+         self.layers.append(nn.Linear(hidden_size, output_size)) # add output layer
 
-       def forward(self, x):
-           for layer in self.layers[:-1]:
+      def forward(self, x):    # Function to perform forward propagation
+         for layer in self.layers[:-1]:
                x = torch.relu(layer(x))
-           return self.layers[-1](x)
+         x = self.layers[-1](x)
+         return x
+      
+   # NN architecture
+   input_size = 3
+   num_layers = 6
+   hidden_size = 64
+   output_size = 1
+   model = NeuralNetwork(input_size, hidden_size, output_size, num_layers)
+
 
 Training loop
 ^^^^^^^^^^^^^
 
-The model is trained by minimizing the mean squared error between the
-DNS heat release rate and the corrected LFR prediction
-:math:`\gamma \dot{Q}_{LFR}`.
+The neural network is trained by minimizing the mean squared error (MSE)
+between the DNS heat release rate and the corrected Laminar Finite Rate (LFR)
+prediction
+
+.. math::
+
+   \dot{Q}_{ML} = \gamma \, \dot{Q}_{LFR}.
+
+The loss function and optimizer are first defined:
 
 .. code-block:: python
+   :caption: Loss function and optimizer
+   criterion = nn.MSELoss()
+   optimizer = optim.Adam(model.parameters())
 
-   loss = criterion(output * HRR_LFR_train, HRR_DNS_train)
+The optimizer acts on ``model.parameters()``, which contains all learnable
+weights and biases of the neural network layers. During training, these
+parameters are iteratively updated to minimize the loss function.
 
-Training and testing losses are monitored to assess convergence and
-generalization.
+To accelerate training, the model and tensors are transferred to the
+appropriate computational device. On Apple Silicon machines, the Metal
+Performance Shaders (MPS) backend is used if available; otherwise,
+the computation falls back to the CPU.
+
+.. code-block:: python
+   :caption: Transfer to GPU
+
+   if torch.backends.mps.is_available():
+      device = "mps"
+   elif torch.cuda.is_available():
+      device = "cuda"
+   else:
+      device = "cpu"
+      
+   model = model.to(device)
+   X_train = X_train.to(device)
+   X_test = X_test.to(device)
+   HRR_LFR_train = HRR_LFR_train.to(device)
+   HRR_DNS_train = HRR_DNS_train.to(device)
+   HRR_LFR_test = HRR_LFR_test.to(device)
+   HRR_DNS_test = HRR_DNS_test.to(device)
+
+   # Move the optimizer's state to the same device
+   for state in optimizer.state.values():
+      for k, v in state.items():
+         if isinstance(v, torch.Tensor):
+               state[k] = v.to(device)
+
+The training process consists of repeated forward and backward passes over
+the dataset for a fixed number of epochs:
+
+.. code-block:: python
+   :caption: Training loop
+
+   num_epochs = 1000
+   for epoch in range(num_epochs):
+
+       output = model(X_train)
+       loss = criterion(output * HRR_LFR_train, HRR_DNS_train)
+
+       with torch.no_grad():
+           output_test = model(X_test)
+           loss_test = criterion(output_test * HRR_LFR_test, HRR_DNS_test)
+
+       optimizer.zero_grad()
+       loss.backward()
+       optimizer.step()
+
+At each epoch:
+
+1. **Forward pass**: the network predicts the correction factor
+   :math:`\gamma` for the training inputs.
+2. **Loss evaluation**: the corrected LFR heat release rate is compared
+   to the DNS reference.
+3. **Backward pass**: gradients of the loss with respect to the model
+   parameters are computed.
+4. **Parameter update**: the Adam optimizer updates the network weights.
+
+The testing loss is computed without gradient tracking (``torch.no_grad()``)
+to evaluate eventual overfitting, but it is not used for optimization.
+
+Training and testing losses are stored at each epoch and plotted on a
+logarithmic scale to monitor convergence and detect possible overfitting.
+
+.. container:: demo
+
+   .. code-block:: python
+      :caption: Plot loss vs epochs
+
+      plt.plot(train_loss_list, label='Training Loss')
+      plt.plot(test_loss_list, label='Testing Loss')
+      plt.yscale('log')
+      plt.legend()
+      plt.show()
+
+   .. container:: demo-result
+
+      .. figure:: /_static/figures/fundamentals_and_usage/tutorial_07_fig2.png
+         :width: 50%
+         :align: center
+
+         Figure 3 - Loss function evolution during training.
+
+A decreasing and stable testing loss indicates that the network has learned
+a consistent mapping between DNS filtered quantities and the subgrid deep learning 
+closure :math:`\gamma \cdot \dot{Q}_{LFR}`.
 
 Step 3: Results visualization
-^^^^^^^^^^^^^^^^^^^^^
+-----------------------------
 
 Once trained, the neural network is evaluated on the full dataset.
 Parity plots are used to compare the DNS heat release rate with both
 the LFR model and the machine-learning-corrected prediction.
 
-.. code-block:: python
+.. container:: demo
 
-   gamma = model(torch.tensor(X, dtype=torch.float32).to(device)).cpu().numpy()
+   .. code-block:: python
+      :caption: Model accuracy parity plots
 
-   ap.parity_plot(HRR_DNS, HRR_LFR, density=True,
-                  x_name=r'$\dot{Q}_{DNS}$',
-                  y_name=r'$\dot{Q}_{LFR}$')
+      # PLOTTING
+      with torch.no_grad():
+         gamma = model(torch.tensor(X, dtype=torch.float32).to(device)).cpu().numpy()
 
-   ap.parity_plot(HRR_DNS, gamma * HRR_LFR, density=True,
-                  x_name=r'$\dot{Q}_{DNS}$',
-                  y_name=r'$\dot{Q}_{ML}$')
+      # Visualize the results
+      f = ap.parity_plot(HRR_DNS, HRR_LFR, density=True, 
+                     x_name=r'$\dot{Q}_{DNS}$',
+                     y_name=r'$\dot{Q}_{LFR}$',
+                     cbar_title=r'$\rho_{KDE}/max(\rho_{KDE})$',
+                     )
+      f = ap.parity_plot(HRR_DNS, gamma*HRR_LFR,density=True, 
+                     x_name=r'$\dot{Q}_{DNS}$',
+                     y_name=r'$\dot{Q}_{ML}$',
+                     cbar_title=r'$\rho_{KDE}/max(\rho_{KDE})$',
+                     )
+
+   .. container:: demo-result
+
+      .. figure:: /_static/figures/fundamentals_and_usage/tutorial_07_fig3.png
+         :width: 90%
+         :align: center
+
+         Figure 3 - Parity plots representing the pointwise accuracy of the baseline 
+         Laminar Finite Rates model (LFR, on the left) and of the Machine Learning model 
+         (ML, on the right).
 
 Spatial distributions of the error and of the predicted correction factor
 are finally visualized using mid-plane contour plots.
+
+.. container:: demo
+
+   .. code-block:: python
+      :caption: Deep learning model output contour plots
+
+      gamma_2D = gamma.reshape(filtered_field.shape)[:,:,filtered_field.shape[2]//2] # extract the z midplane of gamma
+      HRR_LFR_2D = HRR_LFR.reshape(filtered_field.shape)[:,:,filtered_field.shape[2]//2]# extract the z midplane
+      HRR_ML_2D = gamma_2D * HRR_LFR_2D
+      HRR_DNS_2D = HRR_DNS.reshape(filtered_field.shape)[:,:,filtered_field.shape[2]//2]# extract the z midplane
+
+      f = ap.contour_plot(filtered_field.mesh.X_midZ*1000,   # Extract x mesh on the z midplane
+                        filtered_field.mesh.Y_midZ*1000,   # Extract y mesh on the z midplane
+                        np.abs(HRR_LFR_2D-HRR_DNS_2D),
+                        vmax=1.5e10,
+                        colormap='Reds',
+                        x_name='x [mm]',
+                        y_name='y [mm]',
+                        title=r'$|\dot{Q}_{LFR}-\dot{Q}_{DNS}|$'
+                        )
+
+      f = ap.contour_plot(filtered_field.mesh.X_midZ*1000,   # Extract x mesh on the z midplane
+                        filtered_field.mesh.Y_midZ*1000,   # Extract y mesh on the z midplane
+                        np.abs(HRR_ML_2D-HRR_DNS_2D),
+                        vmax=1.5e10,
+                        colormap='Reds',
+                        x_name='x [mm]',
+                        y_name='y [mm]',
+                        title=r'$|\dot{Q}_{ML}-\dot{Q}_{DNS}|$'
+                        )
+
+      # Visualize the NN output
+      f = ap.contour_plot(filtered_field.mesh.X_midZ*1000,   # Extract x mesh on the z midplane
+                        filtered_field.mesh.Y_midZ*1000,   # Extract y mesh on the z midplane
+                        gamma_2D,
+                        colormap='viridis',
+                        x_name='x [mm]',
+                        y_name='y [mm]',
+                        title=r'$\gamma_{NN}$'
+                        )
+
+   .. container:: demo-result
+
+      .. figure:: /_static/figures/fundamentals_and_usage/tutorial_07_fig4.avif
+         :width: 90%
+         :align: center
+
+         Figure 4 - Absolute error of the baseline physics-based model LFR (left) 
+         on the xy physical space; absolute error of the machine learning model
+         (right), typo on the figure title (:math:`\dot{Q}_{LFR} -> \dot{Q}_{ML}`)
+
+      .. figure:: /_static/figures/fundamentals_and_usage/tutorial_07_fig5.jpeg
+         :width: 40%
+         :align: center
+
+         Figure 5 - Plot in the physical space of the cell reacting fraction 
+         computed with the machine learning model.

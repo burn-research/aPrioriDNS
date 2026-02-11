@@ -28,8 +28,7 @@ DNS_field = Field3D(directory)
 DNS_field.compute_reaction_rates()
 
 # # Compute the strain rate module on the DNS data without saving the tensor components
-# DNS_field.compute_strain_rate(save_tensor=False)
-
+DNS_field.compute_strain_rate(save_tensor=False)
 
 # FILTERING
 filter_size = 16
@@ -67,23 +66,21 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 
 # DATA PROCESSING
-shape  = filtered_field.shape
-length = shape[0]*shape[1]*shape[2]
-T      = filtered_field.T.value.reshape(length,1) # extract the valeue of Temperature from the filtered field and rehape it as a column vector
-S      = filtered_field.S_LES.value.reshape(length,1)
-Tau_c  = filtered_field.Tau_c_SFR.value.reshape(length,1)
+T      = filtered_field.T.reshape_column() # extract the valeue of Temperature from the filtered field and rehape it as a column vector
+S      = filtered_field.S_LES.reshape_column()
+Tau_c  = filtered_field.Tau_c_SFR.reshape_column()
 
-HRR_LFR = filtered_field.HRR_LFR.value.reshape(length,1)
-HRR_DNS = filtered_field.HRR_DNS.value.reshape(length,1)
+HRR_LFR = filtered_field.HRR_LFR.reshape_column()
+HRR_DNS = filtered_field.HRR_DNS.reshape_column()
 
 # Data scaling
-T      = T-np.min(T)/(np.max(T)-np.min(T))
+T      = (T-np.min(T))/(np.max(T)-np.min(T))
 S      = np.log10(S)
-S      = S-np.min(S)/(np.max(S) - np.min(S))
+S      = (S-np.min(S))/(np.max(S) - np.min(S))
 Tau_c  = np.log10(Tau_c)
-Tau_c  = Tau_c-np.min(Tau_c) / (np.max(Tau_c)-np.min(Tau_c))
+Tau_c  = (Tau_c-np.min(Tau_c)) / (np.max(Tau_c)-np.min(Tau_c))
 
-# Build the training vector
+# Build the training data matrix
 X = np.hstack([T, S, Tau_c])
 
 # Divide between train and test data
@@ -126,8 +123,13 @@ criterion = nn.MSELoss()
 optimizer = optim.Adam(model.parameters()) # here we are using the Adam optimizer, to optimize model.parameters, but what is there inside this attribute?
 
 # transfer on GPU
-device = torch.device("mps" if torch.backends.mps.is_available() else "cpu") # GPU available on Mac M2
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # if you're using a device with cuda
+if torch.backends.mps.is_available():
+    device = "mps"
+elif torch.cuda.is_available():
+    device = "cuda"
+else:
+    device = "cpu"
+    
 model = model.to(device)
 X_train = X_train.to(device)
 X_test = X_test.to(device)
