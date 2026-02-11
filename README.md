@@ -47,12 +47,15 @@ This will automatically install or update the following dependencies if necessar
 - tabulate>=0.9.0,
 - requests>=2.32.0.
 - PyCSP>=1.4.0
+- findiff>=0.12
 
 ## Documentation
 
-The complete software documentation is available at: 
+The complete software documentation is built with sphynx and hosted using ReadTheDocs at the following website:
 
-https://apriori.gitbook.io/apriori-documentation-1
+https://apriori.readthedocs.io
+
+The old documentation on [Gitbook](https://apriori.gitbook.io/apriori-documentation-1) is not updated and will soon be deprecated.
 
 ## How to cite
 This open-source software is distributed under the MIT license. If you use it in your work, please cite it as:
