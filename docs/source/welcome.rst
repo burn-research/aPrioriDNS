@@ -35,8 +35,8 @@
    :alt: PyPI Downloads
    :height: 20px
 
-.. |zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.13793622.png
-   :target: https://zenodo.org/records/13793623
+.. |zenodo| image:: https://img.shields.io/badge/Journal%20article-blue?label=DOI
+   :target: https://doi.org/10.1007/s10494-024-00626-3
    :alt: Zenodo DOI
    :height: 20px
 
