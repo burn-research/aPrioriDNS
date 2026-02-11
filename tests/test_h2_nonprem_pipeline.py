@@ -123,7 +123,18 @@ def test_h2_premixed_end_to_end(apriori_test_cache_dir: str):
     filtered_field.compute_mixing_timescale(mode="Kolmo")
     assert hasattr(filtered_field, "Tau_m_Kolmo"), "Mixing timescale should exist"
 
-    # Progress variable + gradient + laplacian
+    # Progress variable + gradient + laplacian(DNS field)
+    dns_field.compute_progress_variable("H2O")
+    assert hasattr(dns_field, "C"), "Progress variable should exist"
+
+    dns_field.compute_gradient_C()
+    assert hasattr(dns_field, "C_grad"), "Progress-variable gradient should exist"
+
+    dns_field.compute_laplacian_C()
+    assert hasattr(dns_field, "C_laplacian"), "Progress-variable laplacian should exist"
+
+
+    # Progress variable + gradient + laplacian (filtered field)
     filtered_field.compute_progress_variable("H2O")
     assert hasattr(filtered_field, "C"), "Progress variable should exist"
 
@@ -215,7 +226,7 @@ def test_h2_premixed_end_to_end(apriori_test_cache_dir: str):
         cbar_title=r"$c$ [-]",
         remove_y=True,
     )
-    _save_and_check_fig(fig5, os.path.join(figures_dir, "C.png"), dpi=dpi)
+    _save_and_check_fig(fig5, os.path.join(figures_dir, "C_grad.png"), dpi=dpi)
 
     # --- Plot: Filtered progress variable 
     fig6, ax6 = filtered_field.plot_z_midplane(
@@ -225,7 +236,7 @@ def test_h2_premixed_end_to_end(apriori_test_cache_dir: str):
         # title="$\widetilde{c}$",
         cbar_title=r"$\widetilde{c}$",
     )
-    _save_and_check_fig(fig6, os.path.join(figures_dir, "C_filtered.png"), dpi=dpi)
+    _save_and_check_fig(fig6, os.path.join(figures_dir, "C_grad_filtered.png"), dpi=dpi)
     
     # --- Plot: Progress variable
     fig7, ax7 = dns_field.plot_z_midplane(
@@ -236,7 +247,7 @@ def test_h2_premixed_end_to_end(apriori_test_cache_dir: str):
         cbar_title=r"$c$ [-]",
         remove_y=True,
     )
-    _save_and_check_fig(fig7, os.path.join(figures_dir, "C.png"), dpi=dpi)
+    _save_and_check_fig(fig7, os.path.join(figures_dir, "C_laplacian.png"), dpi=dpi)
 
     # --- Plot: Filtered progress variable 
     fig8, ax8 = filtered_field.plot_z_midplane(
@@ -246,5 +257,5 @@ def test_h2_premixed_end_to_end(apriori_test_cache_dir: str):
         # title="$\widetilde{c}$",
         cbar_title=r"$\widetilde{c}$",
     )
-    _save_and_check_fig(fig8, os.path.join(figures_dir, "C_filtered.png"), dpi=dpi)
+    _save_and_check_fig(fig8, os.path.join(figures_dir, "C_laplacian_filtered.png"), dpi=dpi)
     
