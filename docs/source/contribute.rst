@@ -44,7 +44,7 @@ Clone your fork to your local machine:
 .. code-block:: bash
 
    git clone https://github.com/<your-username>/aPriori.git
-   cd aPrioriDNS
+   cd aPriori
 
 Add the upstream repository (optional but recommended):
 
