@@ -89,16 +89,26 @@ Then install the development dependencies:
 This installs development dependencies (testing, formatting, documentation tools)
 and allows changes to be picked up immediately.
 
-Before moving on, please try to run the tests to check that everything works, with
+5. Run tests
+^^^^^^^^^^^^
+
+Before moving on, please try to run the tests to check that everything works. The 
+tests can take a long time even 5 to 10 minutes; please run them with
 the following command:
+
+.. code-block:: bash
+
+   pytest -m slow --html=pytest_report.html --self-contained-html
+
+If some of the tests fail, please open an issue attaching the test results.
+
+If this command fails or you don't have installed pytest-html, also try this one:
 
 .. code-block:: bash
 
    pytests
 
-If some of the tests fail, please open an issue attaching the test results.
-
-5. Make your changes
+6. Make your changes
 ^^^^^^^^^^^^^^^^^^^^
 
 - Keep changes focused and reasonably scoped
@@ -110,18 +120,18 @@ If some of the tests fail, please open an issue attaching the test results.
 If your contribution affects numerical results or algorithms, please document
 the rationale clearly.
 
-6. Run tests
+7. Run tests
 ^^^^^^^^^^^^
 
-Before committing, run the test suite locally:
+Before committing, run again the test suite locally:
 
 .. code-block:: bash
 
-   pytest
+   pytest -m slow --html=pytest_report.html --self-contained-html
 
 If you add new functionality, please include corresponding tests whenever possible.
 
-7. Commit your changes
+8. Commit your changes
 ^^^^^^^^^^^^^^^^^^^^^^
 
 Write clear, descriptive commit messages:
@@ -133,14 +143,14 @@ Write clear, descriptive commit messages:
 
 Avoid large commits that mix unrelated changes.
 
-8. Push to your fork
+9. Push to your fork
 ^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: bash
 
    git push origin my-feature-name
 
-9. Open a Pull Request
+10. Open a Pull Request
 ^^^^^^^^^^^^^^^^^^^^^^
 
 Go to your fork on GitHub and open a **Pull Request** targeting the ``main`` branch
