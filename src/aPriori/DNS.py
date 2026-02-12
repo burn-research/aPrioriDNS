@@ -815,10 +815,13 @@ class Field3D():
         else:
             filter_size = self.filter_size
 
-        # Computing the laplacian incrementally to avoid memory overload
-        laplacian =  gradient_x(self.C_grad_X, self.mesh, filter_size)
-        laplacian += gradient_y(self.C_grad_Y, self.mesh, filter_size)
-        laplacian += gradient_y(self.C_grad_Y, self.mesh, filter_size)
+        # # Computing the laplacian incrementally to avoid memory overload
+        # laplacian =  gradient_x(self.C_grad_X, self.mesh, filter_size)
+        # laplacian += gradient_y(self.C_grad_Y, self.mesh, filter_size)
+        # laplacian += gradient_y(self.C_grad_Y, self.mesh, filter_size)
+
+        # Compute the laplacian with the derivatives module
+        laplacian_C = laplacian(self.C, self.mesh, filter_size)
 
         save_file(laplacian, self.find_path('C_laplacian'))
 
@@ -4886,7 +4889,7 @@ def save_file (X, file_name):
     X = X.astype(np.float32)
     X.tofile(file_name)
 
-from .derivatives import(gradient_x, gradient_y, gradient_z)
+from .derivatives import(gradient_x, gradient_y, gradient_z, laplacian)
 
     
 # def gradient_x(F, mesh, filter_size=1):
