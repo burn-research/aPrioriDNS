@@ -771,18 +771,23 @@ class Field3D():
             filter_size = 1
         else:
             filter_size = self.filter_size
+
+        # Reduce gradients accuracy for filtered fields
+        reduce_acc = False
+        if self.filter_size > 1:
+            reduce_acc = True
         
-        grad_C_x = gradient_x(self.C, self.mesh, filter_size)
+        grad_C_x = gradient_x(self.C, self.mesh, filter_size, reduce_acc=reduce_acc)
         save_file(grad_C_x, self.find_path('C_grad_X'))
         self.update()
         del grad_C_x # release memory
         
-        grad_C_y = gradient_y(self.C, self.mesh, filter_size)
+        grad_C_y = gradient_y(self.C, self.mesh, filter_size, reduce_acc=reduce_acc)
         save_file(grad_C_y, self.find_path('C_grad_Y'))
         self.update()
         del grad_C_y # release memory
         
-        grad_C_z = gradient_z(self.C, self.mesh, filter_size)
+        grad_C_z = gradient_z(self.C, self.mesh, filter_size, reduce_acc=reduce_acc)
         save_file(grad_C_z, self.find_path('C_grad_Z'))
         self.update()
         del grad_C_z # release memory
@@ -815,8 +820,13 @@ class Field3D():
         else:
             filter_size = self.filter_size
 
+        # Reduce derivatives accuracy for filtered fields
+        reduce_acc = False
+        if self.filter_size > 1:
+            reduce_acc = True
+
         # Compute the laplacian with the derivatives module
-        laplacian_C = laplacian(self.C, self.mesh, filter_size)
+        laplacian_C = laplacian(self.C, self.mesh, filter_size, reduce_acc=reduce_acc)
 
         save_file(laplacian_C, self.find_path('C_laplacian'))
 
@@ -1828,6 +1838,11 @@ class Field3D():
             filter_size =  1  # filter_size is used for the gradients computation
             # if the field is downsampled, there is no need to compute gradients skipping values
         mesh = self.mesh
+
+        # Reduce gradients accuracy for filtered fields
+        reduce_acc = False
+        if self.filter_size > 1:
+            reduce_acc = True
         
         # define the list to use to change the file name
         path_list = self.U_X.path.split('/')
@@ -1846,11 +1861,11 @@ class Field3D():
                         print(f"Computing dU_{axes[i].lower()}/d{axes[j].lower()}...")
                     U = getattr(self, f"U_{axes[i]}")
                     if j == 0:
-                        dU_dx = gradient_x(U, mesh, filter_size)
+                        dU_dx = gradient_x(U, mesh, filter_size, reduce_acc=reduce_acc)
                     if j == 1:
-                        dU_dx = gradient_y(U, mesh, filter_size)
+                        dU_dx = gradient_y(U, mesh, filter_size, reduce_acc=reduce_acc)
                     if j == 2:
-                        dU_dx = gradient_z(U, mesh, filter_size)
+                        dU_dx = gradient_z(U, mesh, filter_size, reduce_acc=reduce_acc)
                     save_file(dU_dx, file_name)
                     del dU_dx
                 else:
@@ -2357,11 +2372,15 @@ class Field3D():
         else:
             filter_size = self.filter_size
         
-        grad_Z = np.sqrt(
-            gradient_x(self.Z, self.mesh, filter_size)**2 + 
-            gradient_y(self.Z, self.mesh, filter_size)**2 + 
-            gradient_z(self.Z, self.mesh, filter_size)**2
-            )
+        # Reduce gradients accuracy to second order for filtered fields
+        reduce_acc = False
+        if self.filter_size > 1:
+            reduce_acc = True
+
+        grad_Z  = gradient_x(self.Z, self.mesh, filter_size, reduce_acc=reduce_acc)**2 
+        grad_Z += gradient_y(self.Z, self.mesh, filter_size, reduce_acc=reduce_acc)**2 
+        grad_Z += gradient_z(self.Z, self.mesh, filter_size, reduce_acc=reduce_acc)**2
+        grad_Z  = np.sqrt(grad_Z)
         
         save_file(grad_Z, self.find_path('Z_grad'))
         self.update()
