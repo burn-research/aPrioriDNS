@@ -89,6 +89,9 @@ Then install the development dependencies:
 This installs development dependencies (testing, formatting, documentation tools)
 and allows changes to be picked up immediately.
 
+The following steps are recommended for who wants to contribute to the project, 
+but they are not necessary if you're planning to edit the library for personal usage only.
+
 5. Run tests
 ^^^^^^^^^^^^
 
