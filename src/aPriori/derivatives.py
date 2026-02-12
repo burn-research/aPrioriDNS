@@ -81,7 +81,7 @@ def _apply_findiff_on_strided_grid(data, coords_1d, axis, filter_size, acc, deri
     return result
 
 
-def gradient_x(F, mesh, filter_size=1, acc=4):
+def gradient_x(F, mesh, filter_size=1, acc=4, reduce_acc=False):
     '''
     Description
     -----------
@@ -115,6 +115,9 @@ def gradient_x(F, mesh, filter_size=1, acc=4):
         raise TypeError("filter_size must be an integer")
     if not isinstance(acc, int):
         raise TypeError("acc must be an integer")
+    
+    if reduce_acc: # Switch to decrease gradients accuracy (used for example on LES grids)
+        acc=2
 
     # 2. Call Internal Helper
     return _apply_findiff_on_strided_grid(
@@ -127,7 +130,7 @@ def gradient_x(F, mesh, filter_size=1, acc=4):
     )
 
 
-def gradient_y(F, mesh, filter_size=1, acc=4):
+def gradient_y(F, mesh, filter_size=1, acc=4, reduce_acc=False):
     '''
     Description
     -----------
@@ -137,6 +140,11 @@ def gradient_y(F, mesh, filter_size=1, acc=4):
         raise TypeError("F must be an object of the class Scalar3D")
     if type(mesh).__name__ != 'Mesh3D':
         raise TypeError("mesh must be an object of the class Mesh3D")
+    if not isinstance(acc, int):
+        raise TypeError("acc must be an integer")
+    
+    if reduce_acc:
+        acc = 2
 
     return _apply_findiff_on_strided_grid(
         data=F._3d,
@@ -148,7 +156,7 @@ def gradient_y(F, mesh, filter_size=1, acc=4):
     )
 
 
-def gradient_z(F, mesh, filter_size=1, acc=4):
+def gradient_z(F, mesh, filter_size=1, acc=4, reduce_acc=False):
     '''
     Description
     -----------
@@ -158,6 +166,11 @@ def gradient_z(F, mesh, filter_size=1, acc=4):
         raise TypeError("F must be an object of the class Scalar3D")
     if type(mesh).__name__ != 'Mesh3D':
         raise TypeError("mesh must be an object of the class Mesh3D")
+    if not isinstance(acc, int):
+        raise TypeError("acc must be an integer")
+    
+    if reduce_acc:
+        acc = 2
 
     return _apply_findiff_on_strided_grid(
         data=F._3d,
@@ -169,7 +182,7 @@ def gradient_z(F, mesh, filter_size=1, acc=4):
     )
 
 
-def laplacian(F, mesh, filter_size=1, acc=4):
+def laplacian(F, mesh, filter_size=1, acc=4, reduce_acc=False):
     '''
     Description
     -----------
@@ -191,6 +204,9 @@ def laplacian(F, mesh, filter_size=1, acc=4):
         raise TypeError("F must be an object of the class Scalar3D")
     if type(mesh).__name__ != 'Mesh3D':
         raise TypeError("mesh must be an object of the class Mesh3D")
+    
+    if reduce_acc:
+        acc = 2
 
     # Compute second derivatives for each axis
     laplacian_value  = _apply_findiff_on_strided_grid(F._3d, mesh.X1D, 0, filter_size, acc, deriv_order=2)
