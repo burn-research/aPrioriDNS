@@ -169,7 +169,7 @@ def gradient_z(F, mesh, filter_size=1, acc=4):
     )
 
 
-def laplacian(F, mesh, filter_size=1, acc=3):
+def laplacian(F, mesh, filter_size=1, acc=4):
     '''
     Description
     -----------
@@ -193,8 +193,8 @@ def laplacian(F, mesh, filter_size=1, acc=3):
         raise TypeError("mesh must be an object of the class Mesh3D")
 
     # Compute second derivatives for each axis
-    laplacian  = _apply_findiff_on_strided_grid(F._3d, mesh.X1D, 0, filter_size, acc, deriv_order=2)
-    laplacian += _apply_findiff_on_strided_grid(F._3d, mesh.Y1D, 1, filter_size, acc, deriv_order=2)
-    laplacian += _apply_findiff_on_strided_grid(F._3d, mesh.Z1D, 2, filter_size, acc, deriv_order=2)
+    laplacian_value  = _apply_findiff_on_strided_grid(F._3d, mesh.X1D, 0, filter_size, acc, deriv_order=2)
+    laplacian_value += _apply_findiff_on_strided_grid(F._3d, mesh.Y1D, 1, filter_size, acc, deriv_order=2)
+    laplacian_value += _apply_findiff_on_strided_grid(F._3d, mesh.Z1D, 2, filter_size, acc, deriv_order=2)
 
-    return laplacian
+    return laplacian_value
