@@ -20,10 +20,19 @@ from findiff import FinDiff
 from .DNS import Scalar3D
 from .DNS import Mesh3D
 
-# Ideally, import your actual classes here to support isinstance() checks.
-# If this causes circular imports, you can import them inside the functions
-# or keep the checks generic.
-# from .classes import Scalar3D, Mesh3D 
+
+_DEFAULT_DERIVATIVES_ORDER = 4
+
+def set_gradients_order(order: int) -> None:
+    global _DEFAULT_DERIVATIVES_ORDER
+    _DEFAULT_DERIVATIVES_ORDER = order
+
+def print_gradients_order(order=None):
+    if order is None:
+        order = _DEFAULT_DERIVATIVES_ORDER
+    print(f"Using order {order}")
+
+
 
 def _apply_findiff_on_strided_grid(data, coords_1d, axis, filter_size, acc, deriv_order):
     """
@@ -81,7 +90,7 @@ def _apply_findiff_on_strided_grid(data, coords_1d, axis, filter_size, acc, deri
     return result
 
 
-def gradient_x(F, mesh, filter_size=1, acc=4, reduce_acc=False):
+def gradient_x(F, mesh, filter_size=1, acc=8, reduce_acc=False):
     '''
     Description
     -----------
@@ -130,7 +139,7 @@ def gradient_x(F, mesh, filter_size=1, acc=4, reduce_acc=False):
     )
 
 
-def gradient_y(F, mesh, filter_size=1, acc=4, reduce_acc=False):
+def gradient_y(F, mesh, filter_size=1, acc=8, reduce_acc=False):
     '''
     Description
     -----------
@@ -156,7 +165,7 @@ def gradient_y(F, mesh, filter_size=1, acc=4, reduce_acc=False):
     )
 
 
-def gradient_z(F, mesh, filter_size=1, acc=4, reduce_acc=False):
+def gradient_z(F, mesh, filter_size=1, acc=8, reduce_acc=False):
     '''
     Description
     -----------
