@@ -388,3 +388,56 @@ def process_arrays(x, y):
         raise ValueError("y must be a 1D array or a list of 1D arrays")
 
     return x, y_list, m
+
+class VerbosePrinter:
+    """Callable verbose printer.
+
+    A lightweight helper class that behaves like the built-in ``print``
+    function, but only outputs text when verbosity is enabled.
+
+    The instance is callable, so it can be used exactly like ``print``.
+    Additional keyword arguments are forwarded directly to ``print``.
+
+    Example:
+        >>> vprint = VerbosePrinter(verbose=True)
+        >>> vprint("Loading mesh...")
+        Loading mesh...
+
+        >>> vprint.verbose = False
+        >>> vprint("This will not print")
+
+    Args:
+        verbose (bool, optional):
+            If True, messages are printed. If False, output is suppressed.
+            Defaults to False.
+        prefix (str | None, optional):
+            Optional string prepended to every printed message.
+            Defaults to None.
+
+    Attributes:
+        verbose (bool):
+            Controls whether output is printed.
+        prefix (str | None):
+            Optional prefix added to messages.
+    """
+
+    def __init__(self, verbose: bool = False, prefix: str | None = None):
+        self.verbose = verbose
+        self.prefix = prefix
+
+    def __call__(self, *args, **kwargs) -> None:
+        """Print message if verbosity is enabled.
+
+        Args:
+            *args:
+                Positional arguments forwarded to ``print``.
+            **kwargs:
+                Keyword arguments forwarded to ``print``.
+        """
+        if not self.verbose:
+            return
+
+        if self.prefix:
+            print(self.prefix, *args, **kwargs)
+        else:
+            print(*args, **kwargs)
