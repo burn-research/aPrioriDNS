@@ -32,6 +32,7 @@ import requests
 import re
 from itertools import zip_longest
 import warnings
+import math
 
 from ._variables import variables_list
 from ._variables import mesh_list
@@ -44,7 +45,8 @@ from ._utils import (
     extract_filter,
     change_folder_name,
     check_mass_fractions,
-    check_reaction_rates
+    check_reaction_rates,
+    VerbosePrinter
 )
 from ._data_struct import folder_structure
 from .plot_utilities import contour_plot, plot_multifield
@@ -201,13 +203,15 @@ class Field3D():
     __field_dimension = 3
     
     
-    def __init__(self, folder_path, reactive=True):
-        print("\n---------------------------------------------------------------")
-        print("Initializing 3D Field\n")
+    def __init__(self, folder_path, reactive=True, verbose=True):
+        vprint = VerbosePrinter(verbose=verbose)
+
+        vprint("\n---------------------------------------------------------------")
+        vprint("Initializing 3D Field\n")
         # check the folder structure and files
         check_folder_structure(folder_path, reactive=reactive)
         _, ids = check_data_files(folder_path)
-        print("Folder structure OK")
+        vprint("Folder structure OK")
         
         self.folder_path = folder_path
         self.data_path = os.path.join(folder_path, folder_structure["data_path"])
@@ -228,31 +232,48 @@ class Field3D():
         
         self.id_string = ids
         
-        print("\n---------------------------------------------------------------")
-        print ("Building mesh attribute...")
-        X=Scalar3D(self.shape, path=os.path.join(self.grid_path,mesh_list["X_mesh"][0]) )
-        Y=Scalar3D(self.shape, path=os.path.join(self.grid_path,mesh_list["Y_mesh"][0]) )
-        Z=Scalar3D(self.shape, path=os.path.join(self.grid_path,mesh_list["Z_mesh"][0]) )
+        vprint("\n---------------------------------------------------------------")
+        vprint ("Checking mesh files...")
+
+        # Create the attributes with the path to the mesh location
+        self.X_m_path = os.path.join(self.grid_path,mesh_list["X_mesh"][0])
+        self.Y_m_path = os.path.join(self.grid_path,mesh_list["Y_mesh"][0])
+        self.Z_m_path = os.path.join(self.grid_path,mesh_list["Z_mesh"][0])
+
+        # Check that the mesh files are 3D and not 1D
+        mesh_is_3d, mesh_is_1d = check_mesh_files(self.X_m_path, self.Y_m_path, self.Z_m_path, self.shape)
+
+        if not mesh_is_3d:
+            if mesh_is_1d:
+                vprint ("Converting mesh files from 1D to 3D arrays...")
+                build_meshgrid(self.X_m_path, self.Y_m_path, self.Z_m_path) # Overwrite mesh files in-place
+            else:
+                raise ValueError(f"Mesh shape does not correspond to the declared field shape {self.shape}. Please check the mesh files.")
+
+        vprint ("Building mesh attribute...")
+        X=Scalar3D(self.shape, path=self.X_m_path)
+        Y=Scalar3D(self.shape, path=self.Y_m_path)
+        Z=Scalar3D(self.shape, path=self.Z_m_path)
         
         self.mesh = Mesh3D(X, Y, Z)
-        print ("Mesh fields read correctly")
+        vprint ("Mesh fields read correctly")
         
         if reactive:
-            print("\n---------------------------------------------------------------")
-            print("Reading kinetic mechanism...")
+            vprint("\n---------------------------------------------------------------")
+            vprint("Reading kinetic mechanism...")
             self.kinetic_mechanism = find_kinetic_mechanism(self.chem_path)
-            print(f"Kinetic mechanism file found: {self.kinetic_mechanism}")
+            vprint(f"Kinetic mechanism file found: {self.kinetic_mechanism}")
             self.species = extract_species(self.kinetic_mechanism)
             self.reactions, self.reaction_equations = extract_reactions(self.kinetic_mechanism)
             self.reaction_names = [re.search(r'\(([^)]+)\)', r).group(1) for r in self.reactions]
-            print("Species:")
-            print(self.species)
+            vprint("Species:")
+            vprint(self.species)
         
         
-        print("\n---------------------------------------------------------------")
-        print ("Building scalar attributes...")
+        vprint("\n---------------------------------------------------------------")
+        vprint ("Building scalar attributes...")
         self.attr_list, self.paths_list = self.build_attributes_list()
-        self.update(verbose=True)
+        self.update(verbose=verbose)
         
     def add_variable(self, attr_name, file_name):
         
@@ -4663,6 +4684,88 @@ def process_file(file_path):
     """
     # Placeholder for file processing logic
     return np.fromfile(file_path,dtype='<f4')
+
+import numpy as np
+
+def check_mesh_files(X_m_path, Y_m_path, Z_m_path, shape):
+    """
+    Checks whether mesh coordinate files match either:
+    - a full 3D mesh of size prod(shape)
+    - a 1D mesh of sizes shape[0], shape[1], shape[2]
+
+    Returns
+    -------
+    check_3d : bool
+        True if all coordinates match full 3D size.
+    check_1d : bool
+        True if all coordinates match corresponding 1D axis size.
+    """
+
+    expected_3d_size = np.prod(shape)
+
+    check_3d = True
+    check_1d = True
+
+    paths = [X_m_path, Y_m_path, Z_m_path]
+
+    for axis, path in enumerate(paths):
+        data = process_file(path)
+        size = len(data)
+
+        # Check 3D consistency
+        if size != expected_3d_size:
+            check_3d = False
+
+        # Check 1D consistency
+        if size != shape[axis]:
+            check_1d = False
+
+        del data  # Explicit memory release if files are large
+
+    return check_3d, check_1d
+
+import numpy as np
+
+def build_meshgrid(X_m_path: str, Y_m_path: str, Z_m_path: str):
+    """
+    Converts 1D mesh coordinate files (X, Y, Z) into 3D meshgrid
+    coordinate fields and overwrites the original files.
+
+    The input files must contain 1D coordinate vectors.
+    The output files will contain the corresponding 3D meshgrid
+    coordinates stored in flattened binary format via `save_file()`.
+
+    Parameters
+    ----------
+    X_m_path : str
+        Path to the X coordinate file (1D vector).
+    Y_m_path : str
+        Path to the Y coordinate file (1D vector).
+    Z_m_path : str
+        Path to the Z coordinate file (1D vector).
+
+    Returns
+    -------
+    tuple[int, int, int]
+        The generated mesh shape as (Nx, Ny, Nz).
+
+    Raises
+    ------
+    ValueError
+        If any of the input arrays is not 1D or is empty.
+    """
+
+    x = process_file(X_m_path)
+    y = process_file(Y_m_path)
+    z = process_file(Z_m_path)
+
+    # Create structured meshgrid (matrix indexing)
+    X3, Y3, Z3 = np.meshgrid(x, y, z, indexing="ij")
+
+    # Overwrite files in-place
+    save_file(X3, X_m_path)
+    save_file(Y3, Y_m_path)
+    save_file(Z3, Z_m_path)
 
 
 def filter_gauss(field,delta, mode='mirror'):
