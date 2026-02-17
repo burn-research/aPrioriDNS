@@ -61,7 +61,7 @@ The old documentation on [Gitbook](https://apriori.gitbook.io/apriori-documentat
 The library's software paper is currently under preparation.
 
 If you use aPriori in your work, please **temporarily cite** the following
-peer-reviewed publication, which introduces the methodology and workflows
+[peer-reviewed publication](doi:10.1007/s10494-024-00626-3), which introduces the methodology and workflows
 on which the library is based:
 
 ```
@@ -73,6 +73,8 @@ doi:10.1007/s10494-024-00626-3.
 
 ## Third party software
 The present library relies on the code [PyCSP](https://github.com/rmalpica/PyCSP) package for Computational Singular Perturbation (CSP) analysis. PyCSP is developed and maintained by Professor Riccardo Malpica Galassi at Sapienza University of Rome. For detailed documentation and further information, please refer to the original repository.
+
+All the libraries the software relies on are automatically installed at installation, to ensure a tested and updated environment. These libraries are mentioned in the [third party notice file](THIRD_PARTY_NOTICES.md).
 
 ## License
 This project is licensed under the [GNU General Public License](https://creativecommons.org/licenses/by/4.0/deed.en) (GPL v3.0).
