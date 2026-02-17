@@ -17,7 +17,7 @@ First of all, we need to import the module. Make sure you installed
 the package with the command
 pip install aPrioriDNS
 """
-import aPrioriDNS as ap
+import aPriori as ap
 import numpy as np
 
 """

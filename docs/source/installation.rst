@@ -49,7 +49,7 @@ After installation, verify it worked:
 Optional: creating a virtual environment
 ----------------------------------------
 
-Although not required, it is **strongly recommended** to install aPrioriDNS inside
+Although not required, it is **strongly recommended** to install aPriori inside
 a clean environment:
 
 .. tab-set::
@@ -78,51 +78,15 @@ Installing the Development Version (for Contributors)
 
 If you plan to:
 
-* add new features (both for yourself or to contribute)
+* add new features (both for yourself or to contribute to the project)
 * fix bugs,
-* improve documentation,
+* improve documentation and tutorials,
 * contribute DNS datasets or utilities,
 
 then you should install the **development** version from GitHub.
-It is strongly recommended to clone the 'dev' branch, as it is 
-the one where new features are added before a new release.
 
-.. container:: center
-
-   .. card:: 🛠️ Repository
-      :link: https://github.com/LorenzoPiu/aPrioriDNS
-      :text-align: center
-      :shadow: md
-      :padding: 2
-
-      Clone or fork the development repository on GitHub.
-
-Developer installation steps
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-1. **Clone the repository**
-
-   .. code-block:: bash
-
-      git clone https://github.com/LorenzoPiu/aPrioriDNS.git
-      cd aPrioriDNS
-      git checkout dev
-
-2. **Create a development environment**
-
-   .. code-block:: bash
-
-      python3 -m venv .venv
-      source .venv/bin/activate
-
-3. **Install in editable mode**
-
-   This installs the package so that changes in the source code are
-   immediately reflected when you import it:
-
-   .. code-block:: bash
-
-      pip install -e .
+All the detailed information on how to install the code in editable mode 
+can be found at the :doc:`How to contribute <contribute>` page.
 
 Upgrading to the latest version
 -------------------------------

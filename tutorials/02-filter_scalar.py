@@ -6,8 +6,8 @@ Created on Fri May 24 12:00:20 2024
 @author: lorenzo piu
 """
 
-import aPrioriDNS.DNS as DNS
-from aPrioriDNS.DNS import Scalar3D
+import aPriori.DNS as DNS
+from aPriori.DNS import Scalar3D
 import numpy as np
 
 shape = [4, 2, 4]

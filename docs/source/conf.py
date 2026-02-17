@@ -32,7 +32,7 @@ autoapi_own_page_level = "function"
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'aPriori'
-copyright = 'Copyright © 2024, Lorenzo Piu, Heinz Pitsch, Alessandro Parente'
+copyright = 'Copyright © 2026, Lorenzo Piu, Heinz Pitsch, Alessandro Parente'
 author = 'Lorenzo Piu'
 release = '1.1.10'
 html_title = "aPriori Documentation"
@@ -121,6 +121,14 @@ html_theme_options = {
             "title": "Publications",
             "url": "publications"
         },
+        {
+            "title": "Cite",
+            "url": "how_to_cite"
+        },
+        {
+            "title": "Contribute",
+            "url": "contribute"
+        },
     ],
     "github_url": "https://github.com/LorenzoPiu/aPrioriDNS",
     "linkedin_url": "https://www.linkedin.com/in/lorenzopiu/",
@@ -129,7 +137,7 @@ html_theme_options = {
 html_context = {
     "source_type": "github",
     "source_user": "LorenzoPiu",
-    "source_repo": "aPrioriDNS",
+    "source_repo": "aPriori",
 }
 
 bibtex_bibfiles = ["references.bib"]

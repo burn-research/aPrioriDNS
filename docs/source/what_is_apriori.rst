@@ -20,11 +20,11 @@ mechanics, turbulence, and reacting-flow research. By resolving the full
 Navier–Stokes equations and all relevant spatio-temporal scales
 :cite:p:`moin1998direct`, DNS provides highly detailed information on:
 
-- the interaction between turbulence and chemical reactions
-  :cite:p:`PoinsotVeynante_2005`;
-- small-scale mixing, dissipation, and scalar transport;
 - statistical and structural properties of turbulent flows
   :cite:p:`Pope2012-jn`.
+- the interaction between turbulence and chemical reactions
+  :cite:p:`PoinsotVeynante_2005`;
+- small-scale mixing, dissipation, and scalar transport :cite:p:`Attili2012`;
 
 This level of detail comes at a cost: modern DNS runs are computationally
 expensive and increasingly energy-intensive. A recent analysis of DNS studies
@@ -89,8 +89,8 @@ main features include:
   experienced users through typical analysis patterns.
 
 The package aims to provide a uniform, intuitive, and efficient interface to
-heterogeneous DNS datasets—reducing friction, avoiding unnecessary memory
-usage, and accelerating research workflows in turbulence, combustion, and
+heterogeneous DNS datasets—avoiding unnecessary memory
+usage and accelerating research workflows in turbulence, combustion, and
 machine learning. As an example, the following figure displays the typical 
 set of operations that using aPriori can be performed with a few lines of code:
 

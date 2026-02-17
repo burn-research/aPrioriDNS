@@ -8,11 +8,11 @@
    :alt: Dark mode version
    :align: center
 
-|mit| |source| |docs| |issues| |pypi| |zenodo|
+|license| |source| |docs| |issues| |pypi| |zenodo|
 
-.. |mit| image:: https://img.shields.io/badge/License-MIT-yellow
-   :target: https://opensource.org/licenses/MIT
-   :alt: MIT License
+.. |license| image:: https://img.shields.io/badge/GPL%20v3.0%20-%20%23F5CF27?label=License&logo=gplv3&logoColor=white
+   :target: https://www.gnu.org/licenses/gpl-3.0.en.html
+   :alt: GPL v3.0 License
    :height: 20px
 
 .. |source| image:: https://img.shields.io/badge/Source-Github-02bfa6?&logo=Github&logoColor=white
@@ -20,8 +20,8 @@
    :alt: GitHub Source Code
    :height: 20px
 
-.. |docs| image:: https://img.shields.io/badge/Documentation-Gitbook-green?logo=Gitbook&logoColor=white
-   :target: https://apriori.gitbook.io/apriori-documentation-1
+.. |docs| image:: https://img.shields.io/badge/Documentation-ReadTheDocs-green?logo=readthedocs&logoColor=white
+   :target: https://apriori.readthedocs.io
    :alt: Documentation
    :height: 20px
 
@@ -30,13 +30,13 @@
    :alt: GitHub Issues
    :height: 20px
 
-.. |pypi| image:: https://img.shields.io/pypi/dm/aprioridns?color=03b1fc&logo=pypi&logoColor=white
-   :target: https://pypistats.org/packages/aprioridns
+.. |pypi| image:: https://img.shields.io/pepy/dt/aPrioriDNS?logo=pypi&logoColor=white&color=03b1fc
+   :target: https://pepy.tech/projects/aprioridns
    :alt: PyPI Downloads
    :height: 20px
 
-.. |zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.13793622.png
-   :target: https://zenodo.org/records/13793623
+.. |zenodo| image:: https://img.shields.io/badge/Journal%20article-blue?label=DOI
+   :target: https://doi.org/10.1007/s10494-024-00626-3
    :alt: Zenodo DOI
    :height: 20px
 

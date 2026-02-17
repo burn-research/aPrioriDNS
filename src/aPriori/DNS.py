@@ -32,6 +32,7 @@ import requests
 import re
 from itertools import zip_longest
 import warnings
+import math
 
 from ._variables import variables_list
 from ._variables import mesh_list
@@ -44,7 +45,8 @@ from ._utils import (
     extract_filter,
     change_folder_name,
     check_mass_fractions,
-    check_reaction_rates
+    check_reaction_rates,
+    VerbosePrinter
 )
 from ._data_struct import folder_structure
 from .plot_utilities import contour_plot, plot_multifield
@@ -201,13 +203,15 @@ class Field3D():
     __field_dimension = 3
     
     
-    def __init__(self, folder_path, reactive=True):
-        print("\n---------------------------------------------------------------")
-        print("Initializing 3D Field\n")
+    def __init__(self, folder_path, reactive=True, verbose=True):
+        vprint = VerbosePrinter(verbose=verbose)
+
+        vprint("\n---------------------------------------------------------------")
+        vprint("Initializing 3D Field\n")
         # check the folder structure and files
         check_folder_structure(folder_path, reactive=reactive)
         _, ids = check_data_files(folder_path)
-        print("Folder structure OK")
+        vprint("Folder structure OK")
         
         self.folder_path = folder_path
         self.data_path = os.path.join(folder_path, folder_structure["data_path"])
@@ -228,31 +232,48 @@ class Field3D():
         
         self.id_string = ids
         
-        print("\n---------------------------------------------------------------")
-        print ("Building mesh attribute...")
-        X=Scalar3D(self.shape, path=os.path.join(self.grid_path,mesh_list["X_mesh"][0]) )
-        Y=Scalar3D(self.shape, path=os.path.join(self.grid_path,mesh_list["Y_mesh"][0]) )
-        Z=Scalar3D(self.shape, path=os.path.join(self.grid_path,mesh_list["Z_mesh"][0]) )
+        vprint("\n---------------------------------------------------------------")
+        vprint ("Checking mesh files...")
+
+        # Create the attributes with the path to the mesh location
+        self.X_m_path = os.path.join(self.grid_path,mesh_list["X_mesh"][0])
+        self.Y_m_path = os.path.join(self.grid_path,mesh_list["Y_mesh"][0])
+        self.Z_m_path = os.path.join(self.grid_path,mesh_list["Z_mesh"][0])
+
+        # Check that the mesh files are 3D and not 1D
+        mesh_is_3d, mesh_is_1d = check_mesh_files(self.X_m_path, self.Y_m_path, self.Z_m_path, self.shape)
+
+        if not mesh_is_3d:
+            if mesh_is_1d:
+                vprint ("Converting mesh files from 1D to 3D arrays...")
+                build_meshgrid(self.X_m_path, self.Y_m_path, self.Z_m_path) # Overwrite mesh files in-place
+            else:
+                raise ValueError(f"Mesh shape does not correspond to the declared field shape {self.shape}. Please check the mesh files.")
+
+        vprint ("Building mesh attribute...")
+        X=Scalar3D(self.shape, path=self.X_m_path)
+        Y=Scalar3D(self.shape, path=self.Y_m_path)
+        Z=Scalar3D(self.shape, path=self.Z_m_path)
         
         self.mesh = Mesh3D(X, Y, Z)
-        print ("Mesh fields read correctly")
+        vprint ("Mesh fields read correctly")
         
         if reactive:
-            print("\n---------------------------------------------------------------")
-            print("Reading kinetic mechanism...")
+            vprint("\n---------------------------------------------------------------")
+            vprint("Reading kinetic mechanism...")
             self.kinetic_mechanism = find_kinetic_mechanism(self.chem_path)
-            print(f"Kinetic mechanism file found: {self.kinetic_mechanism}")
+            vprint(f"Kinetic mechanism file found: {self.kinetic_mechanism}")
             self.species = extract_species(self.kinetic_mechanism)
             self.reactions, self.reaction_equations = extract_reactions(self.kinetic_mechanism)
             self.reaction_names = [re.search(r'\(([^)]+)\)', r).group(1) for r in self.reactions]
-            print("Species:")
-            print(self.species)
+            vprint("Species:")
+            vprint(self.species)
         
         
-        print("\n---------------------------------------------------------------")
-        print ("Building scalar attributes...")
+        vprint("\n---------------------------------------------------------------")
+        vprint ("Building scalar attributes...")
         self.attr_list, self.paths_list = self.build_attributes_list()
-        self.update(verbose=True)
+        self.update(verbose=verbose)
         
     def add_variable(self, attr_name, file_name):
         
@@ -771,18 +792,23 @@ class Field3D():
             filter_size = 1
         else:
             filter_size = self.filter_size
+
+        # Reduce gradients accuracy for filtered fields
+        reduce_acc = False
+        if self.filter_size > 1:
+            reduce_acc = True
         
-        grad_C_x = gradient_x(self.C, self.mesh, filter_size)
+        grad_C_x = gradient_x(self.C, self.mesh, filter_size, reduce_acc=reduce_acc)
         save_file(grad_C_x, self.find_path('C_grad_X'))
         self.update()
         del grad_C_x # release memory
         
-        grad_C_y = gradient_y(self.C, self.mesh, filter_size)
+        grad_C_y = gradient_y(self.C, self.mesh, filter_size, reduce_acc=reduce_acc)
         save_file(grad_C_y, self.find_path('C_grad_Y'))
         self.update()
         del grad_C_y # release memory
         
-        grad_C_z = gradient_z(self.C, self.mesh, filter_size)
+        grad_C_z = gradient_z(self.C, self.mesh, filter_size, reduce_acc=reduce_acc)
         save_file(grad_C_z, self.find_path('C_grad_Z'))
         self.update()
         del grad_C_z # release memory
@@ -815,12 +841,15 @@ class Field3D():
         else:
             filter_size = self.filter_size
 
-        # Computing the laplacian incrementally to avoid memory overload
-        laplacian =  gradient_x(self.C_grad_X, self.mesh, filter_size)
-        laplacian += gradient_y(self.C_grad_Y, self.mesh, filter_size)
-        laplacian += gradient_y(self.C_grad_Y, self.mesh, filter_size)
+        # Reduce derivatives accuracy for filtered fields
+        reduce_acc = False
+        if self.filter_size > 1:
+            reduce_acc = True
 
-        save_file(laplacian, self.find_path('C_laplacian'))
+        # Compute the laplacian with the derivatives module
+        laplacian_C = laplacian(self.C, self.mesh, filter_size, reduce_acc=reduce_acc)
+
+        save_file(laplacian_C, self.find_path('C_laplacian'))
 
         self.update()
         
@@ -1830,6 +1859,11 @@ class Field3D():
             filter_size =  1  # filter_size is used for the gradients computation
             # if the field is downsampled, there is no need to compute gradients skipping values
         mesh = self.mesh
+
+        # Reduce gradients accuracy for filtered fields
+        reduce_acc = False
+        if self.filter_size > 1:
+            reduce_acc = True
         
         # define the list to use to change the file name
         path_list = self.U_X.path.split('/')
@@ -1848,11 +1882,11 @@ class Field3D():
                         print(f"Computing dU_{axes[i].lower()}/d{axes[j].lower()}...")
                     U = getattr(self, f"U_{axes[i]}")
                     if j == 0:
-                        dU_dx = gradient_x(U, mesh, filter_size)
+                        dU_dx = gradient_x(U, mesh, filter_size, reduce_acc=reduce_acc)
                     if j == 1:
-                        dU_dx = gradient_y(U, mesh, filter_size)
+                        dU_dx = gradient_y(U, mesh, filter_size, reduce_acc=reduce_acc)
                     if j == 2:
-                        dU_dx = gradient_z(U, mesh, filter_size)
+                        dU_dx = gradient_z(U, mesh, filter_size, reduce_acc=reduce_acc)
                     save_file(dU_dx, file_name)
                     del dU_dx
                 else:
@@ -2359,11 +2393,15 @@ class Field3D():
         else:
             filter_size = self.filter_size
         
-        grad_Z = np.sqrt(
-            gradient_x(self.Z, self.mesh, filter_size)**2 + 
-            gradient_y(self.Z, self.mesh, filter_size)**2 + 
-            gradient_z(self.Z, self.mesh, filter_size)**2
-            )
+        # Reduce gradients accuracy to second order for filtered fields
+        reduce_acc = False
+        if self.filter_size > 1:
+            reduce_acc = True
+
+        grad_Z  = gradient_x(self.Z, self.mesh, filter_size, reduce_acc=reduce_acc)**2 
+        grad_Z += gradient_y(self.Z, self.mesh, filter_size, reduce_acc=reduce_acc)**2 
+        grad_Z += gradient_z(self.Z, self.mesh, filter_size, reduce_acc=reduce_acc)**2
+        grad_Z  = np.sqrt(grad_Z)
         
         save_file(grad_Z, self.find_path('Z_grad'))
         self.update()
@@ -4530,7 +4568,7 @@ def delete_file(file_path):
     else:
         warnings.warn(f"No such file: '{file_path}'")
 
-def download(repo_url="https://github.com/LorenzoPiu/aPrioriDNS/tree/main/data", dest_folder="./", dataset=None):
+def download(repo_url="https://github.com/LorenzoPiu/aPriori-data/tree/main", dest_folder=None, dataset=None):
     """
     Downloads all files from a specified GitHub repository directory and saves them to the destination folder,
     including files in subdirectories.
@@ -4546,21 +4584,34 @@ def download(repo_url="https://github.com/LorenzoPiu/aPrioriDNS/tree/main/data",
     if dataset is not None:
         datasets_list = ['h2_lifted', 'h2_premixed', 'hit']
         if dataset.lower() == 'h2_lifted':
-            repo_url = "https://github.com/LorenzoPiu/aPrioriDNS/tree/main/data/Lifted_H2_subdomain"
+            repo_url = "https://github.com/LorenzoPiu/aPriori-data/tree/main/Lifted_H2_subdomain"
+            if dest_folder is None:
+                dest_folder = 'Lifted_H2_subdomain'
         elif dataset.lower() == 'h2_premixed':
-            repo_url = "https://github.com/LorenzoPiu/aPrioriDNS/tree/dev/data/Premixed_H2_Phi0.5"
+            repo_url = "https://github.com/LorenzoPiu/aPriori-data/tree/main/Premixed_H2_Phi0.5"
+            if dest_folder is None:
+                dest_folder = 'Premixed_H2_Phi0.5'
         elif dataset.lower() == 'hit':
-            repo_url = "https://github.com/LorenzoPiu/aPrioriDNS/tree/main/data/Forced_HIT_ReL184"
+            repo_url = "https://github.com/LorenzoPiu/aPriori-data/tree/main/Forced_HIT_ReL184"
+            if dest_folder is None:
+                dest_folder = 'Forced_HIT_ReL184'
         if dataset.lower() not in datasets_list:
             raise ValueError(
             f"Invalid dataset '{dataset}'. Expected one of {datasets_list}."
         )
+
+    if dest_folder is None:
+        dest_folder = "./DNS_data"
             
     if not os.path.exists(dest_folder):
         os.makedirs(dest_folder)
 
     # Extract owner, repo, and branch from the URL
     parts = repo_url.split('/')
+
+    # for debug
+    print(parts)
+
     owner = parts[3]
     repo = parts[4]
     branch = parts[6]
@@ -4633,6 +4684,88 @@ def process_file(file_path):
     """
     # Placeholder for file processing logic
     return np.fromfile(file_path,dtype='<f4')
+
+import numpy as np
+
+def check_mesh_files(X_m_path, Y_m_path, Z_m_path, shape):
+    """
+    Checks whether mesh coordinate files match either:
+    - a full 3D mesh of size prod(shape)
+    - a 1D mesh of sizes shape[0], shape[1], shape[2]
+
+    Returns
+    -------
+    check_3d : bool
+        True if all coordinates match full 3D size.
+    check_1d : bool
+        True if all coordinates match corresponding 1D axis size.
+    """
+
+    expected_3d_size = np.prod(shape)
+
+    check_3d = True
+    check_1d = True
+
+    paths = [X_m_path, Y_m_path, Z_m_path]
+
+    for axis, path in enumerate(paths):
+        data = process_file(path)
+        size = len(data)
+
+        # Check 3D consistency
+        if size != expected_3d_size:
+            check_3d = False
+
+        # Check 1D consistency
+        if size != shape[axis]:
+            check_1d = False
+
+        del data  # Explicit memory release if files are large
+
+    return check_3d, check_1d
+
+import numpy as np
+
+def build_meshgrid(X_m_path: str, Y_m_path: str, Z_m_path: str):
+    """
+    Converts 1D mesh coordinate files (X, Y, Z) into 3D meshgrid
+    coordinate fields and overwrites the original files.
+
+    The input files must contain 1D coordinate vectors.
+    The output files will contain the corresponding 3D meshgrid
+    coordinates stored in flattened binary format via `save_file()`.
+
+    Parameters
+    ----------
+    X_m_path : str
+        Path to the X coordinate file (1D vector).
+    Y_m_path : str
+        Path to the Y coordinate file (1D vector).
+    Z_m_path : str
+        Path to the Z coordinate file (1D vector).
+
+    Returns
+    -------
+    tuple[int, int, int]
+        The generated mesh shape as (Nx, Ny, Nz).
+
+    Raises
+    ------
+    ValueError
+        If any of the input arrays is not 1D or is empty.
+    """
+
+    x = process_file(X_m_path)
+    y = process_file(Y_m_path)
+    z = process_file(Z_m_path)
+
+    # Create structured meshgrid (matrix indexing)
+    X3, Y3, Z3 = np.meshgrid(x, y, z, indexing="ij")
+
+    # Overwrite files in-place
+    save_file(X3, X_m_path)
+    save_file(Y3, Y_m_path)
+    save_file(Z3, Z_m_path)
 
 
 def filter_gauss(field,delta, mode='mirror'):
@@ -4872,157 +5005,9 @@ def save_file (X, file_name):
     import numpy as np
     X = X.astype(np.float32)
     X.tofile(file_name)
-    
-def gradient_x(F, mesh, filter_size=1):
-    '''
-        Description
-        -----------
-        
-        Computes the gradient of a 3D, non downsampled, filtered field. Numpy is
-        used to compute the gradients on all the possible downsampled grids.
-        
-        Specifically, the parameter filter_size is used to temporarily downsample
-        the grid in the x direction. The function considers one point each 
-        filter_size points and computes the derivatives on this downsampled grid.
-        Does this for every possible downsampled grid, so in the end the output
-        field has the same shape as the input field.
 
-        Parameters
-        ----------
-        Ur : Scalar3D object
-            Is the field to filter.
-        
-        mesh : Mesh3D object
-            Is the mesh object used to compute the derivatives.
-            
-        filter_size : int
-            Is the filter size used to filter the field.
-        
-        verbose : bool
-            If True, it will output relevant information.
+from .derivatives import(gradient_x, gradient_y, gradient_z, laplacian)
 
-        Returns
-        -------
-        grad_x : numpy array
-            The x component of the gradient            
-        '''
-    import time
-    # Check the data types of the input
-    if not isinstance(mesh, Mesh3D):
-        raise TypeError("mesh must be an object of the class Mesh3D")
-    if not isinstance(F, Scalar3D):
-        raise TypeError("F must be an object of the class Scalar3D")
-    if not isinstance(filter_size, int):
-        raise TypeError("filter_size must be an integer")
-    Nx = F.Nx
-    Ny = F.Ny
-    Nz = F.Nz
-    
-    grad_x = np.zeros(F._3d.shape)
-    X1D = mesh.X1D
-    for i in range(filter_size):
-        start = i
-        
-        field = F._3d[start::filter_size, :, :]
-        
-        grad_x[start::filter_size, :, :] = np.gradient(field, X1D[start::filter_size], axis=0)
-        
-    return grad_x
-
-def gradient_y(F, mesh, filter_size=1):
-    '''
-        Computes the gradient of a 3D, non downsampled, filtered field. Numpy is
-        used to computed the gradients on all the possible downsampled grids
-
-        Parameters
-        ----------
-        Ur : Scalar3D object
-            Is the field to filter.
-        
-        mesh : Mesh3D object
-            Is the mesh object used to compute the derivatives.
-            
-        filter_size : int
-            Is the filter size used to filter the field.
-        
-        verbose : bool
-            If True, it will output relevant information.
-
-        Returns
-        -------
-        grad_y : numpy array
-            The y component of the gradient            
-        '''
-    import time
-    # Check the data types of the input
-    if not isinstance(mesh, Mesh3D):
-        raise TypeError("mesh must be an object of the class Mesh3D")
-    if not isinstance(F, Scalar3D):
-        raise TypeError("F must be an object of the class Scalar3D")
-    if not isinstance(filter_size, int):
-        raise TypeError("filter_size must be an integer")
-    Nx = F.Nx
-    Ny = F.Ny
-    Nz = F.Nz
-    
-    grad_y = np.zeros(F._3d.shape)
-    Y1D = mesh.Y1D
-    for i in range(filter_size):
-        start = i
-        
-        field = F._3d[:, start::filter_size, :]
-        
-        grad_temp = np.gradient(field, Y1D[start::filter_size], axis=1)
-        
-        grad_y[:, start::filter_size, :] = grad_temp
-        
-    return grad_y
-
-def gradient_z(F, mesh, filter_size=1):
-    '''
-        Computes the z component of the gradient of a 3D, non downsampled, filtered field. 
-        Numpy is used to computed the gradients on all the possible downsampled grids
-
-        Parameters
-        ----------
-        Ur : Scalar3D object
-            Is the field to filter.
-        
-        mesh : Mesh3D object
-            Is the mesh object used to compute the derivatives.
-            
-        filter_size : int
-            Is the filter size used to filter the field.
-        
-        Returns
-        -------
-        grad_z : numpy array
-            The z component of the gradient            
-        '''
-    import time
-    # Check the data types of the input
-    if not isinstance(mesh, Mesh3D):
-        raise TypeError("mesh must be an object of the class Mesh3D")
-    if not isinstance(F, Scalar3D):
-        raise TypeError("F must be an object of the class Scalar3D")
-    if not isinstance(filter_size, int):
-        raise TypeError("filter_size must be an integer")
-    Nx = F.Nx
-    Ny = F.Ny
-    Nz = F.Nz
-    
-    grad_z = np.zeros(F._3d.shape)
-    Z1D = mesh.Z1D
-    for i in range(filter_size):
-        start = i
-        
-        field = F._3d[:, :, start::filter_size]
-        
-        grad_temp = np.gradient(field, Z1D[start::filter_size], axis=2)
-        
-        grad_z[:, :, start::filter_size] = grad_temp
-        
-    return grad_z
 
 def generate_mask(start, shape, delta):
     '''

@@ -2,11 +2,11 @@
   <img src="branding/img/Graphical_abstract_2.png" width="100%">
 </p>
 
-[![Static Badge](https://img.shields.io/badge/CC%20BY%204.0%20-%20%23F5CF27?label=License)](https://creativecommons.org/licenses/by/4.0/deed.en) 
-[![Static Badge](https://img.shields.io/badge/Documentation-Gitbook-green?logo=Gitbook&logoColor=white)](https://apriori.gitbook.io/apriori-documentation-1)
+[![Static Badge](https://img.shields.io/badge/GPL%20v3.0%20-%20%23F5CF27?label=License&logo=gplv3&logoColor=white)](https://www.gnu.org/licenses/gpl-3.0.en.html) 
+[![Static Badge](https://img.shields.io/badge/Documentation-ReadTheDocs-green?logo=readthedocs&logoColor=white)](https://apriori.readthedocs.io)
 [![Static Badge](https://img.shields.io/badge/Issues-Github-02bfa6?&logo=Github&logoColor=white)](https://github.com/LorenzoPiu/aPrioriDNS/issues)
-[![Static Badge](https://img.shields.io/pypi/dm/aprioridns?color=03b1fc&logo=pypi&logoColor=white)](https://pypistats.org/packages/aprioridns)
-[![Static Badge](https://zenodo.org/badge/DOI/10.5281/zenodo.13793622.svg)](https://zenodo.org/records/13793623)
+[![Static Badge](https://img.shields.io/pepy/dt/aPrioriDNS?logo=pypi&logoColor=white&color=03b1fc)](https://pepy.tech/projects/aprioridns)
+[![Static Badge](https://img.shields.io/badge/Journal%20article-blue?label=DOI)](https://doi.org/10.1007/s10494-024-00626-3)
 
 A Python package to process Direct Numerical Simulations of reacting and non-reacting flows.
 
@@ -47,12 +47,15 @@ This will automatically install or update the following dependencies if necessar
 - tabulate>=0.9.0,
 - requests>=2.32.0.
 - PyCSP>=1.4.0
+- findiff>=0.12
 
 ## Documentation
 
-The complete software documentation is available at: 
+The complete software documentation is built with sphynx and hosted using ReadTheDocs at the following website:
 
-https://apriori.gitbook.io/apriori-documentation-1
+https://apriori.readthedocs.io
+
+The old documentation on [Gitbook](https://apriori.gitbook.io/apriori-documentation-1) is not updated and will soon be deprecated.
 
 ## How to cite
 This open-source software is distributed under the MIT license. If you use it in your work, please cite it as:
@@ -63,7 +66,7 @@ Lorenzo Piu. ‘aprioridns: V1.1.8’. Zenodo, 19 September 2024. https://doi.or
 The present library relies on the code [PyCSP](https://github.com/rmalpica/PyCSP) package for Computational Singular Perturbation (CSP) analysis. PyCSP is developed and maintained by Professor Riccardo Malpica Galassi at Sapienza University of Rome. For detailed documentation and further information, please refer to the original repository.
 
 ## License
-This project is licensed under the [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/deed.en) (CC BY 4.0).
+This project is licensed under the [GNU General Public License](https://creativecommons.org/licenses/by/4.0/deed.en) (GPL v3.0).
 
 © 2026 Lorenzo Piu, Heinz Pitsch and Alessandro Parente.
 
@@ -74,10 +77,10 @@ The following code can be used to test the library once installed. A detailed ex
 
 ```python
 """
-import aPrioriDNS as ap
+import aPriori as ap
 
 # Download the dataset
-ap.download()
+ap.download(dataset='h2_lifted')
 
 # Initialize 3D DNS field
 field_DNS = ap.Field3D('Lifted_H2_subdomain')
@@ -208,4 +211,6 @@ f = ap.parity_plot(field_filtered.HRR_DNS.value,  # x
 
 [2] W. T. Chung, M. Ihme, K. S. Jung, J. H. Chen, J. Guo,  D. Brouzet, M. Talei, B. Jiang, B. Savard, A. Y. Poludnenko, B. Akoush, P. Sharma & A. Tamkin. BLASTNet Simulation Dataset (Version 2.0), 2023. https://blastnet.github.io/. 
 
-
+[//]: # (The following two badges are commented out: )
+[//]: # (https://img.shields.io/pypi/dm/aprioridns?color=03b1fc&logo=pypi&logoColor=white)
+[//]: # (https://static.pepy.tech/personalized-badge/aprioridns?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=BLUE&left_text=Downloads)

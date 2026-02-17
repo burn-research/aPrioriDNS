@@ -29,6 +29,7 @@
    tutorials/04_data_visualization
    tutorials/05_cut_dns_field
    tutorials/06_filter_dns_field
+   tutorials/07_data_driven_combustion
 
 .. toctree::
    :caption: API Guide
@@ -41,4 +42,5 @@
    :maxdepth: 1
 
    aPriori License <license>
+   How to cite <how_to_cite>
    Bibliography <bibliography>

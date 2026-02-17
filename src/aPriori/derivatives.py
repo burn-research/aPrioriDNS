@@ -20,10 +20,19 @@ from findiff import FinDiff
 from .DNS import Scalar3D
 from .DNS import Mesh3D
 
-# Ideally, import your actual classes here to support isinstance() checks.
-# If this causes circular imports, you can import them inside the functions
-# or keep the checks generic.
-# from .classes import Scalar3D, Mesh3D 
+
+_DEFAULT_DERIVATIVES_ORDER = 4
+
+def set_gradients_order(order: int) -> None:
+    global _DEFAULT_DERIVATIVES_ORDER
+    _DEFAULT_DERIVATIVES_ORDER = order
+
+def print_gradients_order(order=None):
+    if order is None:
+        order = _DEFAULT_DERIVATIVES_ORDER
+    print(f"Using order {order}")
+
+
 
 def _apply_findiff_on_strided_grid(data, coords_1d, axis, filter_size, acc, deriv_order):
     """
@@ -81,7 +90,7 @@ def _apply_findiff_on_strided_grid(data, coords_1d, axis, filter_size, acc, deri
     return result
 
 
-def gradient_x(F, mesh, filter_size=1, acc=4):
+def gradient_x(F, mesh, filter_size=1, acc=8, reduce_acc=False):
     '''
     Description
     -----------
@@ -115,6 +124,9 @@ def gradient_x(F, mesh, filter_size=1, acc=4):
         raise TypeError("filter_size must be an integer")
     if not isinstance(acc, int):
         raise TypeError("acc must be an integer")
+    
+    if reduce_acc: # Switch to decrease gradients accuracy (used for example on LES grids)
+        acc=2
 
     # 2. Call Internal Helper
     return _apply_findiff_on_strided_grid(
@@ -127,7 +139,7 @@ def gradient_x(F, mesh, filter_size=1, acc=4):
     )
 
 
-def gradient_y(F, mesh, filter_size=1, acc=4):
+def gradient_y(F, mesh, filter_size=1, acc=8, reduce_acc=False):
     '''
     Description
     -----------
@@ -137,6 +149,11 @@ def gradient_y(F, mesh, filter_size=1, acc=4):
         raise TypeError("F must be an object of the class Scalar3D")
     if type(mesh).__name__ != 'Mesh3D':
         raise TypeError("mesh must be an object of the class Mesh3D")
+    if not isinstance(acc, int):
+        raise TypeError("acc must be an integer")
+    
+    if reduce_acc:
+        acc = 2
 
     return _apply_findiff_on_strided_grid(
         data=F._3d,
@@ -148,7 +165,7 @@ def gradient_y(F, mesh, filter_size=1, acc=4):
     )
 
 
-def gradient_z(F, mesh, filter_size=1, acc=4):
+def gradient_z(F, mesh, filter_size=1, acc=8, reduce_acc=False):
     '''
     Description
     -----------
@@ -158,6 +175,11 @@ def gradient_z(F, mesh, filter_size=1, acc=4):
         raise TypeError("F must be an object of the class Scalar3D")
     if type(mesh).__name__ != 'Mesh3D':
         raise TypeError("mesh must be an object of the class Mesh3D")
+    if not isinstance(acc, int):
+        raise TypeError("acc must be an integer")
+    
+    if reduce_acc:
+        acc = 2
 
     return _apply_findiff_on_strided_grid(
         data=F._3d,
@@ -169,7 +191,7 @@ def gradient_z(F, mesh, filter_size=1, acc=4):
     )
 
 
-def laplacian(F, mesh, filter_size=1, acc=3):
+def laplacian(F, mesh, filter_size=1, acc=4, reduce_acc=False):
     '''
     Description
     -----------
@@ -191,10 +213,13 @@ def laplacian(F, mesh, filter_size=1, acc=3):
         raise TypeError("F must be an object of the class Scalar3D")
     if type(mesh).__name__ != 'Mesh3D':
         raise TypeError("mesh must be an object of the class Mesh3D")
+    
+    if reduce_acc:
+        acc = 2
 
     # Compute second derivatives for each axis
-    d2_dx2 = _apply_findiff_on_strided_grid(F._3d, mesh.X1D, 0, filter_size, acc, deriv_order=2)
-    d2_dy2 = _apply_findiff_on_strided_grid(F._3d, mesh.Y1D, 1, filter_size, acc, deriv_order=2)
-    d2_dz2 = _apply_findiff_on_strided_grid(F._3d, mesh.Z1D, 2, filter_size, acc, deriv_order=2)
+    laplacian_value  = _apply_findiff_on_strided_grid(F._3d, mesh.X1D, 0, filter_size, acc, deriv_order=2)
+    laplacian_value += _apply_findiff_on_strided_grid(F._3d, mesh.Y1D, 1, filter_size, acc, deriv_order=2)
+    laplacian_value += _apply_findiff_on_strided_grid(F._3d, mesh.Z1D, 2, filter_size, acc, deriv_order=2)
 
-    return d2_dx2 + d2_dy2 + d2_dz2
+    return laplacian_value

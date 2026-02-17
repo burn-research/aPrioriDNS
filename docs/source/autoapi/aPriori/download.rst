@@ -1,7 +1,7 @@
 aPriori.download
 ================
 
-.. py:function:: aPriori.download(repo_url='https://github.com/LorenzoPiu/aPrioriDNS/tree/main/data', dest_folder='./', dataset=None)
+.. py:function:: aPriori.download(repo_url='https://github.com/LorenzoPiu/aPriori-data/tree/main', dest_folder=None, dataset=None)
 
    Downloads all files from a specified GitHub repository directory and saves them to the destination folder,
    including files in subdirectories.

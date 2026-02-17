@@ -7,11 +7,11 @@ Created on Fri Sep 20 14:21:37 2024
 """
 
 import os
-import aPrioriDNS as ap
+import aPriori as ap
 import json
 
 # Uncomment the following line if you did not download the dataset yet
-# ap.download()
+# ap.download(dataset='h2_lifted')
 
 directory = os.path.join('.','Lifted_H2_subdomain') # change this with your path to the data folder
 
