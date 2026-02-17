@@ -16,7 +16,8 @@ Below is a list of the main third-party packages and their respective licenses a
 | **Cantera**    | BSD-3-Clause   | https://cantera.org |
 | **Tabulate**   | MIT License    | https://pypi.org/project/tabulate |
 | **Requests**   | Apache-2.0     | https://requests.readthedocs.io/en/latest/ |
-| **PyCSP-lib**  | MIT License    | https://pypi.org/project/PyCSP-lib/ |
+| **PyCSP**      | MIT License    | https://pypi.org/project/PyCSP-lib/ |
+| **Findiff**    | MIT License    | https://github.com/maroba/findiff |
 
 If any of these libraries (or their sub-dependencies) are distributed together with *aPrioriDNS* in future releases,  
 their license texts will be included in the `third_party/` directory and acknowledged in this notice.
