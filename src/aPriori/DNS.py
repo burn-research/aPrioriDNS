@@ -4582,7 +4582,7 @@ def download(repo_url="https://github.com/LorenzoPiu/aPriori-data/tree/main", de
     """
     
     if dataset is not None:
-        datasets_list = ['h2_lifted', 'h2_premixed', 'hit']
+        datasets_list = ['h2_lifted', 'h2_premixed', 'hit', 'csp']
         if dataset.lower() == 'h2_lifted':
             repo_url = "https://github.com/LorenzoPiu/aPriori-data/tree/main/Lifted_H2_subdomain"
             if dest_folder is None:
@@ -4595,6 +4595,10 @@ def download(repo_url="https://github.com/LorenzoPiu/aPriori-data/tree/main", de
             repo_url = "https://github.com/LorenzoPiu/aPriori-data/tree/main/Forced_HIT_ReL184"
             if dest_folder is None:
                 dest_folder = 'Forced_HIT_ReL184'
+        elif dataset.lower() == 'csp':
+            repo_url = "https://github.com/LorenzoPiu/aPriori-data/tree/main/Lifted_H2_subdomain_csp"
+            if dest_folder is None:
+                dest_folder = 'Lifted_H2_subdomain_csp'
         if dataset.lower() not in datasets_list:
             raise ValueError(
             f"Invalid dataset '{dataset}'. Expected one of {datasets_list}."
