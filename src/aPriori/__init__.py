@@ -7,8 +7,8 @@ Library initialization and relative imports
 __author__ = "Lorenzo Piu"
 __copyright__ = "Copyright (c) 2024-2025, Lorenzo Piu"
 __credits__ = ["Universite Libre de Bruxelles, Aero-Thermo-Mechanics Laboratory, Brussels, Belgium"]
-__license__ = "CC-BY 4.0"
-__version__ = "1.11.0"
+__license__ = "GPL 3.0"
+__version__ = "1.2.2"
 __maintainer__ = ["Lorenzo Piu"]
 __email__ = ["lorenzo.piu@ulb.be"]
 __status__ = "Production"
