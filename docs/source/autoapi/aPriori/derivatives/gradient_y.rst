@@ -1,7 +1,7 @@
 aPriori.derivatives.gradient_y
 ==============================
 
-.. py:function:: aPriori.derivatives.gradient_y(F, mesh, filter_size=1, acc=4)
+.. py:function:: aPriori.derivatives.gradient_y(F, mesh, filter_size=1, acc=8, reduce_acc=False)
 
    Description
    -----------

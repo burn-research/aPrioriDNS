@@ -1,29 +1,22 @@
 aPriori.gradient_x
 ==================
 
-.. py:function:: aPriori.gradient_x(F, mesh, filter_size=1)
+.. py:function:: aPriori.gradient_x(F, mesh, filter_size=1, acc=8, reduce_acc=False)
 
    Description
    -----------
+   Computes the x-component of the gradient using findiff with specified accuracy.
+   Uses striding (filter_size) to compute derivatives on downsampled grids.
 
-   Computes the gradient of a 3D, non downsampled, filtered field. Numpy is
-   used to compute the gradients on all the possible downsampled grids.
-
-   Specifically, the parameter filter_size is used to temporarily downsample
-   the grid in the x direction. The function considers one point each
-   filter_size points and computes the derivatives on this downsampled grid.
-   Does this for every possible downsampled grid, so in the end the output
-   field has the same shape as the input field.
-
-   :param Ur: Is the field to filter.
-   :type Ur: Scalar3D object
-   :param mesh: Is the mesh object used to compute the derivatives.
+   :param F: The field to differentiate.
+   :type F: Scalar3D object
+   :param mesh: The mesh object containing coordinates (X1D).
    :type mesh: Mesh3D object
-   :param filter_size: Is the filter size used to filter the field.
-   :type filter_size: int
-   :param verbose: If True, it will output relevant information.
-   :type verbose: bool
+   :param filter_size: The stride used to filter the field (default is 1).
+   :type filter_size: int, optional
+   :param acc: The accuracy order for the finite difference scheme (default is 2).
+   :type acc: int, optional
 
-   :returns: **grad_x** -- The x component of the gradient
+   :returns: **grad_x** -- The x component of the gradient.
    :rtype: numpy array
 

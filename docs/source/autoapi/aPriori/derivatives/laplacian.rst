@@ -1,7 +1,7 @@
 aPriori.derivatives.laplacian
 =============================
 
-.. py:function:: aPriori.derivatives.laplacian(F, mesh, filter_size=1, acc=3)
+.. py:function:: aPriori.derivatives.laplacian(F, mesh, filter_size=1, acc=4, reduce_acc=False)
 
    Description
    -----------

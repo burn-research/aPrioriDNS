@@ -1,7 +1,7 @@
 aPriori.Field3D
 ===============
 
-.. py:class:: aPriori.Field3D(folder_path, reactive=True)
+.. py:class:: aPriori.Field3D(folder_path, reactive=True, verbose=True)
 
    Class representing a 3D field with various attributes and methods for visualization and data management.
 
@@ -177,6 +177,15 @@ aPriori.Field3D
 
 
    .. py:attribute:: id_string
+
+
+   .. py:attribute:: X_m_path
+
+
+   .. py:attribute:: Y_m_path
+
+
+   .. py:attribute:: Z_m_path
 
 
    .. py:method:: add_variable(attr_name, file_name)

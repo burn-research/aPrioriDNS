@@ -15,6 +15,8 @@ Functions
 .. toctree::
    :hidden:
 
+   /autoapi/aPriori/derivatives/set_gradients_order
+   /autoapi/aPriori/derivatives/print_gradients_order
    /autoapi/aPriori/derivatives/gradient_x
    /autoapi/aPriori/derivatives/gradient_y
    /autoapi/aPriori/derivatives/gradient_z
@@ -22,6 +24,8 @@ Functions
 
 .. autoapisummary::
 
+   aPriori.derivatives.set_gradients_order
+   aPriori.derivatives.print_gradients_order
    aPriori.derivatives.gradient_x
    aPriori.derivatives.gradient_y
    aPriori.derivatives.gradient_z

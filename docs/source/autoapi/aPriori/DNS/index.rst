@@ -39,13 +39,12 @@ Functions
    /autoapi/aPriori/DNS/download
    /autoapi/aPriori/DNS/downsample
    /autoapi/aPriori/DNS/process_file
+   /autoapi/aPriori/DNS/check_mesh_files
+   /autoapi/aPriori/DNS/build_meshgrid
    /autoapi/aPriori/DNS/filter_gauss
    /autoapi/aPriori/DNS/filter_box
    /autoapi/aPriori/DNS/filter_3D
    /autoapi/aPriori/DNS/save_file
-   /autoapi/aPriori/DNS/gradient_x
-   /autoapi/aPriori/DNS/gradient_y
-   /autoapi/aPriori/DNS/gradient_z
    /autoapi/aPriori/DNS/generate_mask
    /autoapi/aPriori/DNS/check_same_shape
    /autoapi/aPriori/DNS/check_input_string
@@ -68,13 +67,12 @@ Functions
    aPriori.DNS.download
    aPriori.DNS.downsample
    aPriori.DNS.process_file
+   aPriori.DNS.check_mesh_files
+   aPriori.DNS.build_meshgrid
    aPriori.DNS.filter_gauss
    aPriori.DNS.filter_box
    aPriori.DNS.filter_3D
    aPriori.DNS.save_file
-   aPriori.DNS.gradient_x
-   aPriori.DNS.gradient_y
-   aPriori.DNS.gradient_z
    aPriori.DNS.generate_mask
    aPriori.DNS.check_same_shape
    aPriori.DNS.check_input_string
