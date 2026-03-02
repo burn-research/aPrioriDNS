@@ -6,17 +6,19 @@ Machine Learning for Fluids, Amsterdam 2026
 
 **Event:** `ERCOFTAC ML4Fluids Conference <https://ml4fluids2026.github.io>`_.
 
-**Location:** Amsterdam, The Netherlands  
+**Location:** Amsterdam, Netherlands  
 
-**Dates:** 2026  
+**Dates:** 4-6 March 2026 
 
 **Authors:**  
 Lorenzo Piu, Pasquale Eduardo Lapenna, Tamara Osseily, Giuseppe Indelicato,  
 Kisuke Shigematsu, Albina Tocilla, Joni Kazani, Antonio Attili, Alessandro Parente
 
 **Related links**
+
 - Cypher webpage: https://cypher.ulb.be
 - Data challenge Github page: https://github.com/burn-research/Cypher-challenge-2025
+- Data challenge page: https://cypher.ulb.be/data-challenge/
 
 **Slides:**  
 :download:`Download presentation (PDF) </_static/pdf/ML4Fluids-Cypher.pdf>`
@@ -25,9 +27,9 @@ Kisuke Shigematsu, Albina Tocilla, Joni Kazani, Antonio Attili, Alessandro Paren
 
    <div style="display:flex; justify-content:center; margin-top:1em;">
        <iframe 
-           src="_static/pdf/ML4Fluids-Cypher.pdf" 
-           width="90%" 
-           height="900px"
+           src="../_static/pdf/ML4Fluids-Cypher.pdf" 
+           width="100%" 
+           height="500px"
            style="border:1px solid #ddd; border-radius:8px;">
        </iframe>
    </div>
