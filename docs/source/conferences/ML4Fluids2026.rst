@@ -43,19 +43,19 @@ for turbulent premixed hydrogen flames in Large Eddy Simulation (LES).
 
 The talk addressed three main aspects:
 
-1. **Energy transition context**  
+1. **Energy transition context** - 
    Combustion will continue to play a key role in hard-to-abate sectors,
    with hydrogen and synthetic fuels becoming central energy carriers.
    Accurate and predictive simulations are therefore essential.
 
-2. **Need for improved sub-filter closures**  
+2. **Need for improved sub-filter closures** - 
    High-fidelity simulations (DNS) reveal the complexity of
    turbulence–chemistry interactions, particularly in hydrogen flames
    affected by thermo-diffusive instabilities.  
    Machine learning has shown strong potential to enhance classical
    physics-based models.
 
-3. **Standardized ML benchmarking via shared datasets**  
+3. **Standardized ML benchmarking via shared datasets** - 
    Inspired by successful ML benchmarks (e.g., ImageNet), the CYPHER
    challenge leverages shared DNS datasets and the Codabench platform
    to enable reproducible and fair comparison of different architectures.
@@ -64,21 +64,21 @@ Data Challenge Description
 --------------------------
 
 The first phase of the challenge focuses on modeling the **sub-filter scalar flux**
-of the filtered progress variable :math:`\tilde{C}` in lean premixed H₂ flames.
+of the filtered progress variable :math:`\widetilde{C}` in lean premixed H₂ flames.
 
 The closure target is:
 
 .. math::
 
-   \mathbf{q}_{\tilde{C}} = \overline{\rho \mathbf{u} C}
-   - \overline{\rho} \, \tilde{\mathbf{u}} \tilde{C}
+   \mathbf{q}_{\widetilde{C}} = \overline{\rho} \widetilde{\mathbf{u} C}
+   - \overline{\rho} \, \widetilde{\mathbf{u}} \widetilde{C}
 
 which is modeled under an eddy-diffusivity assumption:
 
 .. math::
 
-   \nabla \cdot \mathbf{q}_{\tilde{C}}
-   \approx \nabla \cdot \left( \overline{\rho} \, \alpha_t \nabla \tilde{C} \right)
+   \nabla \cdot \mathbf{q}_{\widetilde{C}}
+   \approx \nabla \cdot \left( \overline{\rho} \, \alpha_t \nabla \widetilde{C} \right)
 
 The dataset includes:
 
