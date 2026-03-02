@@ -63,7 +63,7 @@ The talk addressed three main aspects:
 Data Challenge Description
 --------------------------
 
-The first phase of the challenge focuses on modeling the **sub-filter scalar flux**
+The first data challenge focuses on modeling the **sub-filter scalar flux**
 of the filtered progress variable :math:`\widetilde{C}` in lean premixed H₂ flames.
 
 The closure target is:
@@ -82,22 +82,22 @@ which is modeled under an eddy-diffusivity assumption:
 
 The dataset includes:
 
-- Flames at different equivalence ratios
-- Multiple filter sizes :math:`\Delta`
-- Separate training and test configurations
+- Flames at different equivalence ratios,
+- Multiple filter sizes :math:`\Delta`,
+- Separate training and test configurations.
 
 Evaluation metrics combine:
 
-- Prediction accuracy
-- Inference time (computational cost)
+- Prediction accuracy and
+- Inference time,
 
 allowing a balanced assessment between model performance and
 practical applicability in LES solvers.
 
-Second Phase
+Second part
 ------------
 
-A second phase of the challenge was introduced, focusing on
+A second data challenge was introduced, focusing on
 modeling filtered reaction rates in premixed lean hydrogen flames
 under gas-turbine-relevant conditions.
 
@@ -111,10 +111,10 @@ Relevance for aPriori
 The aPriori framework supports the entire workflow required
 for such benchmarking activities:
 
-- DNS data processing
-- Filtering and downsampling
-- Computation of sub-filter quantities
-- Extraction of training tensors
+- DNS data processing,
+- Filtering and downsampling,
+- Computation of sub-filter quantities,
+- Extraction of tensors for model training,
 - Integration with PyTorch-based ML models
 
 The software therefore plays a key role in enabling
