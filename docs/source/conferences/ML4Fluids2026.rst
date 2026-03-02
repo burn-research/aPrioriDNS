@@ -126,4 +126,6 @@ Acknowledgments
 The CYPHER Data Challenge is organized within the
 CYPHER COST Action, promoting collaboration between
 European researchers and industrial stakeholders to
-accelerate digitalization in renewable-fuel combustion systems.
+accelerate digitalization in sustainable fuels combustion systems.
+
+
