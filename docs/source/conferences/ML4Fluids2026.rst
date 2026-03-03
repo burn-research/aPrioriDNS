@@ -16,10 +16,41 @@ Kisuke Shigematsu, Albina Tocilla, Joni Kazani, Antonio Attili, Alessandro Paren
 
 **Related links**
 
-- Cypher webpage: https://cypher.ulb.be
-- Data challenge Github page: https://github.com/burn-research/Cypher-challenge-2025
-- Data challenge page: https://cypher.ulb.be/data-challenge/
-- Download the data for the 2nd part of the challenge: https://drive.google.com/drive/folders/1fyxajDioxhJVdp36sT5zSkMKTxjSQgIq?usp=share_link
+.. grid:: 1 2 2 2
+   :padding: 2
+   :gutter: 2
+
+   .. grid-item-card:: 🌐 Cypher webpage
+      :link: https://cypher.ulb.be
+      :text-align: center
+      :shadow: md
+      :padding: 1
+
+      Visit the official Cypher website.
+
+   .. grid-item-card:: 💻 Data challenge GitHub
+      :link: https://github.com/burn-research/Cypher-challenge-2025
+      :text-align: center
+      :shadow: md
+      :padding: 1
+
+      Browse the repository, code, and resources for the challenge.
+
+   .. grid-item-card:: 🏁 Data challenge page
+      :link: https://cypher.ulb.be/data-challenge/
+      :text-align: center
+      :shadow: md
+      :padding: 1
+
+      Read the rules, timeline, and submission instructions.
+
+   .. grid-item-card:: 💾 DNS data (Part 2)
+      :link: https://drive.google.com/drive/folders/1fyxajDioxhJVdp36sT5zSkMKTxjSQgIq?usp=share_link
+      :text-align: center
+      :shadow: md
+      :padding: 1
+
+      Download the dataset for the second part of the challenge.
 
 **Slides:**  
 :download:`Download presentation (PDF) </_static/pdf/ML4Fluids-Cypher.pdf>`
@@ -105,6 +136,17 @@ under gas-turbine-relevant conditions.
 Researchers interested in participating are encouraged to contact:
 
 ``pasquale.lapenna@uniroma1.it``
+
+.. grid::
+   :justify-content: center
+
+   .. grid-item-card:: 💾 DNS data
+      :columns: 6
+      :link: https://drive.google.com/drive/folders/1fyxajDioxhJVdp36sT5zSkMKTxjSQgIq?usp=share_link 
+      :text-align: center
+      :shadow: md
+      :padding: 1
+
 
 Relevance for aPriori
 ---------------------
