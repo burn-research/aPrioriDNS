@@ -128,4 +128,9 @@ CYPHER COST Action, promoting collaboration between
 European researchers and industrial stakeholders to
 accelerate digitalization in sustainable fuels combustion systems.
 
-
+Lorenzo Piu has received funding from the European Union’s Horizon 
+Europe research and innovation programme under the Marie Skłodowska-Curie 
+grant agreement No 101072779 (ENCODING). 
+The results of this publication/presentation reflect only the author(s) 
+view and do not necessarily reflect those of the European Union. 
+The European Union cannot be held responsible for them.
