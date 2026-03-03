@@ -8,7 +8,7 @@ Machine Learning for Fluids, Amsterdam 2026
 
 **Location:** Amsterdam, Netherlands  
 
-**Dates:** 4-6 March 2026 
+**Dates:** 4th - 6th March 2026 
 
 **Authors:**  
 Lorenzo Piu, Pasquale Eduardo Lapenna, Tamara Osseily, Giuseppe Indelicato,  
@@ -19,6 +19,7 @@ Kisuke Shigematsu, Albina Tocilla, Joni Kazani, Antonio Attili, Alessandro Paren
 - Cypher webpage: https://cypher.ulb.be
 - Data challenge Github page: https://github.com/burn-research/Cypher-challenge-2025
 - Data challenge page: https://cypher.ulb.be/data-challenge/
+- Download the data for the 2nd part of the challenge: https://drive.google.com/drive/folders/1fyxajDioxhJVdp36sT5zSkMKTxjSQgIq?usp=share_link
 
 **Slides:**  
 :download:`Download presentation (PDF) </_static/pdf/ML4Fluids-Cypher.pdf>`
