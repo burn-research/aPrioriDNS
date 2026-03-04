@@ -137,16 +137,24 @@ Researchers interested in participating are encouraged to contact:
 
 ``pasquale.lapenna@uniroma1.it``
 
-.. grid::
-   :justify-content: center
+.. grid:: 1 2 2 2
+   :padding: 2
+   :gutter: 2
 
-   .. grid-item-card:: 💾 DNS data
+   .. grid-item::
+      :columns: 3
+
+   .. grid-item-card:: 💾 DNS data (Part 2)
       :columns: 6
-      :link: https://drive.google.com/drive/folders/1fyxajDioxhJVdp36sT5zSkMKTxjSQgIq?usp=share_link 
+      :link: https://drive.google.com/drive/folders/1fyxajDioxhJVdp36sT5zSkMKTxjSQgIq?usp=share_link
       :text-align: center
       :shadow: md
       :padding: 1
 
+      Download here the DNS dataset for the second part of the data challenge.
+
+   .. grid-item::
+      :columns: 3
 
 Relevance for aPriori
 ---------------------
