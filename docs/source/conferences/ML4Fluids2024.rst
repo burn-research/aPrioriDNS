@@ -2,9 +2,9 @@ Machine Learning for Fluids, Paris 2024
 =======================================
 
 **Title:**  
-*CYPHER data challenge: Benchmarking ML-enhanced turbulent combustion closures*
+*A data-driven approach to correct the cell reacting fraction in the partially-stirred reactor closure for LES of premixed flames*
 
-**Event:** `ERCOFTAC ML4Fluids Conference <https://ml4fluids2026.github.io>`_.
+**Event:** `ERCOFTAC ML4Fluids Conference <https://www.ercoftac.org/special_interest_groups/54-machine-learning-for-fluid-dynamics/>`_.
 
 **Location:** Paris, France  
 
@@ -36,88 +36,152 @@ Lorenzo Piu, Arthur Péquin, Rodolfo Freitas, Salvatore Iavarone, Heinz Pitsch, 
 Overview
 --------
 
-This presentation introduced the **CYPHER Data Challenge**, a community
-initiative aimed at benchmarking machine-learning–enhanced closure models
-for turbulent premixed hydrogen flames in Large Eddy Simulation (LES).
+.. note::
 
-The talk addressed three main aspects:
+   The results of this presentation were extended and published in the 
+   conference special issue. You can find the full article `here <https://link.springer.com/article/10.1007/s10494-024-00626-3>`
 
-1. **Energy transition context** - 
-   Combustion will continue to play a key role in hard-to-abate sectors,
-   with hydrogen and synthetic fuels becoming central energy carriers.
-   Accurate and predictive simulations are therefore essential.
+This presentation introduces a **machine-learning–enhanced closure model**
+to improve the **Partially Stirred Reactor (PaSR)** formulation for
+Large Eddy Simulation (LES) of turbulent premixed flames.
 
-2. **Need for improved sub-filter closures** - 
-   High-fidelity simulations (DNS) reveal the complexity of
-   turbulence–chemistry interactions, particularly in hydrogen flames
-   affected by thermo-diffusive instabilities.  
-   Machine learning has shown strong potential to enhance classical
-   physics-based models.
+Turbulent combustion is characterized by strong interactions between
+fluid dynamics and chemical kinetics across multiple spatial and temporal
+scales. As shown in the presentation, this complexity makes accurate
+prediction of reaction rates particularly challenging in practical CFD
+simulations.
 
-3. **Standardized ML benchmarking via shared datasets** - 
-   Inspired by successful ML benchmarks (e.g., ImageNet), the CYPHER
-   challenge leverages shared DNS datasets and the Codabench platform
-   to enable reproducible and fair comparison of different architectures.
-
-Data Challenge Description
---------------------------
-
-The first data challenge focuses on modeling the **sub-filter scalar flux**
-of the filtered progress variable :math:`\widetilde{C}` in lean premixed H₂ flames.
-
-The closure target is:
+In LES, the filtered chemical source terms generally satisfy:
 
 .. math::
 
-   \mathbf{q}_{\widetilde{C}} = \overline{\rho} \widetilde{\mathbf{u} C}
-   - \overline{\rho} \, \widetilde{\mathbf{u}} \widetilde{C}
+   \dot{\omega}_k(T,Y) \neq \dot{\omega}_k(\bar{T}, \bar{Y})
 
-which is modeled under an eddy-diffusivity assumption:
+which highlights the need for models capable of describing
+**turbulence–chemistry interaction (TCI)**.
+
+Limitations of the PaSR Model
+-----------------------------
+
+The classical PaSR closure estimates filtered reaction rates as
 
 .. math::
 
-   \nabla \cdot \mathbf{q}_{\widetilde{C}}
-   \approx \nabla \cdot \left( \overline{\rho} \, \alpha_t \nabla \widetilde{C} \right)
+   \overline{\dot{\omega}}_{k,PaSR} =
+   \frac{\tau_c}{\tau_c + \tau_m} \;
+   \overline{\dot{\omega}}_{k,LFR}
 
-The dataset includes:
+where:
 
-- Flames at different equivalence ratios,
-- Multiple filter sizes :math:`\Delta`,
-- Separate training and test configurations.
+- :math:`\tau_c` is the chemical timescale
+- :math:`\tau_m` is the turbulent mixing timescale
 
-Evaluation metrics combine:
+This formulation introduces a **cell reacting fraction**
 
-- Prediction accuracy and
-- Inference time,
+.. math::
 
-allowing a balanced assessment between model performance and
-practical applicability in LES solvers.
+   \gamma_{PaSR} = \frac{\tau_c}{\tau_c + \tau_m}
 
-Second part
+which determines the fraction of the computational cell where reactions
+are assumed to occur.
+
+However, DNS-based a-priori analyses reveal significant discrepancies
+between PaSR predictions and the true filtered reaction rates.
+
+Machine Learning Correction
+---------------------------
+
+To address these limitations, a **Fully Connected Neural Network (FCNN)**
+is used to predict a correction term for the reacting fraction:
+
+.. math::
+
+   \overline{\dot{\omega}}_k =
+   (\gamma_{PaSR} + \gamma_{FCNN}) \,
+   \overline{\dot{\omega}}_{k,LFR}
+
+The network is trained using **filtered DNS data**, learning the mapping
+between LES-accessible quantities and the correction term
+:math:`\gamma_{FCNN}`.
+
+Training Dataset
+----------------
+
+The model was trained on a **DNS of a turbulent premixed methane jet flame**
+developed by Attili et al.
+
+Main simulation parameters include:
+
+- Equivalence ratio: :math:`\phi = 0.7`
+- Inlet temperature: 800 K
+- Jet velocity: 100 m/s
+- Coflow velocity: 15 m/s
+- Thermal flame thickness: ~110 µm
+
+The DNS field was filtered at different filter sizes to generate
+training data representative of LES conditions.
+
+Neural Network Architecture
+---------------------------
+
+The FCNN architecture consists of:
+
+- **Input variables**
+
+  - Filtered progress variable :math:`\tilde{C}`
+  - Chemical timescale :math:`\tau_c`
+  - Mixing timescale :math:`\tau_m`
+
+- **Network structure**
+
+  - 3 input neurons
+  - 6 hidden layers
+  - 64 neurons per layer
+  - 1 output neuron (:math:`\gamma_{FCNN}`)
+
+The model is trained by minimizing the error between predicted and DNS
+heat release rates.
+
+Role of Spatial Information
+---------------------------
+
+Including spatial information significantly improves model performance.
+Additional inputs such as
+
+- :math:`\nabla \tilde{C}`
+- :math:`\nabla^2 \tilde{C}`
+
+allow the network to better capture local flame structure.
+
+As shown in the presentation results, models including spatial
+information reduce prediction errors by more than one order of magnitude.
+
+Generalization Across Filter Sizes
+----------------------------------
+
+A key challenge for machine-learning closures is **generalization across
+filter sizes**.
+
+Training the model using data filtered at a single filter width leads
+to poor generalization when applied to different LES resolutions.
+
+The study shows that training on **multiple filter sizes**
+(:math:`\Delta = 2, 3, 6, 9`) significantly improves robustness and
+accuracy for unseen filter widths.
+
+Key Findings
 ------------
 
-A second data challenge was introduced, focusing on
-modeling filtered reaction rates in premixed lean hydrogen flames
-under gas-turbine-relevant conditions.
+The main conclusions of the study are:
 
-Researchers interested in participating are encouraged to contact:
-
-``pasquale.lapenna@uniroma1.it``
-
-Relevance for aPriori
----------------------
-
-The aPriori framework supports the entire workflow required
-for such benchmarking activities:
-
-- DNS data processing,
-- Filtering and downsampling,
-- Computation of sub-filter quantities,
-- Extraction of tensors for model training,
-- Integration with PyTorch-based ML models
-
-The software therefore plays a key role in enabling
-standardized, reproducible ML-assisted combustion modeling.
+- Machine learning can significantly improve PaSR predictions of filtered
+  reaction rates.
+- Including spatial derivatives of the progress variable improves both
+  accuracy and sparsity of the model.
+- Training on multiple filter sizes improves generalization across LES
+  resolutions.
+- Optimal predictions require the corrected reacting fraction to extend
+  beyond the traditional physical bounds :math:`0 \le \gamma \le 1`.
 
 Acknowledgments
 ---------------
