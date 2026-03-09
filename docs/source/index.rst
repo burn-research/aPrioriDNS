@@ -41,6 +41,8 @@
    :caption: Conference presentations
    :maxdepth: 1
 
+   conferences/ML4Fluids2024
+   conferences/CYPHER2025
    conferences/ML4Fluids2026
 
 .. toctree::
