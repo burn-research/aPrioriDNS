@@ -26,7 +26,7 @@ Lorenzo Piu, Arthur Péquin, Rodolfo Freitas, Salvatore Iavarone, Heinz Pitsch, 
 
    <div style="display:flex; justify-content:center; margin-top:1em;">
        <iframe 
-           src="../_static/pdf/ML4Fluids-Cypher.pdf" 
+           src="../_static/pdf/ML4Fluids-2024.pdf" 
            width="100%" 
            height="500px"
            style="border:1px solid #ddd; border-radius:8px;">
