@@ -1,8 +1,7 @@
 Publications using aPriori
 ==========================
 
-This page collects scientific works that use or reference **aPriori** /
-**aPrioriDNS**.  
+This page collects scientific works that use or reference **aPriori**.  
 If you used the library in a publication and it is not listed here yet,
 please get in touch so we can add it.
 
