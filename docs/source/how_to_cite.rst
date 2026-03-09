@@ -14,7 +14,7 @@ on which the library is based:
    for turbulent premixed flames. Flow Turbulence Combust. 2025.
    doi:10.1007/s10494-024-00626-3.
 
-Once the dedicated aPriori software article is published, this section will
+Once the dedicated software article is published, this section will
 be updated with the official citation.
 
 Citation formats
