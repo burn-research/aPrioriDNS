@@ -13,11 +13,10 @@ Machine Learning for Fluids, Paris 2024
 **Authors:**  
 Lorenzo Piu, Arthur Péquin, Rodolfo Freitas, Salvatore Iavarone, Heinz Pitsch, Alessandro Parente
 
-**Related links**
+**Full article**
 
-- Cypher webpage: https://cypher.ulb.be
-- Data challenge Github page: https://github.com/burn-research/Cypher-challenge-2025
-- Data challenge page: https://cypher.ulb.be/data-challenge/
+The results were selected for a special issue of the conference, so the work was extended and published. 
+You can access the full article at `this link <https://link.springer.com/article/10.1007/s10494-024-00626-3>`
 
 **Slides:**  
 :download:`Download presentation (PDF) </_static/pdf/ML4Fluids-Cypher.pdf>`
@@ -69,12 +68,13 @@ The classical PaSR closure estimates filtered reaction rates as
 
    \overline{\dot{\omega}}_{k,PaSR} =
    \frac{\tau_c}{\tau_c + \tau_m} \;
-   \overline{\dot{\omega}}_{k,LFR}
+   \overline{\dot{\omega}}_{k}
 
 where:
 
-- :math:`\tau_c` is the chemical timescale
-- :math:`\tau_m` is the turbulent mixing timescale
+- :math:`\tau_c` is the chemical timescale,
+- :math:`\tau_m` is the turbulent mixing timescale,
+- :math:`\overline{\dot{\omega}}_{k}` is the mass exchange between fine structures and surrounding fluid.
 
 This formulation introduces a **cell reacting fraction**
 
