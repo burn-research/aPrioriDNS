@@ -39,18 +39,40 @@ Click **Fork** (top right) to create a copy of the repository under your own Git
 2. Clone your fork locally
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Clone your fork to your local machine:
+Clone your fork to your local machine.
 
-.. code-block:: bash
+If you only need the **latest state of the repository** and want to avoid
+downloading the full history (which may contain large files), you can use
+a shallow clone instead.
 
-   git clone https://github.com/<your-username>/aPriori.git
-   cd aPriori
+.. tab-set::
+
+   .. tab-item:: Full clone (default)
+
+      Downloads the complete repository history.
+
+      .. code-block:: bash
+
+         git clone https://github.com/<your-username>/aPriori.git
+         cd aPriori
+
+   .. tab-item:: Shallow clone (reduced download)
+
+      Downloads only recent commits starting from a given date.  
+      This can significantly reduce the amount of data downloaded locally.
+
+      .. code-block:: bash
+
+         git clone --shallow-since=2026-02-17 https://github.com/<your-username>/aPriori.git
+         cd aPriori
 
 Add the upstream repository (optional but recommended):
 
 .. code-block:: bash
 
    git remote add upstream https://github.com/LorenzoPiu/aPriori.git
+
+This allows to pull updates from the original repository while pushing your work to your fork.
 
 3. Create a dedicated branch
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
