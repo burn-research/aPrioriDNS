@@ -42,7 +42,7 @@ exclude = [
 [project.urls]
 Homepage = "https://github.com/LorenzoPiu/aPriori"
 Issues = "https://github.com/LorenzoPiu/aPriori/issues"
-Documentation = "https://apriori.gitbook.io"
+Documentation = "https://apriori.readthedocs.io"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/aPriori"]
