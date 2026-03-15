@@ -421,7 +421,7 @@ class VerbosePrinter:
             Optional prefix added to messages.
     """
 
-    def __init__(self, verbose: bool = False, prefix: str | None = None):
+    def __init__(self, verbose=False, prefix=None):
         self.verbose = verbose
         self.prefix = prefix
 
